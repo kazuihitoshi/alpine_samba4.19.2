@@ -2,9 +2,13 @@
 
 ## build手順
 
+インターネット通信が可能な環境で以下を実行ください。
+
 ```bash
 docker-compose up -d
 docker-compose exec alpine-build sh
+su - build
+abuild-keygen -a -i
 cd /aports/main/samba
 build -r
 ```
