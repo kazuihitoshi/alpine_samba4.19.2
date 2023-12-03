@@ -9,16 +9,16 @@ docker-compose up -d
 docker-compose exec alpine-build sh
 su - build
 abuild-keygen -a -i
-cd /aports/main/ldb
-abuild -r
-cd /aports/main/tlb
-abuild -r
 cd /aports/main/tevent
 abuild -r
 cd /aports/main/talloc
 abuild -r
-cd ~/packages/main/x86_64/
-sudo apk add *.apk
+sudo apk add ~/packages/main/x86_64/*.apk
+cd /aports/main/ldb
+abuild -r
+cd /aports/main/tdb
+abuild -r
+sudo apk add ~/packages/main/x86_64/*.apk
 cd /aports/main/samba
 build -r
 ```
