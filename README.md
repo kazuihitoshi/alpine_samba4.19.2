@@ -9,6 +9,8 @@ docker-compose up -d
 docker-compose exec alpine-build sh
 su - build
 abuild-keygen -a -i
+cd /aports/main/ldb
+abuild -r
 cd /aports/main/tlb
 abuild -r
 cd /aports/main/tevent

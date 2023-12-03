@@ -6,6 +6,7 @@ services:
     command: /bin/sh
     volumes:
       - ./aports:/aports
+      - ./packages:/home/build/packages
     stdin_open: true
     tty: true
     
