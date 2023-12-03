@@ -15,6 +15,8 @@ cd /aports/main/tevent
 abuild -r
 cd /aports/main/talloc
 abuild -r
+cd ~/packages/main/x86_64/
+sudo apk add *.apk
 cd /aports/main/samba
 build -r
 ```
