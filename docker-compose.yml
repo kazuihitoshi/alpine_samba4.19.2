@@ -1,0 +1,12 @@
+version: "3.8"
+
+services:
+  alpine-build:
+    image: alpine:latest
+    container_name: alpine-build
+    command: /bin/sh
+    volumes:
+      - ./aports:/aports
+    stdin_open: true
+    tty: true
+    
