@@ -1,0 +1,74 @@
+# Contributor: Nulo <alpine@nulo.in>
+# Maintainer: Adam Thiede <me@adamthiede.com>
+pkgname=coreboot-tools
+pkgver=4.22.01
+pkgrel=0
+pkgdesc="Tools from the coreboot project"
+url="https://review.coreboot.org/coreboot"
+# coreboot only runs on x86_64 and x86 systems
+arch="x86 x86_64"
+license="GPL-2.0-only"
+
+# All specified dependencies are just for configurator subpackage.
+# Everything else builds with default tooling.
+makedepends="
+	inkscape
+	meson
+	qt5-qtbase-dev
+	qt5-qttools-dev
+	qt5-qtsvg-dev
+	yaml-cpp-dev
+	"
+subpackages="$pkgname-ectool $pkgname-nvramtool $pkgname-nvramtool-doc:nvramtool_doc:noarch $pkgname-ifdtool $pkgname-configurator"
+source="https://coreboot.org/releases/coreboot-$pkgver.tar.xz"
+builddir="$srcdir/coreboot-$pkgver"
+options="!check" # no test suite
+
+build() {
+	make -e -C util/ectool
+	make -e -C util/nvramtool CFLAGS="$CFLAGS -I. -DCMOS_HAL=1"
+	make -e -C util/ifdtool
+	abuild-meson -Db_lto=true util/coreboot-configurator util/coreboot-configurator/output
+	meson compile -C util/coreboot-configurator/output
+}
+
+package() {
+	make -e -C util/ectool PREFIX="$pkgdir/usr" install
+	make -e -C util/nvramtool PREFIX="$pkgdir/usr" install
+	make -e -C util/ifdtool PREFIX="$pkgdir/usr" install
+}
+
+nvramtool() {
+	pkgdesc="Manipulates NVRAM from userspace"
+
+	amove usr/sbin/nvramtool
+}
+
+nvramtool_doc() {
+	pkgdesc="Manipulates NVRAM from userspace (documentation)"
+	install_if="$pkgname-nvramtool=$pkgver-r$pkgrel docs"
+
+	amove usr/share/man/man8/nvramtool*
+	gzip -9n "$subpkgdir"/usr/share/man/man8/*
+}
+
+ectool() {
+	pkgdesc="Dumps the RAM of a laptop’s Embedded/Environmental Controller (EC)"
+
+	amove usr/sbin/ectool
+}
+
+ifdtool() {
+	pkgdesc="Extract and dump Intel Firmware Descriptor information"
+
+	amove usr/bin/ifdtool
+}
+
+configurator() {
+	pkgdesc="Graphical NVRAMtool frontend"
+	DESTDIR="$subpkgdir" meson install --no-rebuild -C $builddir/util/coreboot-configurator/output
+}
+
+sha512sums="
+66529f0b370a1d3d82d7aa5cfc3fe3db5685af5a56ad2e1250ded5f60cd6edbbe6146978a7020d46e365d12dbae78bedecdf150176bd29e71e4d31b8edefbd54  coreboot-4.22.01.tar.xz
+"

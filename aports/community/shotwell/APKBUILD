@@ -1,0 +1,54 @@
+# Contributor: Natanael Copa <ncopa@alpinelinux.org>
+# Maintainer: Rasmus Thomsen <oss@cogitri.dev>
+pkgname=shotwell
+pkgver=0.32.3
+pkgrel=0
+pkgdesc="Digital photo organizer designed for the GNOME desktop environment"
+url="https://wiki.gnome.org/Apps/Shotwell"
+arch="all"
+license="CC-BY-SA-3.0 AND LGPL-2.1-or-later"
+subpackages="$pkgname-lang $pkgname-doc"
+makedepends="
+	dbus-glib-dev
+	desktop-file-utils
+	gcr-dev
+	gexiv2-dev
+	gst-plugins-base-dev
+	gtk+3.0-dev
+	itstool
+	json-glib-dev
+	libexif-dev
+	libgdata-dev
+	libgee-dev
+	libgphoto2-dev
+	libgudev-dev
+	libportal-dev
+	libraw-dev
+	libsecret-dev
+	meson
+	sqlite-dev
+	vala
+	webkit2gtk-4.1-dev
+	"
+checkdepends="appstream-glib"
+source="https://download.gnome.org/sources/shotwell/${pkgver%.*}/shotwell-$pkgver.tar.xz"
+
+build() {
+	abuild-meson \
+		-Db_lto=true \
+		-Dinstall_apport_hook=false \
+		. output
+	meson compile -C output
+}
+
+check() {
+	meson test --no-rebuild --print-errorlogs -C output
+}
+
+package() {
+	DESTDIR="$pkgdir" meson install --no-rebuild -C output
+}
+
+sha512sums="
+a8574402a71d8a5de70e3d045586cea325fad7291914cf11f0ce4ef9abf5868dd9e581a0a3f3929c16dbfd5d934ce24775a220169efab2099e2f594cdb229f86  shotwell-0.32.3.tar.xz
+"

@@ -1,0 +1,42 @@
+# Contributor: Steeve Chailloux <steeve.chailloux@orus.io>
+# Maintainer: Willow Barraco <contact@willowbarraco.fr>
+pkgname=s3fs-fuse
+pkgver=1.93
+pkgrel=0
+pkgdesc="FUSE-based file system backed by Amazon S3"
+options="!check" # Fails to connect to localhost
+url="https://github.com/s3fs-fuse/s3fs-fuse"
+arch="all"
+license="GPL-2.0-only"
+makedepends="automake autoconf libxml2-dev fuse-dev curl-dev git bash"
+checkdepends="coreutils sed"
+subpackages="$pkgname-doc"
+source="$pkgname-$pkgver.tar.gz::https://github.com/s3fs-fuse/s3fs-fuse/archive/v$pkgver.tar.gz"
+
+prepare() {
+	default_prepare
+	./autogen.sh
+}
+
+build() {
+	./configure \
+		--build=$CBUILD \
+		--host=$CHOST \
+		--prefix=/usr \
+		--sysconfdir=/etc \
+		--mandir=/usr/share/man \
+		--localstatedir=/var
+	make
+}
+
+check() {
+	make check
+}
+
+package() {
+	make DESTDIR="$pkgdir" install
+}
+
+sha512sums="
+613ad713ac426236b471aa4b2f8292ee0558017f149bfe51aa7fad1bacd60fccf00c31404ebc14b692787e524704e9cd9111b84540f1309ba99900d42d03dc5d  s3fs-fuse-1.93.tar.gz
+"

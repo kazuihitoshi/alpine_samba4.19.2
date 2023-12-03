@@ -1,0 +1,50 @@
+# Contributor: Bart Ribbers <bribbers@disroot.org>
+# Maintainer: team/kde <bribbers@disroot.org>
+
+# The group tag is just to easily find this APKBUILD by some scripts for automation
+# group=kde-applications
+pkgname=kjumpingcube
+pkgver=23.08.3
+pkgrel=0
+pkgdesc="A simple dice driven tactical game"
+# armhf blocked by extra-cmake-modules
+arch="all !armhf"
+url="https://apps.kde.org/kjumpingcube/"
+license="GPL-2.0-or-later AND GFDL-1.2-only"
+makedepends="
+	extra-cmake-modules
+	kconfig5-dev
+	kconfigwidgets5-dev
+	kcoreaddons5-dev
+	kcrash5-dev
+	kdbusaddons5-dev
+	kdoctools5-dev
+	ki18n5-dev
+	kio5-dev
+	kwidgetsaddons5-dev
+	kxmlgui5-dev
+	libkdegames-dev
+	qt5-qtbase-dev
+	qt5-qtsvg-dev
+	samurai
+	"
+_repo_url="https://invent.kde.org/games/kjumpingcube.git"
+source="https://download.kde.org/stable/release-service/$pkgver/src/kjumpingcube-$pkgver.tar.xz"
+subpackages="$pkgname-doc $pkgname-lang"
+options="!check" # No tests
+
+build() {
+	cmake -B build -G Ninja \
+		-DCMAKE_BUILD_TYPE=RelWithDebInfo \
+		-DCMAKE_INSTALL_PREFIX=/usr \
+		-DCMAKE_INSTALL_LIBDIR=lib
+	cmake --build build
+}
+
+package() {
+	DESTDIR="$pkgdir" cmake --install build
+}
+
+sha512sums="
+6e576b552eea90156326f95b7eb84491b48495d9f035f3546af59fed901ec06b12d382ff167665d718fc00eea01874903dfcc7052aeb5372f77ce26fdeaa5611  kjumpingcube-23.08.3.tar.xz
+"

@@ -1,0 +1,57 @@
+# Contributor: David Demelier <markand@malikania.fr>
+# Maintainer: David Demelier <markand@malikania.fr>
+pkgname=lilv
+pkgver=0.24.22
+pkgrel=0
+pkgdesc="C library for simpler use of LV2 plugins"
+url="https://drobilla.net/software/lilv"
+arch="all"
+license="ISC"
+makedepends="
+	libsndfile-dev
+	lv2-dev
+	meson
+	serd-dev
+	sord-dev
+	sratom-dev
+	"
+subpackages="
+	$pkgname-dev
+	$pkgname-libs
+	py3-$pkgname-pyc
+	py3-$pkgname:py3:noarch
+	$pkgname-doc
+	$pkgname-bash-completion
+	"
+source="https://download.drobilla.net/lilv-$pkgver.tar.xz
+	python-lib.patch
+	"
+
+build() {
+	abuild-meson -Db_lto=true . output
+	meson compile -C output
+}
+
+check() {
+	meson test --print-errorlogs --no-rebuild -C output
+}
+
+package() {
+	DESTDIR="$pkgdir" meson install --no-rebuild -C output
+	mkdir -p "$pkgdir"/usr/share/bash-completion/completions
+	mv "$pkgdir"/etc/bash_completion.d/lilv \
+		"$pkgdir"/usr/share/bash-completion/completions/
+	rmdir "$pkgdir"/etc/bash_completion.d
+	python3 -m compileall -fq "$pkgdir"/usr/lib/python*
+}
+
+py3() {
+	pkgdesc="$pkgdesc (python module)"
+	depends="$pkgname-libs=$pkgver-r$pkgrel"
+	amove usr/lib/python*
+}
+
+sha512sums="
+cd771db89919a11e258d12b43674d7174645a4369f5d3a5168b1217c0a87795926dd7db5304e81cb27eb30477198ac42e6e4931d40fcda833bf70ef75acc558f  lilv-0.24.22.tar.xz
+59ad0b3129ebc6042d168a44276ccd121fd19c1a314a65d7594629f6733f96ebfa270dfcf828084f05001f05e6dd92cfa6079aa1e2eddcbcc1a2ecb48120e8ad  python-lib.patch
+"

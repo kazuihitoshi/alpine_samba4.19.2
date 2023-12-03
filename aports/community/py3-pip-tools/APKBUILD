@@ -1,0 +1,47 @@
+# Maintainer: Hugo Osvaldo Barrera <hugo@whynothugo.nl>
+pkgname=py3-pip-tools
+pkgver=7.3.0
+pkgrel=0
+pkgdesc="A set of tools to keep your pinned Python dependencies fresh."
+url="https://pip-tools.rtfd.io"
+arch="noarch"
+license="BSD-3-Clause"
+source="https://files.pythonhosted.org/packages/source/p/pip-tools/pip-tools-$pkgver.tar.gz"
+depends="
+	py3-build
+	py3-click
+	py3-pip
+	"
+makedepends="
+	py3-gpep517
+	py3-installer
+	py3-setuptools_scm
+	py3-wheel
+	"
+checkdepends="py3-pytest-xdist"
+subpackages="$pkgname-pyc"
+builddir="$srcdir/pip-tools-$pkgver"
+# requires every build backend in the universe
+options="!check"
+
+build() {
+	SETUPTOOLS_SCM_PRETEND_VERSION="$pkgver" \
+	gpep517 build-wheel \
+		--wheel-dir .dist \
+		--output-fd 3 3>&1 >&2
+}
+
+check() {
+	python3 -m venv --clear --without-pip --system-site-packages .testenv
+	.testenv/bin/python3 -m installer .dist/*.whl
+	.testenv/bin/python3 -m pytest
+}
+
+package() {
+	python3 -m installer -d "$pkgdir" \
+		.dist/*.whl
+}
+
+sha512sums="
+dfe5f9a52af6aeab248a9943ff3742a30f4361c6b6ad74b4d17c85183f24b43c6fa6e07e275251447a1603155f8e03a211fb34b419933e94d99bee6743c82fff  pip-tools-7.3.0.tar.gz
+"

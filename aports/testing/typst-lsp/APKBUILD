@@ -1,0 +1,41 @@
+# Maintainer: lauren n. liberda <lauren@selfisekai.rocks>
+pkgname=typst-lsp
+pkgver=0.11.0
+pkgrel=0
+pkgdesc="Language server for typst"
+url="https://github.com/nvarner/typst-lsp"
+# typst, rust-analyzer
+arch="aarch64 ppc64le x86_64"
+license="MIT"
+depends="rust-analyzer"
+makedepends="
+	cargo
+	cargo-auditable
+	openssl-dev
+	"
+source="
+	https://github.com/nvarner/typst-lsp/archive/refs/tags/v$pkgver/typst-lsp-$pkgver.tar.gz
+	"
+options="net !check" # no tests
+
+prepare() {
+	default_prepare
+
+	cargo fetch --target="$CTARGET" --locked
+}
+
+build() {
+	cargo auditable build \
+		--release \
+		--frozen \
+		--no-default-features \
+		--features=remote-packages,native-tls
+}
+
+package() {
+	install -Dm755 target/release/typst-lsp -t "$pkgdir"/usr/bin/
+}
+
+sha512sums="
+462db65bf8ef0974faa23ae14db5990980f280ff9ba604fc80ec27549d55e9ef28459e4fa99966c8d2693e47c77d303020ddc79a544be71db3e01884e830034e  typst-lsp-0.11.0.tar.gz
+"

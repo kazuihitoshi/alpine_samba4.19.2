@@ -1,0 +1,40 @@
+# Contributor: Justin Berthault <justin.berthault@zaclys.net>
+# Maintainer: Justin Berthault <justin.berthault@zaclys.net>
+pkgname=py3-mypy
+pkgver=1.6.1
+pkgrel=0
+pkgdesc="Optional static typing for Python (PEP484)"
+url="https://mypy-lang.org/"
+arch="noarch"
+license="MIT"
+depends="
+	py3-mypy-extensions
+	py3-typing-extensions
+	"
+makedepends="python3-dev py3-gpep517 py3-setuptools py3-wheel"
+checkdepends="py3-pytest py3-pytest-xdist py3-lxml py3-typed-ast py3-virtualenv"
+subpackages="$pkgname-pyc"
+source="$pkgname-$pkgver.tar.gz::https://github.com/python/mypy/archive/refs/tags/v$pkgver.tar.gz"
+builddir="$srcdir/mypy-$pkgver"
+options="!check" # they take forever
+
+build() {
+	gpep517 build-wheel \
+		--wheel-dir .dist \
+		--output-fd 3 3>&1 >&2
+}
+
+check() {
+	python3 -m venv --clear --without-pip --system-site-packages test-env
+	test-env/bin/python3 -m installer .dist/mypy-*.whl
+	test-env/bin/python3 -m pytest
+}
+
+package() {
+	python3 -m installer -d "$pkgdir" \
+		.dist/mypy-*.whl
+}
+
+sha512sums="
+eac6b17dd418146c365a446e34c2cb403692a6ffa08b06a94c54accfbcedd441284c95894ef9f9b83e48df81edc35893b17163f6dba9f81fe7e9a8527401968b  py3-mypy-1.6.1.tar.gz
+"

@@ -1,0 +1,50 @@
+# Contributor: Michał Polański <michal@polanski.me>
+# Maintainer: Michał Polański <michal@polanski.me>
+pkgname=cargo-generate
+pkgver=0.18.5
+pkgrel=0
+pkgdesc="Use pre-existing git repositories as templates"
+url="https://github.com/cargo-generate/cargo-generate"
+license="MIT OR Apache-2.0"
+arch="all !s390x" # fails to build nix crate
+makedepends="cargo libgit2-dev openssl-dev cargo-auditable"
+source="https://github.com/cargo-generate/cargo-generate/archive/v$pkgver/cargo-generate-$pkgver.tar.gz
+	remove-cargo-husky.patch
+	"
+options="net" # fetch dependencies
+
+prepare() {
+	default_prepare
+
+	# Rust target triple.
+	local target=$(rustc -vV | sed -n 's/host: //p')
+
+	# Build against system-provided libs
+	mkdir -p .cargo
+	cat >> .cargo/config.toml <<-EOF
+		[target.$target]
+		git2 = { rustc-link-lib = ["git2"] }
+	EOF
+
+	# open64
+	cargo update -p getrandom --precise 0.2.10
+
+	cargo fetch --target="$CTARGET" --locked
+}
+
+build() {
+	cargo auditable build --frozen --release --no-default-features
+}
+
+check() {
+	cargo test --frozen --lib --no-default-features
+}
+
+package() {
+	install -Dm755 target/release/$pkgname -t "$pkgdir"/usr/bin/
+}
+
+sha512sums="
+b94324921f733e2067c7a17608889a52cea6d888391e9c8065854b483b9036be488b6536cc8a0b511c93399787a6d1ba07c54d6dbacfba319f24c7a7107a0228  cargo-generate-0.18.5.tar.gz
+f3fe075713f4ff7b2e4c0d89a60d7ec49fbeef0ecda2497505776a1e35bca50340f324619668e7742ffd35daf733775201e37d91ef7f8efc1f734118769d555d  remove-cargo-husky.patch
+"

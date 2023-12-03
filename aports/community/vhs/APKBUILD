@@ -1,0 +1,56 @@
+# Contributor: Grigory Kirillov <txgk@bk.ru>
+# Maintainer: Celeste <cielesti@protonmail.com>
+pkgname=vhs
+pkgver=0.6.0
+pkgrel=4
+pkgdesc="Tool for automatic recording of terminal sessions"
+url="https://github.com/charmbracelet/vhs"
+arch="all"
+license="MIT"
+depends="ffmpeg ttyd"
+makedepends="go"
+subpackages="
+	$pkgname-doc
+	$pkgname-bash-completion
+	$pkgname-fish-completion
+	$pkgname-zsh-completion
+	"
+source="https://github.com/charmbracelet/vhs/archive/v$pkgver/vhs-v$pkgver.tar.gz"
+
+export GOCACHE="${GOCACHE:-"$srcdir/go-cache"}"
+export GOMODCACHE="${GOMODCACHE:-"$srcdir/go"}"
+export GOTMPDIR="${GOTMPDIR:-"$srcdir"}"
+
+build() {
+	mkdir builddir
+
+	go build -v \
+		-trimpath \
+		-ldflags "-X main.Version=$pkgver -extldflags \"$LDFLAGS\"" \
+		-o builddir .
+
+	./builddir/vhs man > builddir/vhs.1
+	./builddir/vhs completion bash > completion.bash
+	./builddir/vhs completion fish > completion.fish
+	./builddir/vhs completion zsh > completion.zsh
+}
+
+check() {
+	go test -v ./...
+}
+
+package() {
+	install -Dm755 builddir/vhs -t "$pkgdir"/usr/bin/
+	install -Dm644 builddir/vhs.1 -t "$pkgdir"/usr/share/man/man1/
+
+	install -Dm644 completion.bash \
+		"$pkgdir"/usr/share/bash-completion/completions/vhs
+	install -Dm644 completion.fish \
+		"$pkgdir"/usr/share/fish/vendor_completions.d/vhs.fish
+	install -Dm644 completion.zsh \
+		"$pkgdir"/usr/share/zsh/site-functions/_vhs
+}
+
+sha512sums="
+aee66dcc70b3bceb01371c2a0c1a6153e8b3de3d69fe35648b55fd1ec02997b622e8eb16ab29aa4fe6067e6c0f055fec52fd5b3264554d932970a884145e9b2e  vhs-v0.6.0.tar.gz
+"

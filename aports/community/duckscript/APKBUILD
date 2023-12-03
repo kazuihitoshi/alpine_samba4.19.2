@@ -1,0 +1,49 @@
+# Contributor: Jakub Jirutka <jakub@jirutka.cz>
+# Maintainer: Jakub Jirutka <jakub@jirutka.cz>
+pkgname=duckscript
+pkgver=0.9.1
+pkgrel=0
+pkgdesc="Simple, extendable and embeddable scripting language"
+url="https://sagiegurari.github.io/duckscript/"
+arch="all"
+license="Apache-2.0"
+makedepends="
+	bzip2-dev
+	cargo
+	cargo-auditable
+	openssl-dev
+	zlib-dev
+	"
+source="https://github.com/sagiegurari/duckscript/archive/$pkgver/duckscript-$pkgver.tar.gz
+	use-zlib.patch
+	"
+
+case "$CARCH" in
+# fails on builders for some reason with new networking
+arm*|aarch64) options="$options !check" ;;
+esac
+
+_cargo_opts="--frozen --no-default-features --features tls-native"
+
+prepare() {
+	default_prepare
+
+	cargo fetch --target="$CTARGET" --locked
+}
+
+build() {
+	cargo auditable build $_cargo_opts --release
+}
+
+check() {
+	cargo test $_cargo_opts
+}
+
+package() {
+	install -D -m755 target/release/duck -t "$pkgdir"/usr/bin/
+}
+
+sha512sums="
+8c1d79464efcad3f60ad10e08aabd585197359b294479aa5c7f161612b0ba7a60b1ecaadc408b4267ef82a7fd20a584ae41a085aa39fbd64173255c0a54485d7  duckscript-0.9.1.tar.gz
+2c4761321af45a356215bfc87e84a2878935e4caf10fd693a1312e3355aece0735d696773026ebec42d0ffab766b1a4b900e70464c9e34efdf90d54072961fdc  use-zlib.patch
+"

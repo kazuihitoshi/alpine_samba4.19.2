@@ -1,0 +1,29 @@
+# Contributor: 7heo <7heo@mail.com>
+# Maintainer: Patrycja Rosa <alpine@ptrcnull.me>
+pkgname=homebank
+pkgver=5.7.2
+pkgrel=0
+pkgdesc="Free personal finance software, money management"
+url="http://homebank.free.fr"
+arch="all"
+license="GPL-2.0-or-later"
+makedepends="gtk+3.0-dev libsoup3-dev libofx-dev intltool"
+options="!check" # no test suite
+subpackages="$pkgname-lang"
+source="http://homebank.free.fr/public/sources/homebank-$pkgver.tar.gz"
+
+build() {
+	./configure \
+		--host=$CHOST \
+		--build=$CBUILD \
+		--prefix=/usr
+	make
+}
+
+package() {
+	make DESTDIR="$pkgdir" install
+}
+
+sha512sums="
+d61015a8d2996858dac32c97faa7d2b757f20c3efa4fb15653a6b153213db94da6b343ea97b5799d1641fb09f4218a49bf414e702632224faa1171593f687c39  homebank-5.7.2.tar.gz
+"

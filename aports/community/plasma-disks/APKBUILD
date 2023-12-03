@@ -1,0 +1,60 @@
+# Contributor: Bart Ribbers <bribbers@disroot.org>
+# Maintainer: team/kde <bribbers@disroot.org>
+
+# The group tag is just to easily find this APKBUILD by some scripts for automation
+# group=kde-plasma
+pkgname=plasma-disks
+pkgver=5.27.9
+pkgrel=0
+pkgdesc="Monitors S.M.A.R.T. capable devices for imminent failure"
+# armhf blocked by qt5-qtdeclarative
+arch="all !armhf"
+url="https://kde.org/plasma-desktop/"
+license="GPL-2.0-or-later"
+depends="
+	kirigami2
+	smartmontools
+	"
+makedepends="
+	extra-cmake-modules
+	qt5-qtbase-dev
+	kcoreaddons5-dev
+	kdbusaddons5-dev
+	knotifications5-dev
+	ki18n5-dev
+	solid5-dev
+	kservice5-dev
+	kio5-dev
+	kauth5-dev
+	kdeclarative5-dev
+	samurai
+	"
+checkdepends="xvfb-run"
+
+case "$pkgver" in
+	*.90*) _rel=unstable;;
+	*) _rel=stable;;
+esac
+_repo_url="https://invent.kde.org/plasma/plasma-disks.git"
+source="https://download.kde.org/$_rel/plasma/$pkgver/plasma-disks-$pkgver.tar.xz"
+subpackages="$pkgname-lang"
+
+build() {
+	cmake -B build -G Ninja \
+		-DCMAKE_BUILD_TYPE=RelWithDebInfo \
+		-DCMAKE_INSTALL_PREFIX=/usr \
+		-DCMAKE_INSTALL_LIBDIR=lib
+	cmake --build build
+}
+
+check() {
+	xvfb-run ctest --test-dir build --output-on-failure
+}
+
+package() {
+	DESTDIR="$pkgdir" cmake --install build
+}
+
+sha512sums="
+0bd786cabab0e2ef182757448d0837557decec3a9365bcb12d4da07b5246ed0dafbba850043156f49acd141494f3b4d2cf1f19aef6a5cb37571874009d45d19a  plasma-disks-5.27.9.tar.xz
+"

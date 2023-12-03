@@ -1,0 +1,52 @@
+# Contributor: Bart Ribbers <bribbers@disroot.org>
+# Maintainer: team/kde <bribbers@disroot.org>
+
+# The group tag is just to easily find this APKBUILD by some scripts for automation
+# group=kde-applications
+pkgname=kdenetwork-filesharing
+pkgver=23.08.3
+pkgrel=0
+# armhf blocked by extra-cmake-modules
+arch="all !armhf"
+url="https://www.kde.org/applications/internet/"
+pkgdesc="Properties dialog plugin to share a directory with the local network"
+license="GPL-2.0-only OR GPL-3.0-only"
+depends="samba"
+makedepends="
+	extra-cmake-modules
+	kcompletion5-dev
+	kcoreaddons5-dev
+	kdeclarative5-dev
+	kdoctools5-dev
+	ki18n5-dev
+	kio5-dev
+	kwidgetsaddons5-dev
+	qcoro-dev
+	qt5-qtbase-dev
+	samurai
+	"
+_repo_url="https://invent.kde.org/network/kdenetwork-filesharing.git"
+source="https://download.kde.org/stable/release-service/$pkgver/src/kdenetwork-filesharing-$pkgver.tar.xz"
+subpackages="$pkgname-lang"
+options="!check" # No tests
+
+build() {
+	cmake -B build -G Ninja \
+		-DCMAKE_BUILD_TYPE=RelWithDebInfo \
+		-DCMAKE_INSTALL_PREFIX=/usr \
+		-DCMAKE_INSTALL_LIBDIR=lib \
+		-DSAMBA_INSTALL=OFF
+	cmake --build build
+}
+
+check() {
+	ctest --test-dir build --output-on-failure
+}
+
+package() {
+	DESTDIR="$pkgdir" cmake --install build
+}
+
+sha512sums="
+11dcb8f199745a4558584dd74ce11c637868aeff385e537a7724fd8f31a8b5550109630c3d9658a92bd73377241b673c9b8b5a0e724dbb7d0ecadbfc2ccc99e3  kdenetwork-filesharing-23.08.3.tar.xz
+"

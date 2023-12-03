@@ -1,0 +1,37 @@
+# Maintainer: Willow Barraco <contact@willowbarraco.fr>
+pkgname=wl-mirror
+pkgver=0.14.2
+pkgrel=0
+pkgdesc="A simple Wayland output mirror client"
+url="https://github.com/Ferdi265/wl-mirror"
+license="GPL-3.0-or-later"
+arch="all"
+makedepends="
+	cmake
+	mesa-dev
+	samurai
+	scdoc
+	wayland-dev
+	wayland-protocols
+	"
+subpackages="$pkgname-doc"
+source="https://github.com/Ferdi265/wl-mirror/releases/download/v$pkgver/wl-mirror-$pkgver.tar.gz"
+options="!check" # no test suite
+
+build() {
+	cmake -B build -G Ninja \
+		-DCMAKE_BUILD_TYPE=MinSizeRel \
+		-DCMAKE_INSTALL_PREFIX=/usr \
+		-DINSTALL_DOCUMENTATION=ON \
+		-DINSTALL_EXAMPLE_SCRIPTS=OFF \
+		-DWLR_PROTOCOL_DIR="$builddir/proto/wlr-protocols"
+	cmake --build build
+}
+
+package() {
+	DESTDIR="$pkgdir" cmake --install build
+}
+
+sha512sums="
+adf86ddb6797cfbe30ffb2b37b6749ea3fa3509e4c138c5a47dd89a52af6755366af99c74ea71536676c53fb81f1c52df22dd5eca78f4003351a65f1b7c3f93f  wl-mirror-0.14.2.tar.gz
+"

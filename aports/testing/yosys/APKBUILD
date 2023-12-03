@@ -1,0 +1,79 @@
+# Contributor: Dominika Liberda <ja@sdomi.pl>
+# Maintainer: Dominika Liberda <ja@sdomi.pl>
+pkgname=yosys
+pkgver=0.35
+pkgrel=0
+_abc=896e5e7
+pkgdesc="Yosys Open SYnthesis Suite"
+url="https://yosyshq.net"
+# doesn't build
+arch="all !s390x !riscv64"
+license="ISC"
+makedepends="
+	bash
+	bison
+	boost-dev
+	clang
+	flex
+	gawk
+	graphviz-dev
+	libffi-dev
+	lld
+	protobuf-dev
+	python3
+	readline-dev
+	tcl-dev
+	zlib-dev
+	"
+subpackages="$pkgname-dev py3-$pkgname:py3:noarch"
+source="https://github.com/YosysHQ/yosys/archive/refs/tags/yosys-$pkgver.tar.gz
+	$pkgname-$pkgver-abc.tar.gz::https://github.com/YosysHQ/yosys/releases/download/yosys-$pkgver/abc.tar.gz
+	"
+builddir="$srcdir/$pkgname-$pkgname-$pkgver/"
+options="!check" # current yosys employee confirmed those dont work
+
+prepare() {
+	default_prepare
+
+	mv "$srcdir"/YosysHQ-abc-$_abc abc
+}
+
+build() {
+	export CFLAGS="$CFLAGS -flto=thin"
+	export CXXFLAGS="$CXXFLAGS -flto=thin"
+	export LDFLAGS="$LDFLAGS -fuse-ld=lld"
+
+	local pyver="$(python3 -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")')"
+
+	cat > Makefile.conf <<- EOF
+	CONFIG:=clang
+	PREFIX:=/usr
+	ABCEXTERNAL:=abc
+	BOOST_PYTHON_LIB:=-lpython$pyver -lboost_python${pyver/./}
+	ENABLE_LIBYOSYS:=1
+	ENABLE_NDEBUG:=1
+	ENABLE_PROTOBUF:=1
+	ENABLE_PYOSYS:=1
+	EOF
+
+	make
+}
+
+package() {
+	make DESTDIR="$pkgdir" install
+
+	# link python to the global yosys
+	ln -sfv /usr/lib/yosys/libyosys.so "$pkgdir"/usr/lib/python3*/site-packages/pyosys/libyosys.so
+}
+
+py3() {
+	pkgdesc="$pkgdesc (python module)"
+	depends="python3 $pkgname=$pkgver-r$pkgrel"
+
+	amove usr/lib/python3*
+}
+
+sha512sums="
+40ebc9cf5a14303b6cefc6297b51867bfbdd14fa1bf34befefda8393e3ec80ee955319af4589af594433bd80b78923d4767dad0176017af22626a2655b1b1158  yosys-0.35.tar.gz
+1a437e64f396188bf0b3500455104133f1373238c7c1904443b00df47482e0d26dc9e08939587fc9f12fa43a09d2ad316a7810b95092bff27add11c17204469f  yosys-0.35-abc.tar.gz
+"

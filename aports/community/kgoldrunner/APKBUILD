@@ -1,0 +1,49 @@
+# Contributor: Bart Ribbers <bribbers@disroot.org>
+# Maintainer: team/kde <bribbers@disroot.org>
+
+# The group tag is just to easily find this APKBUILD by some scripts for automation
+# group=kde-applications
+pkgname=kgoldrunner
+pkgver=23.08.3
+pkgrel=0
+# armhf blocked by extra-cmake-modules
+arch="all !armhf"
+url="https://kde.org/applications/games/kgoldrunner/"
+pkgdesc="A game of action and puzzle solving"
+license="GPL-2.0-or-later AND GFDL-1.2-only"
+makedepends="
+	extra-cmake-modules
+	qt5-qtbase-dev
+	kconfig5-dev
+	kconfigwidgets5-dev
+	kcoreaddons5-dev
+	kcrash5-dev
+	kdbusaddons5-dev
+	kdoctools5-dev
+	ki18n5-dev
+	kio5-dev
+	kwidgetsaddons5-dev
+	kxmlgui5-dev
+	libkdegames-dev
+	samurai
+	"
+_repo_url="https://invent.kde.org/games/kgoldrunner.git"
+source="https://download.kde.org/stable/release-service/$pkgver/src/kgoldrunner-$pkgver.tar.xz"
+subpackages="$pkgname-doc $pkgname-lang"
+options="!check" # No tests
+
+build() {
+	cmake -B build -G Ninja \
+		-DCMAKE_BUILD_TYPE=RelWithDebInfo \
+		-DCMAKE_INSTALL_PREFIX=/usr \
+		-DCMAKE_INSTALL_LIBDIR=lib
+	cmake --build build
+}
+
+package() {
+	DESTDIR="$pkgdir" cmake --install build
+}
+
+sha512sums="
+21f9effa1efadd779bc06e0050b8b4fa985c30f3fce460702793504abc8ebd86eb15304dac981873bf73cd083915e8202b93ed8aed08117c202a5eccb3e67fee  kgoldrunner-23.08.3.tar.xz
+"

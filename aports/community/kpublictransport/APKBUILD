@@ -1,0 +1,49 @@
+# Contributor: Bart Ribbers <bribbers@disroot.org>
+# Maintainer: team/kde <bribbers@disroot.org>
+
+# The group tag is just to easily find this APKBUILD by some scripts for automation
+# group=kde-applications
+pkgname=kpublictransport
+pkgver=23.08.3
+pkgrel=1
+# armhf blocked by qt5-qtdeclarative
+arch="all !armhf"
+url="https://invent.kde.org/libraries/kpublictransport"
+pkgdesc="Library to assist with accessing public transport timetables and other data"
+license="BSD-3-Clause AND LGPL-2.0-or-later AND MIT"
+depends_dev="
+	ki18n5-dev
+	networkmanager-qt5-dev
+	protobuf-dev
+	qt5-qtbase-dev
+	qt5-qtdeclarative-dev
+	zlib-dev
+	"
+makedepends="$depends_dev
+	extra-cmake-modules
+	samurai
+	"
+_repo_url="https://invent.kde.org/libraries/kpublictransport.git"
+source="https://download.kde.org/stable/release-service/$pkgver/src/kpublictransport-$pkgver.tar.xz"
+options="!check" # Broken for now
+subpackages="$pkgname-dev"
+
+build() {
+	cmake -B build -G Ninja \
+		-DCMAKE_BUILD_TYPE=RelWithDebInfo \
+		-DCMAKE_INSTALL_PREFIX=/usr \
+		-DCMAKE_INSTALL_LIBDIR=lib
+	cmake --build build
+}
+
+check() {
+	ctest --test-dir build --output-on-failure
+}
+
+package() {
+	DESTDIR="$pkgdir" cmake --install build
+}
+
+sha512sums="
+278912f30881c46aa516e73f4be27e47a07fc97b6769ce120e9649c69e9cc68087bca58c1565bd66967559303caedd8c3d46b9ec4b26f481ecc12f1db58629a3  kpublictransport-23.08.3.tar.xz
+"

@@ -1,0 +1,61 @@
+# Contributor: Leo <thinkabit.ukim@gmail.com>
+# Contributor: Sören Tempel <soeren+alpine@soeren-tempel.net>
+# Maintainer: Patrycja Rosa <alpine@ptrcnull.me>
+pkgname=py3-fonttools
+_pkgname=fonttools
+pkgver=4.44.3
+pkgrel=0
+pkgdesc="Converts OpenType and TrueType fonts to and from XML"
+url="https://github.com/fonttools/fonttools"
+arch="all"
+license="MIT AND OFL-1.1"
+makedepends="
+	cython
+	py3-gpep517
+	py3-installer
+	py3-setuptools
+	py3-wheel
+	python3-dev
+	"
+checkdepends="py3-fs py3-pytest py3-pytest-xdist py3-brotli"
+subpackages="$pkgname-doc $pkgname-pyc"
+source="$_pkgname-$pkgver.tar.gz::https://github.com/fonttools/fonttools/archive/refs/tags/$pkgver.tar.gz"
+builddir="$srcdir/$_pkgname-$pkgver"
+
+replaces="py-fonttools" # Backwards compatibility
+provides="py-fonttools=$pkgver-r$pkgrel" # Backwards compatibility
+
+prepare() {
+	default_prepare
+	# remove interpreter line
+	sed -i '1d' Lib/fontTools/mtiLib/__init__.py
+}
+
+build() {
+	CFLAGS="$CFLAGS -O2 -flto=auto" \
+	gpep517 build-wheel \
+		--wheel-dir .dist \
+		--output-fd 3 3>&1 >&2
+}
+
+check() {
+	python3 -m venv --clear --without-pip --system-site-packages .testenv
+	.testenv/bin/python3 -m installer .dist/*.whl
+	PATH="$PATH:$PWD" \
+		.testenv/bin/python3 -m pytest -n auto
+}
+
+package() {
+	python3 -m installer -d "$pkgdir" \
+		.dist/fonttools-$pkgver-*.whl
+}
+
+doc() {
+	replaces="py-$_pkgname-doc" # Backwards compatibility
+	provides="py-$_pkgname-doc=$pkgver-r$pkgrel" # Backwards compatibility
+	default_doc
+}
+
+sha512sums="
+cedac35c1273d95785095678a90aef58307b5c66bcd3c2e4f72f6642412265e783afc5e0e1e4cff77ceb31f1f5406ae24d130856c41821998da94e088628823e  fonttools-4.44.3.tar.gz
+"

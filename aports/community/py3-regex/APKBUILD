@@ -1,0 +1,44 @@
+# Contributor: Rasmus Thomsen <oss@cogitri.dev>
+# Maintainer: Rasmus Thomsen <oss@cogitri.dev>
+pkgname=py3-regex
+pkgver=2023.10.3
+pkgrel=0
+pkgdesc="More featureful implementation of the 're' module"
+url="https://github.com/mrabarnett/mrab-regex"
+arch="all"
+license="Apache-2.0"
+depends="python3"
+makedepends="
+	py3-gpep517
+	py3-setuptools
+	py3-wheel
+	python3-dev
+	"
+subpackages="$pkgname-pyc"
+source="$pkgname-$pkgver.tar.gz::https://github.com/mrabarnett/mrab-regex/archive/refs/tags/$pkgver.tar.gz"
+builddir="$srcdir/mrab-regex-$pkgver"
+options="!check" # fails to run
+
+build() {
+	gpep517 build-wheel \
+		--wheel-dir .dist \
+		--output-fd 3 3>&1 >&2
+}
+
+check() {
+	python3 -m venv --clear --without-pip --system-site-packages .testenv
+	.testenv/bin/python3 -m installer .dist/*.whl
+	cd .testenv
+	bin/python3 ../regex_3/test_regex.py
+}
+
+package() {
+	python3 -m installer -d "$pkgdir" \
+		.dist/*.whl
+
+	rm -v "$pkgdir"/usr/lib/python3*/site-packages/regex/test_regex.py
+}
+
+sha512sums="
+cb663fdf8303862eb8592b74cec8f50513e4812df61967f3bc5009f19ebc62fa52944671c5a1b0b273a93afc70b9f4ba0fde82d30a93fb49df4be0bd7debe20a  py3-regex-2023.10.3.tar.gz
+"

@@ -1,0 +1,42 @@
+# Maintainer:
+pkgname=fcitx5-lua
+pkgver=5.0.11
+pkgrel=0
+pkgdesc="Lua support for fcitx5"
+url="https://github.com/fcitx/fcitx5-lua"
+# armhf: extra-cmake-modules
+arch="all !armhf"
+license="LGPL-2.1-or-later"
+makedepends="
+	cmake
+	extra-cmake-modules
+	gettext-dev
+	fcitx5-dev
+	lua5.3-dev
+	samurai
+	"
+subpackages="$pkgname-lang $pkgname-dev"
+source="$pkgname-$pkgver.tar.gz::https://github.com/fcitx/fcitx5-lua/archive/refs/tags/$pkgver.tar.gz"
+
+build() {
+	cmake -B build -G Ninja \
+		-DCMAKE_BUILD_TYPE=None \
+		-DCMAKE_INSTALL_PREFIX=/usr \
+		-DUSE_DLOPEN=OFF \
+		-DLUA_LIBRARIES=/usr/lib/liblua-5.3.so.0 \
+		-DLUA_LIBRARY=/usr/lib/liblua-5.3.so.0 \
+		-DENABLE_TEST="$(want_check && echo ON || echo OFF)"
+	cmake --build build
+}
+
+check() {
+	ctest --test-dir build --output-on-failure
+}
+
+package() {
+	DESTDIR="$pkgdir" cmake --install build
+}
+
+sha512sums="
+cdc0c4d513af1ac09c020e1b5707498742bc487b48297519ef27de578e541afbc4c8895af06c6f9da83c4c31ff1618ab8a64f3a310d14338e553661b9f0cda82  fcitx5-lua-5.0.11.tar.gz
+"

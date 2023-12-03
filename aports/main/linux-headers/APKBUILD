@@ -1,0 +1,65 @@
+# Maintainer: Natanael Copa <ncopa@alpinelinux.org>
+pkgname=linux-headers
+pkgver=6.5 # Follow the latest Linux stable
+case $pkgver in
+	*.*.*)	_kernver=${pkgver%.*};;
+	*.*) _kernver=$pkgver;;
+esac
+pkgrel=0
+pkgdesc="Linux system headers"
+url="https://kernel.org/"
+arch="noarch"
+license="GPL-2.0-only"
+makedepends="perl"
+options="!check !dbg !strip !tracedeps"
+source="https://kernel.org/pub/linux/kernel/v6.x/linux-$_kernver.tar.xz
+	revert-broken-uapi.patch
+	0003-remove-inclusion-of-sysinfo.h-in-kernel.h.patch
+	"
+if [ "${pkgver%.0}" = "$pkgver" ]; then
+	source="
+		$source
+		https://cdn.kernel.org/pub/linux/kernel/v${pkgver%%.*}.x/patch-$pkgver.xz
+		"
+fi
+builddir="$srcdir/linux-$_kernver"
+
+_carch="$CARCH"
+case "$_carch" in
+aarch64*) _carch="arm64" ;;
+arm*) _carch="arm" ;;
+mips*) _carch="mips" ;;
+s390*) _carch="s390" ;;
+ppc*) _carch="powerpc" ;;
+riscv*) _carch="riscv" ;;
+# not sure about this --	ppc64*) _carch="powerpc64" ;;
+esac
+
+prepare() {
+	if [ "$_kernver" != "$pkgver" ]; then
+		unxz -c < "$srcdir"/patch-$pkgver.xz | patch -p1
+	fi
+	default_prepare
+}
+
+build() {
+	make headers ARCH="$_carch"
+}
+
+package() {
+	mkdir -p "$pkgdir"/usr/
+	cp -a usr/include/ "$pkgdir"/usr/include/
+
+	msg "purging non header files.."
+	find "$pkgdir"/usr/include/ ! -iname "*.h" -type f -exec rm -v {} \+
+
+	# provided by libdrm
+	rm -rf "$pkgdir"/usr/include/drm
+}
+
+sha512sums="
+1b59dc5e65d4922c3217a8c8f19022dfd6595ae89747861d825bfeb51a4ae6c85449d05db69635a712bef7b355b80318195665582d8933b1fed6ba582f6ff257  linux-6.5.tar.xz
+32597f2672d1ec365a936d15041a7cf219ef9353241d4a5c378244cf2fc155610443a19bbcd391c86099a0b08486c45e042ec7c90b0d04fe675c3ad0ffc36b53  revert-broken-uapi.patch
+607c074d72aca88fea9ecdbd62198d8f7857daca75e5d027966e0a9997338d6ac8ce0a1e9114b19232b390751d05acca09e28b0cfad2a12d5942f5575a9f4684  0003-remove-inclusion-of-sysinfo.h-in-kernel.h.patch
+d8ef2fb7ac720c88e3be1d3276d64423c8b911f1b7f221f13f179bb635f409578321b519e6e0c3aec6caf0102a8732b366580bb2ef51088f0c17d6d14c8b7d3c  patch-6.5.xz
+"

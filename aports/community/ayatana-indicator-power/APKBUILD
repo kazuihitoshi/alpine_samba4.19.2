@@ -1,0 +1,51 @@
+# Contributor: Luca Weiss <luca@z3ntu.xyz>
+# Maintainer: Luca Weiss <luca@z3ntu.xyz>
+pkgname=ayatana-indicator-power
+pkgver=23.10.1
+pkgrel=0
+pkgdesc="Ayatana Indicator Power Applet"
+url="https://github.com/AyatanaIndicators/ayatana-indicator-power"
+arch="all"
+license="GPL-3.0-only"
+makedepends="
+	cmake
+	cmake-extras
+	dbus-test-runner-dev
+	glib-dev
+	gtest-dev
+	intltool
+	libayatana-common-dev
+	libnotify-dev
+	librda-dev
+	samurai
+	"
+checkdepends="dbus dbus-test-runner"
+subpackages="$pkgname-lang"
+source="https://github.com/AyatanaIndicators/ayatana-indicator-power/archive/$pkgver/ayatana-indicator-power-$pkgver.tar.gz"
+
+build() {
+	if [ "$CBUILD" != "$CHOST" ]; then
+		CMAKE_CROSSOPTS="-DCMAKE_SYSTEM_NAME=Linux -DCMAKE_HOST_SYSTEM_NAME=Linux"
+	fi
+	cmake -B build -G Ninja \
+		-DCMAKE_INSTALL_PREFIX=/usr \
+		-DCMAKE_INSTALL_LIBDIR=lib \
+		-DBUILD_SHARED_LIBS=True \
+		-DCMAKE_BUILD_TYPE=MinSizeRel \
+		-DENABLE_TESTS=ON \
+		$CMAKE_CROSSOPTS .
+	cmake --build build
+}
+
+check() {
+	cd build
+	CTEST_OUTPUT_ON_FAILURE=TRUE ctest
+}
+
+package() {
+	DESTDIR="$pkgdir" cmake --install build
+}
+
+sha512sums="
+28194a050f31df9c506146d6bd41e350260c8850f9364cce683594e60d0b4ce4b73f1dbde33672997a360c4dbe68020b345c6a8d4cb05260d3359aeeaf05b6b2  ayatana-indicator-power-23.10.1.tar.gz
+"

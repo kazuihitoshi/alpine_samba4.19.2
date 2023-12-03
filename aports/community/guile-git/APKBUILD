@@ -1,0 +1,51 @@
+# Contributor: Sören Tempel <soeren+alpine@soeren-tempel.net>
+# Maintainer: Sören Tempel <soeren+alpine@soeren-tempel.net>
+pkgname=guile-git
+pkgver=0.5.2
+pkgrel=1
+pkgdesc="Guile bindings of libgit2"
+url="https://gitlab.com/guile-git/guile-git"
+arch="all"
+license="GPL-3.0-or-later"
+depends="guile guile-bytestructures libgit2-dev"
+makedepends="autoconf automake guile-dev zlib-dev texinfo"
+checkdepends="openssh-server openssh-client"
+subpackages="$pkgname-doc"
+options="!strip" # https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=907061
+source="https://gitlab.com/guile-git/guile-git/-/archive/v$pkgver/guile-git-v$pkgver.tar.bz2
+	0001-Improve-compatibility-with-libgit2.patch
+	0002-Add-sanitycheck-utility-to-ensure-libgit2-compatibil.patch
+
+	skip-ssh-tests.patch"
+builddir="$srcdir/$pkgname-v$pkgver"
+
+prepare() {
+	default_prepare
+	autoreconf -vfi
+}
+
+build() {
+	./configure \
+		--build=$CBUILD \
+		--host=$CHOST \
+		--prefix=/usr \
+		--sysconfdir=/etc \
+		--mandir=/usr/share/man \
+		--localstatedir=/var
+	make
+}
+
+check() {
+	make check
+}
+
+package() {
+	make DESTDIR="$pkgdir" install
+}
+
+sha512sums="
+905e03323a65bd057a50fc75265446407b9b6263852d3fa947a261d66b00ded2965bdb883ec8585c4748a28a1e0ce762a41511004a69fd1b1649c4146703278c  guile-git-v0.5.2.tar.bz2
+506be2410911b984e6df4460667c07789b304ecbc3994a566000aa5999c99ba8be9086d768784e54d94d203a794d225108a4dda24940dd1dbb15fe954ca88c22  0001-Improve-compatibility-with-libgit2.patch
+5c6225ca7a8b559c68ca2a78cf8a722951913fa51b6a65d86a80db43b03744b978b79e0f18a830c46b4d3326a1258b6530550389f7a5ada41c02c814f1b25ee2  0002-Add-sanitycheck-utility-to-ensure-libgit2-compatibil.patch
+c06974da410781544afc108689c310c1ce2230da369f2fa03b5c5c49ca3f04ac456db0c3462cebac9324ad8d88a761f36e50c35a44c104f91fe495fc4dbd783e  skip-ssh-tests.patch
+"

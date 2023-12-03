@@ -1,0 +1,30 @@
+# Maintainer: Simon Zeni <simon@bl4ckb0ne.ca>
+pkgname=hare-json
+pkgver=0_git20230921
+_commit=e24e5dceb8628ff569338e6c4fdba35a5017c5e2
+pkgrel=1
+pkgdesc="JSON support for Hare"
+url="https://sr.ht/~sircmpwn/hare-json"
+arch="x86_64 aarch64 riscv64" # hare
+license="MPL-2.0"
+makedepends="hare"
+source="
+	$pkgname-$_commit.tar.gz::https://git.sr.ht/~sircmpwn/hare-json/archive/$_commit.tar.gz
+"
+builddir="$srcdir/$pkgname-$_commit"
+
+build() {
+	make -j1 PREFIX=/usr
+}
+
+check() {
+	make check
+}
+
+package() {
+	make DESTDIR="$pkgdir" PREFIX=/usr install
+}
+
+sha512sums="
+907ac25928b8b9000f65ba45b1bdb87634388bd0a63380c4d4ec0c4004638b74f148cd6882ae613c2623d6474a691da094f81f2ea2d18e52550aacf441c93603  hare-json-e24e5dceb8628ff569338e6c4fdba35a5017c5e2.tar.gz
+"

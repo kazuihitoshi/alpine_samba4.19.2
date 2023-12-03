@@ -1,0 +1,55 @@
+# Contributor: Lauren N. Liberda <lauren@selfisekai.rocks>
+# Maintainer: Duncan Bellamy <dunk@denkimushi.com>
+pkgname=minizip-ng
+pkgver=4.0.3
+pkgrel=0
+pkgdesc="zlib-ng fork of minizip"
+url="https://github.com/zlib-ng/minizip-ng"
+arch="all"
+license="Zlib"
+makedepends="
+	bzip2-dev
+	cmake
+	gtest-dev
+	ninja
+	openssl-dev
+	python3
+	xz-dev
+	zstd-dev
+	zlib-ng-dev
+	"
+subpackages="$pkgname-dev"
+source="
+	https://github.com/zlib-ng/minizip-ng/archive/refs/tags/$pkgver/minizip-ng-$pkgver.tar.gz
+	"
+
+build() {
+	if [ "$CBUILD" != "$CHOST" ]; then
+		CMAKE_CROSSOPTS="-DCMAKE_SYSTEM_NAME=Linux -DCMAKE_HOST_SYSTEM_NAME=Linux"
+	fi
+	cmake -B build -G Ninja \
+		-DBUILD_SHARED_LIBS=True \
+		-DCMAKE_BUILD_TYPE=MinSizeRel \
+		-DCMAKE_INSTALL_PREFIX=/usr \
+		-DCMAKE_INSTALL_LIBDIR=lib \
+		-DMZ_BUILD_TESTS=ON \
+		-DMZ_BUILD_UNIT_TESTS=ON \
+		-DMZ_COMPAT=ON \
+		-DMZ_FETCH_LIBS=OFF \
+		-DMZ_LIB_SUFFIX=-ng \
+		$CMAKE_CROSSOPTS
+	cmake --build build
+}
+
+check() {
+	cd build
+	CTEST_OUTPUT_ON_FAILURE=TRUE ctest -j1
+}
+
+package() {
+	DESTDIR="$pkgdir" cmake --install build
+}
+
+sha512sums="
+96d1a5ac1106f737f4db161867a440c272b65c617add30aa0224215abba8098ece9f2bde5c4e407932d0fa5d3ca8696a1db82b5a19ce7ffd8019dba83ab5fd01  minizip-ng-4.0.3.tar.gz
+"

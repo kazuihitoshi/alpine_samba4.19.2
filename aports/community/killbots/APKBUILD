@@ -1,0 +1,49 @@
+# Contributor: Bart Ribbers <bribbers@disroot.org>
+# Maintainer: team/kde <bribbers@disroot.org>
+
+# The group tag is just to easily find this APKBUILD by some scripts for automation
+# group=kde-applications
+pkgname=killbots
+pkgver=23.08.3
+pkgrel=0
+pkgdesc="A simple game of evading killer robots"
+# armhf blocked by extra-cmake-modules
+arch="all !armhf"
+url="https://kde.org/applications/games/killbots/"
+license="GPL-2.0-or-later AND GFDL-1.2-only"
+makedepends="
+	extra-cmake-modules
+	kcompletion5-dev
+	kconfig5-dev
+	kconfigwidgets5-dev
+	kcoreaddons5-dev
+	kcrash5-dev
+	kdbusaddons5-dev
+	kdoctools5-dev
+	ki18n5-dev
+	kwidgetsaddons5-dev
+	kxmlgui5-dev
+	libkdegames-dev
+	qt5-qtbase-dev
+	samurai
+	"
+_repo_url="https://invent.kde.org/games/killbots.git"
+source="https://download.kde.org/stable/release-service/$pkgver/src/killbots-$pkgver.tar.xz"
+subpackages="$pkgname-doc $pkgname-lang"
+options="!check" # No tests
+
+build() {
+	cmake -B build -G Ninja \
+		-DCMAKE_BUILD_TYPE=RelWithDebInfo \
+		-DCMAKE_INSTALL_PREFIX=/usr \
+		-DCMAKE_INSTALL_LIBDIR=lib
+	cmake --build build
+}
+
+package() {
+	DESTDIR="$pkgdir" cmake --install build
+}
+
+sha512sums="
+040ebe38954e504b6b51b0754bfef613c1ddaab51fba66c6570b53383f1a84503d330a442e8709c2eb68a6a171db533212d9bdd2a0bde93c4703304a1aaa72d9  killbots-23.08.3.tar.xz
+"

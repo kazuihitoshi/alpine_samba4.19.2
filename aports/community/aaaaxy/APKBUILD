@@ -1,0 +1,66 @@
+# Contributor: Rudolf Polzer <divVerent@gmail.com>
+# Maintainer: Rudolf Polzer <divVerent@gmail.com>
+pkgname=aaaaxy
+pkgver=1.4.101
+pkgrel=0
+pkgdesc="A nonlinear puzzle platformer taking place in impossible spaces"
+url="https://divVerent.github.io/aaaaxy/"
+arch="all !s390x !armhf !armv7 !riscv64"
+license="Apache-2.0"
+makedepends="
+	advancecomp
+	alsa-lib-dev
+	go
+	libx11-dev
+	libxcursor-dev
+	libxinerama-dev
+	libxi-dev
+	libxrandr-dev
+	mesa-dev
+	zip
+"
+checkdepends="xvfb-run mesa-dri-gallium"
+source="
+	https://github.com/divVerent/aaaaxy/archive/v$pkgver/aaaaxy-$pkgver.tar.gz
+	https://github.com/divVerent/aaaaxy/releases/download/v$pkgver/sdl-gamecontrollerdb-for-aaaaxy-v$pkgver.zip
+"
+options="net"  # Needed for go mod download.
+
+export GOCACHE="${GOCACHE:-"$srcdir/go-cache"}"
+export GOTMPDIR="${GOTMPDIR:-"$srcdir"}"
+export GOMODCACHE="${GOMODCACHE:-"$srcdir/go"}"
+
+prepare() {
+	default_prepare
+
+	mv "$srcdir"/third_party/SDL_GameControllerDB/assets/input/* \
+		third_party/SDL_GameControllerDB/assets/input/
+	go mod download
+}
+
+build() {
+	export AAAAXY_BUILD_USE_VERSION_FILE=true
+	make BUILDTYPE=release
+}
+
+check() {
+	xvfb-run sh scripts/regression-test-demo.sh aaaaxy \
+		"on track for Any%, All Paths, No Teleports and No Coil" \
+		./aaaaxy assets/demos/benchmark.dem
+}
+
+package() {
+	install -Dm644 io.github.divverent.aaaaxy.metainfo.xml \
+		"$pkgdir"/usr/share/metainfo/io.github.divverent.aaaaxy.metainfo.xml
+	install -Dm644 aaaaxy.png \
+		"$pkgdir"/usr/share/icons/hicolor/128x128/apps/aaaaxy.png
+	install -Dm644 aaaaxy.desktop \
+		"$pkgdir"/usr/share/applications/aaaaxy.desktop
+	install -Dm755 aaaaxy \
+		"$pkgdir"/usr/bin/aaaaxy
+}
+
+sha512sums="
+e652b54c718c467367afa9a207eb64e06825f8cf46e1719bf15f5a4973fdce49e7b5bc8d95b1207611680fb67f9ccbede3a98606eeeaf11263c9d9282d1d9c4f  aaaaxy-1.4.101.tar.gz
+9b7b1bf312fe52deff704d3a12ab1ba0194113e54a44ef3ae27f7c84cd9e0fbcf920f6f1bd024dbce68456d88a1dc2b1fabfadc09824cb189c651ebcee8c876d  sdl-gamecontrollerdb-for-aaaaxy-v1.4.101.zip
+"

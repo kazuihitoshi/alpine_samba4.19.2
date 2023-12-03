@@ -1,0 +1,44 @@
+# Contributor: Carlo Landmeter <clandmeter@alpinelinux.org>
+# Maintainer: Rasmus Thomsen <oss@cogitri.dev>
+pkgname=exempi
+pkgver=2.6.4
+pkgrel=0
+pkgdesc="Library to parse XMP metadata"
+url="https://wiki.freedesktop.org/libopenraw/Exempi/"
+# s390x fails to build
+arch="all !s390x"
+license="BSD-3-Clause"
+makedepends="
+	boost-dev
+	expat-dev
+	zlib-dev
+	"
+subpackages="$pkgname-dev $pkgname-doc $pkgname-libs"
+source="https://libopenraw.freedesktop.org/download/exempi-$pkgver.tar.xz"
+
+# secfixes:
+#   2.5.1-r0:
+#     - CVE-2018-12648
+
+build() {
+	./configure \
+		--build=$CBUILD \
+		--host=$CHOST \
+		--prefix=/usr \
+		--sysconfdir=/etc \
+		--mandir=/usr/share/man \
+		--localstatedir=/var
+	make
+}
+
+check() {
+	make check
+}
+
+package() {
+	make DESTDIR="$pkgdir" install
+}
+
+sha512sums="
+86e41e24e34150f398dffe3219f1530fbf14606feeee9953395bfedb335316ec90ac88e2843f2c037a564909fc3cc82a5cce53edb18219663a1b454cda6bef72  exempi-2.6.4.tar.xz
+"

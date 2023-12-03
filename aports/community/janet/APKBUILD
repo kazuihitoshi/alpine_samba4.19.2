@@ -1,0 +1,46 @@
+# Contributor: Will Sinatra <wpsinatra@gmail.com>
+# Maintainer: Will Sinatra <wpsinatra@gmail.com>
+pkgname=janet
+pkgver=1.32.1
+pkgrel=0
+pkgdesc="Dynamic Lisp dialect and bytecode VM"
+url="https://janet-lang.org/"
+license="MIT"
+arch="all"
+makedepends="meson"
+subpackages="$pkgname-static $pkgname-doc $pkgname-dev"
+source="$pkgname-$pkgver.tar.gz::https://github.com/janet-lang/janet/archive/v$pkgver.tar.gz"
+
+# secfixes:
+#   1.22.0-r0:
+#     - CVE-2022-30763
+
+case "$CARCH" in
+x86_64) ;;
+# FIXME
+*) options="$options !check" ;;
+esac
+
+build() {
+	abuild-meson \
+		-Db_lto=true \
+		-Depoll=true \
+		-Dos_name="alpine" \
+		. output
+	meson compile -C output
+}
+
+check() {
+	meson test --print-errorlogs --no-rebuild -C output
+}
+
+package() {
+	DESTDIR="$pkgdir" meson install --no-rebuild -C output
+
+	install -dm755 "$pkgdir"/usr/share/doc/janet
+	cp -a examples "$pkgdir"/usr/share/doc/janet
+}
+
+sha512sums="
+65e00cfe9bcd66f5d640e58f965aec72f7703777e086220539a1b080d7dd44a9039247477c352d89b1e73c4f6080320bdba419bd0d20cc114985f9701e2ade2d  janet-1.32.1.tar.gz
+"

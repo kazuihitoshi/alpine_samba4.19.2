@@ -1,0 +1,45 @@
+# Maintainer: Ariadne Conill <ariadne@dereferenced.org>
+pkgname=rpki-client
+pkgver=8.5
+pkgrel=0
+pkgdesc="RPKI validator to support BGP Origin Validation"
+url="https://www.rpki-client.org/"
+arch="all"
+license="ISC"
+depends="rsync"
+makedepends="
+	expat-dev
+	libretls-dev
+	musl-fts-dev
+	openssl-dev>3
+	zlib-dev
+	"
+install="$pkgname.pre-install"
+pkgusers="rpki-client"
+pkggroups="rpki-client"
+subpackages="$pkgname-doc"
+source="https://cdn.openbsd.org/pub/OpenBSD/rpki-client/rpki-client-$pkgver.tar.gz"
+
+build() {
+	./configure \
+		--build=$CBUILD \
+		--host=$CHOST \
+		--prefix=/usr \
+		--sysconfdir=/etc \
+		--mandir=/usr/share/man \
+		--localstatedir=/var \
+		--with-user=rpki-client
+	make
+}
+
+check() {
+	make check
+}
+
+package() {
+	make DESTDIR="$pkgdir" install
+}
+
+sha512sums="
+a5b195324902f058a108b240030c6b1de10fe356d58cdcfcd32fe0cad9d50c68e46dd8f2976026705dd453d3a91a96d4ac5dec4501a8a2c829d6c7eaf0dea8c7  rpki-client-8.5.tar.gz
+"

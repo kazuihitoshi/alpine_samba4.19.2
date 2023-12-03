@@ -1,0 +1,50 @@
+# Contributor: Luca Weiss <luca@z3ntu.xyz>
+# Maintainer: Luca Weiss <luca@z3ntu.xyz>
+pkgname=ayatana-indicator-keyboard
+pkgver=23.10.1
+pkgrel=0
+pkgdesc="Ayatana Indicator Keyboard Applet"
+url="https://github.com/AyatanaIndicators/ayatana-indicator-keyboard"
+arch="all !s390x !riscv64" # blocked by accountsservice-dev
+license="GPL-3.0-only"
+makedepends="
+	accountsservice-dev
+	cmake
+	cmake-extras
+	glib-dev
+	intltool
+	libayatana-common-dev
+	libx11-dev
+	libxkbcommon-dev
+	libxklavier-dev
+	samurai
+	"
+subpackages="$pkgname-dev $pkgname-lang"
+source="https://github.com/AyatanaIndicators/ayatana-indicator-keyboard/archive/$pkgver/ayatana-indicator-keyboard-$pkgver.tar.gz"
+
+build() {
+	if [ "$CBUILD" != "$CHOST" ]; then
+		CMAKE_CROSSOPTS="-DCMAKE_SYSTEM_NAME=Linux -DCMAKE_HOST_SYSTEM_NAME=Linux"
+	fi
+	cmake -B build -G Ninja \
+		-DCMAKE_INSTALL_PREFIX=/usr \
+		-DCMAKE_INSTALL_LIBDIR=lib \
+		-DBUILD_SHARED_LIBS=True \
+		-DCMAKE_BUILD_TYPE=MinSizeRel \
+		-DENABLE_TESTS=ON \
+		$CMAKE_CROSSOPTS .
+	cmake --build build
+}
+
+check() {
+	cd build
+	CTEST_OUTPUT_ON_FAILURE=TRUE ctest
+}
+
+package() {
+	DESTDIR="$pkgdir" cmake --install build
+}
+
+sha512sums="
+8af9ea5367ce47903214912ba59aca4440d9c502dcfa13ed6c2592deb32889b800c646933e3ac90b9c41a78109388902a1d63e8694487b8af1dee77afe4d867a  ayatana-indicator-keyboard-23.10.1.tar.gz
+"

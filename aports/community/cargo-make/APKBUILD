@@ -1,0 +1,45 @@
+# Contributor: Jakub Jirutka <jakub@jirutka.cz>
+# Maintainer: Jakub Jirutka <jakub@jirutka.cz>
+pkgname=cargo-make
+pkgver=0.37.4
+pkgrel=0
+pkgdesc="Rust task runner and build tool"
+url="https://github.com/sagiegurari/cargo-make"
+# riscv64: TODO
+# s390x: fails to build nix crate
+arch="all !riscv64 !s390x"
+license="Apache-2.0"
+makedepends="cargo openssl-dev cargo-auditable"
+subpackages="$pkgname-bash-completion"
+source="https://github.com/sagiegurari/cargo-make/archive/$pkgver/cargo-make-$pkgver.tar.gz"
+options="!check"  # FIXME: some tests are broken
+
+_cargo_opts="--frozen --no-default-features --features tls-native"
+
+
+prepare() {
+	default_prepare
+
+	cargo fetch --target="$CTARGET" --locked
+}
+
+build() {
+	cargo auditable build $_cargo_opts --release
+}
+
+check() {
+	cargo test $_cargo_opts
+}
+
+package() {
+	install -D -m755 -t "$pkgdir"/usr/bin/ \
+		target/release/cargo-make \
+		target/release/makers
+
+	install -D -m644 extra/shell/makers-completion.bash \
+		"$pkgdir"/usr/share/bash-completion/completions/makers
+}
+
+sha512sums="
+a2d3c9455aba3bcf7852b2b57f69f37fb905f95218ba7be25e18a3495063149c3fa49792e0437387127211ce312e4c3e4c4c1b12e6e9b7785d316ea4565b1089  cargo-make-0.37.4.tar.gz
+"

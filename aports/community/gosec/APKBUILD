@@ -1,0 +1,34 @@
+# Contributor: Clayton Craft <clayton@craftyguy.net>
+# Maintainer: Clayton Craft <clayton@craftyguy.net>
+pkgname=gosec
+pkgver=2.18.2
+pkgrel=0
+pkgdesc="Go source code static analyzer, focusing on security"
+url="https://github.com/securego/gosec"
+arch="all"
+license="Apache-2.0"
+makedepends="go"
+source="$pkgname-$pkgver.tar.gz::https://github.com/securego/gosec/archive/refs/tags/v$pkgver.tar.gz"
+# downloads go deps into GOBIN and runs them
+options="!check"
+
+export GOBIN=/tmp
+export GOCACHE="${GOCACHE:-"$srcdir/go-cache"}"
+export GOTMPDIR="${GOTMPDIR:-"$srcdir"}"
+export GOMODCACHE="${GOMODCACHE:-"$srcdir/go"}"
+
+build() {
+	make PREFIX="/usr" VERSION="$pkgver"
+}
+
+check() {
+	make test
+}
+
+package() {
+	install -Dm755 gosec -t "$pkgdir"/usr/bin
+}
+
+sha512sums="
+36d7c48cad773c0ea587fd72247d33e5cbb6882b6895974ad8cf4202e2489126b47ef201c0d034d7088f703990c920da15b1cdbe0ea12623af69ebb0eb819def  gosec-2.18.2.tar.gz
+"

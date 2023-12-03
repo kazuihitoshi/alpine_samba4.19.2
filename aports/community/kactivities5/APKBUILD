@@ -1,0 +1,60 @@
+# Contributor: Bart Ribbers <bribbers@disroot.org>
+# Maintainer: team/kde <bribbers@disroot.org>
+
+# The group tag is just to easily find this APKBUILD by some scripts for automation
+# group=kde-frameworks
+pkgname=kactivities5
+pkgver=5.112.0
+pkgrel=0
+# armhf blocked by qt5-qtdeclarative
+arch="all !armhf"
+pkgdesc="Core components for the KDE's Activities"
+url="https://community.kde.org/Frameworks"
+license="GPL-2.0-or-later AND LGPL-2.1-or-later AND (LGPL-2.1-only OR LGPL-3.0-only)"
+depends="qt5-qtbase-sqlite"
+depends_dev="
+	kconfig5-dev
+	kcoreaddons5-dev
+	kwindowsystem5-dev
+	qt5-qtdeclarative-dev
+	"
+makedepends="$depends_dev
+	boost-dev
+	doxygen
+	extra-cmake-modules
+	qt5-qttools-dev
+	samurai
+	"
+_repo_url="https://invent.kde.org/plasma/kactivities.git"
+source="https://download.kde.org/stable/frameworks/${pkgver%.*}/kactivities-$pkgver.tar.xz"
+subpackages="$pkgname-dev $pkgname-libs $pkgname-doc"
+builddir="$srcdir/kactivities-$pkgver"
+
+replaces="kactivities<=5.110.0-r0"
+
+build() {
+	cmake -B build -G Ninja \
+		-DCMAKE_BUILD_TYPE=RelWithDebInfo \
+		-DCMAKE_INSTALL_PREFIX=/usr \
+		-DCMAKE_INSTALL_LIBDIR=lib \
+		-DBUILD_QCH=ON
+	cmake --build build
+}
+
+check() {
+	ctest --test-dir build --output-on-failure
+}
+
+package() {
+	DESTDIR="$pkgdir" cmake --install build
+}
+
+libs() {
+	# workaround: need to specify replaces, otherwise upgrade will fail
+	replaces="kactivities-libs<=5.110.0-r0"
+	default_libs
+}
+
+sha512sums="
+da31b47c1bfdadfae07de3ef4afc4a65e3d0eb6c3f21352c594d841e28a22d4e1819895dfe36bcd2d8095e5b014ac9cbfbbf232eabfed875b246355580e6e365  kactivities-5.112.0.tar.xz
+"

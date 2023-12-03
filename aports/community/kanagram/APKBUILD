@@ -1,0 +1,54 @@
+# Contributor: Bart Ribbers <bribbers@disroot.org>
+# Maintainer: team/kde <bribbers@disroot.org>
+
+# The group tag is just to easily find this APKBUILD by some scripts for automation
+# group=kde-applications
+pkgname=kanagram
+pkgver=23.08.3
+pkgrel=0
+# armhf blocked by qt5-qtdeclarative
+arch="all !armhf"
+url="https://edu.kde.org/kanagram/"
+pkgdesc="Letter Order Game"
+license="GPL-2.0-or-later AND GFDL-1.2-only"
+makedepends="
+	extra-cmake-modules
+	kconfig5-dev
+	kconfigwidgets5-dev
+	kcoreaddons5-dev
+	kcrash5-dev
+	kdeclarative5-dev
+	kdoctools5-dev
+	ki18n5-dev
+	kio5-dev
+	knewstuff5-dev
+	libkeduvocdocument-dev
+	qt5-qtbase-dev
+	qt5-qtdeclarative-dev
+	samurai
+	sonnet5-dev
+	"
+_repo_url="https://invent.kde.org/education/kanagram.git"
+source="https://download.kde.org/stable/release-service/$pkgver/src/kanagram-$pkgver.tar.xz"
+subpackages="$pkgname-doc $pkgname-lang"
+options="!check" # No tests
+
+build() {
+	cmake -B build -G Ninja \
+		-DCMAKE_BUILD_TYPE=RelWithDebInfo \
+		-DCMAKE_INSTALL_PREFIX=/usr \
+		-DCMAKE_INSTALL_LIBDIR=lib
+	cmake --build build
+}
+
+check() {
+	ctest --test-dir build --output-on-failure
+}
+
+package() {
+	DESTDIR="$pkgdir" cmake --install build
+}
+
+sha512sums="
+4a0b8f0c4e841efe7b171c59c03ac05692ec0af2d5a61481859137169e733158dc0a4660fc02379fcdba1f24b15ee15f857c09c372f50295f110c618f7bf5c0e  kanagram-23.08.3.tar.xz
+"

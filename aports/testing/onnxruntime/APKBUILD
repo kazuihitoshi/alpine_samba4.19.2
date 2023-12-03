@@ -1,0 +1,101 @@
+# Maintainer: leso-kn <info@lesosoftware.com>
+pkgname=onnxruntime
+pkgver=1.16.3
+pkgrel=6
+pkgdesc="Cross-platform, high performance ML inferencing and training accelerator"
+url="https://onnxruntime.ai"
+# x86, s390x: fails to build
+arch="all !x86 !s390x"
+license="MIT"
+makedepends="
+	abseil-cpp-dev
+	bash
+	cmake
+	icu-dev
+	linux-headers
+	nlohmann-json
+	protobuf-dev
+	py3-numpy-dev
+	py3-pybind11-dev
+	py3-setuptools
+	py3-wheel
+	python3-dev
+	re2-dev
+	samurai
+	zlib-dev
+	"
+subpackages="
+	$pkgname-dev
+	py3-$pkgname-pyc
+	py3-$pkgname:py3
+	"
+source="$pkgname-$pkgver.tar.gz::https://github.com/microsoft/onnxruntime/archive/refs/tags/v$pkgver.tar.gz
+	cxx17.patch
+	no-execinfo.patch
+	system.patch
+	0001-Remove-MATH_NO_EXCEPT-macro.patch
+	onnx-5668-disable-lfs64.patch
+	"
+options="net"
+
+# tests fail on arm 32 bit, see https://github.com/microsoft/onnxruntime/issues/16387
+case "$CARCH" in
+armhf|armv7) options="!check $options"; CXXFLAGS="$CXXFLAGS -Wno-overflow";;
+esac
+
+build() {
+	CFLAGS="$CFLAGS -O2 -flto=auto" \
+	CXXFLAGS="$CXXFLAGS -O2 -Wno-deprecated-declarations -flto=auto" \
+	LDFLAGS="$LDFLAGS -Wl,--copy-dt-needed-entries" \
+	cmake -S cmake -B build -G Ninja \
+		-DCMAKE_BUILD_TYPE=None \
+		-DCMAKE_INSTALL_PREFIX=/usr \
+		-DBUILD_ONNX_PYTHON=ON \
+		-Donnxruntime_BUILD_SHARED_LIB=ON \
+		-Donnxruntime_BUILD_UNIT_TESTS="$(want_check && echo ON || echo OFF)" \
+		-Donnxruntime_ENABLE_PYTHON=ON
+	# hack for protobuf 23
+	sed -i 's|CMAKE_CXX_STANDARD 11|CMAKE_CXX_STANDARD 17|' build/_deps/onnx-src/CMakeLists.txt
+
+	cmake --build build
+
+	cd build
+	msg "building python module"
+	python3 ../setup.py build
+}
+
+check() {
+	ctest --test-dir build --output-on-failure
+}
+
+package() {
+	DESTDIR="$pkgdir" cmake --install build
+
+	cd build
+	python3 ../setup.py install --skip-build --root="$pkgdir"
+
+	ln -sfv ../../../../libonnxruntime_providers_shared.so \
+		"$(echo "$pkgdir"/usr/lib/python3*/site-packages/onnxruntime/capi/libonnxruntime_providers_shared.so)"
+}
+
+py3() {
+	pkgdesc="$pkgname (python3 bindings)"
+	depends="
+		py3-coloredlogs
+		py3-flatbuffers
+		py3-numpy
+		py3-packaging
+		py3-sympy
+		"
+
+	amove usr/lib/python3*
+}
+
+sha512sums="
+f2fec4ded88da6bf67ae7d0aa3082736cb3b8ba29e723b5a516d7632b68ce02aed461f24d3e82cbab20757729e0ab45d736bd986c9b7395f2879b16a091c12a1  onnxruntime-1.16.3.tar.gz
+6af5609df589e2220e308ef2645dbdcb4c6f3aa564aa7145ff17fe265b2d633b4b58056b83aceb45ea6dbc95ea7396c0b553fb32297aa39c2a3cedb0ff589678  cxx17.patch
+976913be90b0a82ff1ba403f46306ef4e5939bb05296227c99d3c4a609dd00f5750f9b1c6c30d20791ff0724c1bcffc6aa498eac906257aefefc6f35df796fe0  no-execinfo.patch
+a09b8e7d6d5601784c3aacbbe9c81e2f9c57db82c3cc4d87103d033c70dd1c88795e92adc26c812bd4605380e76c1aa3adaf703f402647da18111c2908135e4c  system.patch
+696d76c9265ad31fdd1d8b7790693e139f31006dff4d571473f8406129fff47f2885010ed0affb7fcf629f98bed5e14d33eeef9e52eb251e90f581a05f587350  0001-Remove-MATH_NO_EXCEPT-macro.patch
+33410a2928763be4495ff4a6376e93f8a9bd806d7adc95862e758a75a04c6148f52db45bacb2d70df4d49317d422030ab4ab5243b7a9c8f85c12bc0569689952  onnx-5668-disable-lfs64.patch
+"

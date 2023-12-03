@@ -1,0 +1,35 @@
+# Contributor: Galen Abell <galen@galenabell.com>
+# Maintainer: Galen Abell <galen@galenabell.com>
+pkgname=py3-docstring-to-markdown
+_pyname=docstring-to-markdown
+pkgver=0.13
+pkgrel=0
+pkgdesc="On the fly conversion of Python docstrings to markdown"
+url="https://github.com/python-lsp/docstring-to-markdown"
+arch="noarch"
+license="LGPL-2.1-only"
+makedepends="py3-gpep517 py3-setuptools py3-setuptools_scm py3-wheel"
+checkdepends="py3-pytest"
+subpackages="$pkgname-pyc"
+source="$_pyname-$pkgver.tar.gz::https://github.com/python-lsp/docstring-to-markdown/archive/v$pkgver.tar.gz"
+builddir="$srcdir/$_pyname-$pkgver"
+
+build() {
+	gpep517 build-wheel \
+		--wheel-dir .dist \
+		--output-fd 3 3>&1 >&2
+}
+
+check() {
+	python3 -m venv --clear --system-site-packages .testenv
+	.testenv/bin/python3 -m installer .dist/*.whl
+	.testenv/bin/python3 -m pytest -c /dev/null
+}
+
+package() {
+	python3 -m installer -d "$pkgdir" .dist/*.whl
+}
+
+sha512sums="
+adaeff9c9c4359889757e80d91cbca1c85c6aa888b66824802828d247c09919877e416367f7334db5c944312b3c3468256c159e598c837718806f314aa11b8db  docstring-to-markdown-0.13.tar.gz
+"

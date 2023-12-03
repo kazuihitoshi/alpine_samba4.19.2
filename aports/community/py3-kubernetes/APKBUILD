@@ -1,0 +1,51 @@
+# Contributor: Duncan Bellamy <dunk@denkimushi.com>
+# Maintainer: Duncan Bellamy <dunk@denkimushi.com>
+pkgname=py3-kubernetes
+_pkgname=kubernetes
+pkgver=28.1.0
+pkgrel=0
+pkgdesc="Official Python client library for kubernetes"
+url="https://github.com/kubernetes-client/python"
+arch="noarch"
+license="Apache-2.0"
+depends="
+	py3-certifi
+	py3-dateutil
+	py3-google-auth
+	py3-requests
+	py3-requests-oauthlib
+	py3-six
+	py3-urllib3
+	py3-websocket-client
+	py3-yaml
+	"
+makedepends="py3-gpep517 py3-setuptools py3-wheel"
+checkdepends="pytest py3-mock"
+subpackages="$pkgname-pyc"
+source="$pkgname-$pkgver.tar.gz::https://files.pythonhosted.org/packages/source/k/kubernetes/kubernetes-$pkgver.tar.gz"
+builddir="$srcdir/$_pkgname-$pkgver"
+
+build() {
+	gpep517 build-wheel \
+		--wheel-dir .dist \
+		--output-fd 3 3>&1 >&2
+}
+
+check() {
+	python3 -m venv --clear --without-pip --system-site-packages .testenv
+	.testenv/bin/python3 -m installer .dist/*.whl
+	# deselected tests have missing modules
+	.testenv/bin/python3 -m \
+	pytest --ignore=kubernetes/dynamic/test_client.py \
+		--ignore=kubernetes/dynamic/test_discovery.py \
+		--ignore=kubernetes/e2e_test \
+		kubernetes
+}
+
+package() {
+	python3 -m installer -d "$pkgdir" .dist/*.whl
+}
+
+sha512sums="
+28ce0ce86388df9a6dc32b1fe79ec0aba37a4b04783efe5004b9b47275012f6ed510bbfccbd146590fa0c72d36e3aad50dd4728b2aedaa485b29c8d24a0df0c9  py3-kubernetes-28.1.0.tar.gz
+"

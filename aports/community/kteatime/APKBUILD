@@ -1,0 +1,47 @@
+# Contributor: Bart Ribbers <bribbers@disroot.org>
+# Maintainer: team/kde <bribbers@disroot.org>
+
+# The group tag is just to easily find this APKBUILD by some scripts for automation
+# group=kde-applications
+pkgname=kteatime
+pkgver=23.08.3
+pkgrel=0
+arch="all !armhf"
+url="https://kde.org/applications/utilities/org.kde.kteatime"
+pkgdesc="A handy timer for steeping tea"
+license="GPL-2.0-or-later AND GFDL-1.2-only"
+makedepends="
+	extra-cmake-modules
+	kconfig5-dev
+	kconfig5-dev
+	kcrash5-dev
+	kdoctools5-dev
+	ki18n5-dev
+	kiconthemes5-dev
+	knotifications5-dev
+	knotifyconfig5-dev
+	ktextwidgets5-dev
+	kxmlgui5-dev
+	qt5-qtbase-dev
+	samurai
+	"
+_repo_url="https://invent.kde.org/utilities/kteatime.git"
+source="https://download.kde.org/stable/release-service/$pkgver/src/kteatime-$pkgver.tar.xz"
+subpackages="$pkgname-doc $pkgname-lang"
+options="!check" # No tests
+
+build() {
+	cmake -B build -G Ninja \
+		-DCMAKE_BUILD_TYPE=RelWithDebInfo \
+		-DCMAKE_INSTALL_PREFIX=/usr \
+		-DCMAKE_INSTALL_LIBDIR=lib
+	cmake --build build
+}
+
+package() {
+	DESTDIR="$pkgdir" cmake --install build
+}
+
+sha512sums="
+a4f92a082bc31cff3665a7eb237cdda82dd479d088435267004459dd74cbe4db594865104f3805b2db43c4c6c96313b3ac55feb002bd18d3e9afa0c4532ac522  kteatime-23.08.3.tar.xz
+"

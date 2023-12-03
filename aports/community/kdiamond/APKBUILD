@@ -1,0 +1,50 @@
+# Contributor: Bart Ribbers <bribbers@disroot.org>
+# Maintainer: team/kde <bribbers@disroot.org>
+
+# The group tag is just to easily find this APKBUILD by some scripts for automation
+# group=kde-applications
+pkgname=kdiamond
+pkgver=23.08.3
+pkgrel=0
+pkgdesc="A single player puzzle game"
+# armhf blocked by extra-cmake-modules
+arch="all !armhf"
+url="https://kde.org/applications/games/kdiamond/"
+license="GPL-2.0-or-later AND GFDL-1.2-only"
+makedepends="
+	extra-cmake-modules
+	kconfig5-dev
+	kconfigwidgets5-dev
+	kcoreaddons5-dev
+	kcrash5-dev
+	kdbusaddons5-dev
+	kdoctools5-dev
+	ki18n5-dev
+	knotifications5-dev
+	knotifyconfig5-dev
+	kwidgetsaddons5-dev
+	kxmlgui5-dev
+	libkdegames-dev
+	qt5-qtbase-dev
+	samurai
+	"
+_repo_url="https://invent.kde.org/games/kdiamond.git"
+source="https://download.kde.org/stable/release-service/$pkgver/src/kdiamond-$pkgver.tar.xz"
+subpackages="$pkgname-doc $pkgname-lang"
+options="!check" # No tests
+
+build() {
+	cmake -B build -G Ninja \
+		-DCMAKE_BUILD_TYPE=RelWithDebInfo \
+		-DCMAKE_INSTALL_PREFIX=/usr \
+		-DCMAKE_INSTALL_LIBDIR=lib
+	cmake --build build
+}
+
+package() {
+	DESTDIR="$pkgdir" cmake --install build
+}
+
+sha512sums="
+e20dcee0328f90a298ca934141eaf0132c43151c810abc96f212b53408d432f3f0f9cc62f727fedd8ac06dd5f29b6d317193ba1d48dc79fe8af7ac1d58bc17ab  kdiamond-23.08.3.tar.xz
+"

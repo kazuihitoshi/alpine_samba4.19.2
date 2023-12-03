@@ -1,0 +1,54 @@
+# Contributor: Bart Ribbers <bribbers@disroot.org>
+# Maintainer: team/kde <bribbers@disroot.org>
+
+# The group tag is just to easily find this APKBUILD by some scripts for automation
+# group=kde-applications
+pkgname=kclock
+pkgver=23.08.3
+pkgrel=0
+pkgdesc="Clock app for Plasma Mobile"
+url="https://invent.kde.org/utilities/kclock"
+# armhf blocked by qt5-qtdeclarative
+# x86 broken
+arch="all !armhf !x86"
+license="LicenseRef-KDE-Accepted-GPL"
+depends="
+	kirigami-addons
+	kirigami2
+	"
+makedepends="
+	extra-cmake-modules
+	kconfig5-dev
+	kcoreaddons5-dev
+	kdbusaddons5-dev
+	ki18n5-dev
+	kirigami-addons-dev
+	kirigami2-dev
+	knotifications5-dev
+	plasma-framework5-dev
+	qt5-qtbase-dev
+	qt5-qtdeclarative-dev
+	qt5-qtmultimedia-dev
+	qt5-qtquickcontrols2-dev
+	qt5-qtsvg-dev
+	samurai
+	"
+_repo_url="https://invent.kde.org/utilities/kclock.git"
+source="https://download.kde.org/stable/release-service/$pkgver/src/kclock-$pkgver.tar.xz"
+options="!check" # No tests
+
+build() {
+	cmake -B build -G Ninja \
+		-DCMAKE_BUILD_TYPE=RelWithDebInfo \
+		-DCMAKE_INSTALL_PREFIX=/usr \
+		-DCMAKE_INSTALL_LIBDIR=lib
+	cmake --build build
+}
+
+package() {
+	DESTDIR="$pkgdir" cmake --install build
+}
+
+sha512sums="
+7d828139dede31209806a194c93014096969965c4f426e3d387a031e4c1c6323ed79c2d8f73348c3199a02857a6f9e51663586ad354f35a09dc58518fa208cf3  kclock-23.08.3.tar.xz
+"

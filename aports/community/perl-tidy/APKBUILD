@@ -1,0 +1,33 @@
+# Contributor: Duncan Bellamy <dunk@denkimushi.com>
+# Maintainer: Duncan Bellamy <dunk@denkimushi.com>
+pkgname=perl-tidy
+pkgver=20230912
+pkgrel=0
+pkgdesc="Parses and beautifies perl source"
+url="https://metacpan.org/dist/Perl-Tidy"
+arch="noarch"
+license="GPL-2.0-only"
+depends="perl"
+subpackages="$pkgname-doc"
+source="https://cpan.metacpan.org/authors/id/S/SH/SHANCOCK/Perl-Tidy-$pkgver.tar.gz"
+builddir="$srcdir/Perl-Tidy-$pkgver"
+
+build() {
+	export CFLAGS=$(perl -MConfig -E 'say $Config{ccflags}')
+	PERL_MM_USE_DEFAULT=1 perl -I. Makefile.PL INSTALLDIRS=vendor
+	make
+}
+
+check() {
+	export CFLAGS=$(perl -MConfig -E 'say $Config{ccflags}')
+	make test
+}
+
+package() {
+	make DESTDIR="$pkgdir" install
+	find "$pkgdir" \( -name perllocal.pod -o -name .packlist \) -delete
+}
+
+sha512sums="
+aeb5e6bd531cc4a197dbddcc24dfb7acccc95f777ee10560f031e095072ac7e4ae50aa452016d904d58f25c8a89daa0ed31d9a088bd291766f129031f3daeefd  Perl-Tidy-20230912.tar.gz
+"

@@ -1,0 +1,33 @@
+# Maintainer: Dave Henderson <dhenderson@gmail.com>
+pkgname=gomplate
+pkgver=3.11.6
+pkgrel=0
+pkgdesc="A versatile Go template processor"
+url="https://github.com/hairyhenderson/gomplate"
+arch="all"
+license="MIT"
+depends="ca-certificates"
+makedepends="go"
+source="$pkgname-$pkgver.tar.gz::https://github.com/hairyhenderson/gomplate/archive/v$pkgver.tar.gz"
+
+export GOFLAGS="$GOFLAGS -trimpath -modcacherw"
+export GOCACHE="${GOCACHE:-"$srcdir/go-cache"}"
+export GOTMPDIR="${GOTMPDIR:-"$srcdir"}"
+export GOMODCACHE="${GOMODCACHE:-"$srcdir/go"}"
+
+build() {
+	make build \
+		VERSION="$pkgver" \
+		COMMIT="unknown"
+}
+
+check() {
+	# Note: make test (that runs go test -race) doesn't work.
+	go test -v
+}
+
+package() {
+	install -D -m 755 bin/gomplate "$pkgdir"/usr/bin/gomplate
+}
+
+sha512sums="484f6d48e79e6162822d4ac8325608bef8c7b654265723f0fa5ad1885d34ef256a6c365559019c3f5422905b89e9a74e652c566b45bb05ad304b1c31debf1142  gomplate-3.11.6.tar.gz"

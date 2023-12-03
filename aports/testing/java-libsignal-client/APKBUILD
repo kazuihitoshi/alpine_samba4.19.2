@@ -1,0 +1,43 @@
+# Contributor: Simon Frankenberger <simon-alpine@fraho.eu>
+# Maintainer: Simon Frankenberger <simon-alpine@fraho.eu>
+pkgname=java-libsignal-client
+pkgver=0.35.0
+pkgrel=0
+pkgdesc="libsignal-client contains platform-agnostic APIs useful for Signal client apps"
+url="https://github.com/signalapp/libsignal"
+# jdk17 only available on 64 bit archs
+# ppc64le jdk17 not available
+# s390x: #error "Unknown target CPU"
+arch="aarch64 x86_64"
+license="AGPL-3.0-or-later"
+depends="java-jre-headless"
+makedepends="bash cargo clang-dev cmake openjdk11-jdk protoc rust zip"
+source="$pkgname-$pkgver.tar.gz::https://github.com/signalapp/libsignal/archive/v$pkgver.tar.gz"
+install="$pkgname.post-install $pkgname.post-upgrade"
+builddir="$srcdir/libsignal-$pkgver"
+# tests succeed, but gradle aborts with exit value 134. have to further investigate later
+options="!check"
+
+
+build() {
+	cd "$builddir"/java
+	./gradlew --no-daemon -PskipAndroid :client:jar
+}
+
+check() {
+	cd "$builddir"/java
+	./gradlew --no-daemon -PskipAndroid :client:test
+}
+
+package() {
+	install -D -m644 "$builddir"/java/client/build/libs/libsignal-client-$pkgver.jar \
+		-t "$pkgdir"/usr/share/java/libsignal-client
+	install -D -m755 "$builddir"/target/release/libsignal_jni.so \
+		-t "$pkgdir"/usr/lib
+	zip -d "$pkgdir"/usr/share/java/libsignal-client/libsignal-client-$pkgver.jar \
+		libsignal_jni.so
+}
+
+sha512sums="
+5267f6105b19cb238d0b2a94a7dde4cb8916392c7a3655c4bd6f1a5411b1bca94fb3a0a3e52c82e991c29d2abe5ffe1e61fde60a2944751d8ca6845b7b61a9c3  java-libsignal-client-0.35.0.tar.gz
+"

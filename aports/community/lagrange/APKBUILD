@@ -1,0 +1,45 @@
+# Contributor: Michał Polański <michal@polanski.me>
+# Maintainer: Michał Polański <michal@polanski.me>
+pkgname=lagrange
+pkgver=1.17.4
+pkgrel=0
+pkgdesc="Beautiful Gemini client"
+url="https://gmi.skyjake.fi/lagrange"
+license="BSD-2-Clause"
+arch="all"
+makedepends="
+	cmake
+	fribidi-dev
+	harfbuzz-dev
+	libunistring-dev
+	libwebp-dev
+	mpg123-dev
+	openssl-dev
+	pcre2-dev
+	samurai
+	sdl2-dev
+	zip
+	zlib-dev
+	"
+subpackages="$pkgname-dbg $pkgname-doc"
+source="https://git.skyjake.fi/gemini/lagrange/releases/download/v$pkgver/lagrange-$pkgver.tar.gz"
+options="!check" # no test suite
+
+build() {
+	cmake -B build -G Ninja \
+		-DCMAKE_BUILD_TYPE=None \
+		-DCMAKE_INSTALL_PREFIX=/usr \
+		-DENABLE_POPUP_MENUS=OFF \
+		-DENABLE_RESIZE_DRAW=OFF \
+		-DENABLE_X11_XLIB=OFF \
+		-DTFDN_ENABLE_SSE41=OFF
+	cmake --build build
+}
+
+package() {
+	DESTDIR="$pkgdir" cmake --install build
+}
+
+sha512sums="
+772c19b7507de6f86c2d46479f625b132e1a3f97d1efd6fbdf9ad6c74d30b3f17626b0953ff0f3d79af2e457ef2c47f486316a19f4f014aae5807466ad6044d3  lagrange-1.17.4.tar.gz
+"

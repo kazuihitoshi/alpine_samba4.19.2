@@ -1,0 +1,56 @@
+# Contributor: jane400 <ralfrachinger@gmail.com>
+# Maintainer: team/kde <bribbers@disroot.org>
+
+# The group tag is just to easily find this APKBUILD by some scripts for automation
+# group=kde-applications
+pkgname=plasmatube
+pkgver=23.08.3
+pkgrel=0
+pkgdesc="Kirigami YouTube video player based on Invidious"
+# armhf blocked by extra-cmake-modules
+arch="all !armhf"
+url="https://invent.kde.org/plasma-mobile/plasmatube"
+license="GPL-3.0-or-later AND CC0-1.0"
+depends="
+	gst-libav
+	gst-plugins-good
+	gst-plugins-good-qt
+	kcoreaddons5
+	kdeclarative5
+	kirigami2
+	qt5-qtquickcontrols2
+	yt-dlp
+	"
+makedepends="
+	extra-cmake-modules
+	ki18n5-dev
+	kirigami2-dev
+	mpv-dev
+	qt5-qtbase-dev
+	qt5-qtquickcontrols2-dev
+	samurai
+	"
+subpackages="$pkgname-lang"
+_repo_url="https://invent.kde.org/multimedia/plasmatube.git"
+source="https://download.kde.org/stable/release-service/$pkgver/src/plasmatube-$pkgver.tar.xz"
+options="!check" # No tests
+
+build() {
+	cmake -B build -G Ninja \
+		-DCMAKE_BUILD_TYPE=RelWithDebInfo \
+		-DCMAKE_INSTALL_PREFIX=/usr \
+		-DCMAKE_INSTALL_LIBDIR=lib
+	cmake --build build
+}
+
+check() {
+	ctest --test-dir build --output-on-failure
+}
+
+package() {
+	DESTDIR="$pkgdir" cmake --install build
+}
+
+sha512sums="
+892317532e3a23afe96c254d1c9f9e3f3441f2acce7601af8da6931ebf173dfcdd31697d204cd91426d2a3effd0f993eda402484a6ab661c67cea0df1908585d  plasmatube-23.08.3.tar.xz
+"

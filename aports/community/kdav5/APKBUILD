@@ -1,0 +1,54 @@
+# Contributor: Bart Ribbers <bribbers@disroot.org>
+# Maintainer: team/kde <bribbers@disroot.org>
+
+# The group tag is just to easily find this APKBUILD by some scripts for automation
+# group=kde-frameworks
+pkgname=kdav5
+pkgver=5.112.0
+pkgrel=0
+pkgdesc="A DAV protocol implementation with KJobs"
+url="https://community.kde.org/Frameworks"
+# armhf blocked by qt5-qtdeclarative
+arch="all !armhf"
+license="LGPL-2.0-or-later"
+depends_dev="
+	kcoreaddons5-dev
+	ki18n5-dev
+	kio5-dev
+	qt5-qtbase-dev
+	qt5-qtxmlpatterns-dev
+	"
+makedepends="$depends_dev
+	doxygen
+	extra-cmake-modules
+	qt5-qttools-dev
+	samurai
+	"
+checkdepends="xvfb-run"
+subpackages="$pkgname-dev $pkgname-doc $pkgname-lang"
+_repo_url="https://invent.kde.org/frameworks/kdav.git"
+source="https://download.kde.org/stable/frameworks/${pkgver%.*}/kdav-$pkgver.tar.xz"
+builddir="$srcdir/kdav-$pkgver"
+
+replaces="kdav<=5.110.0-r0"
+
+build() {
+	cmake -B build -G Ninja \
+		-DCMAKE_BUILD_TYPE=RelWithDebInfo \
+		-DCMAKE_INSTALL_PREFIX=/usr \
+		-DCMAKE_INSTALL_LIBDIR=lib \
+		-DBUILD_QCH=ON
+	cmake --build build
+}
+
+check() {
+	xvfb-run ctest --test-dir build --output-on-failure
+}
+
+package() {
+	DESTDIR="$pkgdir" cmake --install build
+}
+
+sha512sums="
+f95d9564df31d857aaa179d0191ae9a3e2d58b2b8e123930e103cfad345892843f8f77c172441c1b8b54ad7aa6002a0c1bee397442677b5d88225ac972b7efa9  kdav-5.112.0.tar.xz
+"

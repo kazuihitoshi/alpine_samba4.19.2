@@ -1,0 +1,36 @@
+# Maintainer: Hoang Nguyen <folliekazetani@protonmail.com>
+pkgname=ghq
+pkgver=1.4.2
+pkgrel=2
+pkgdesc="CLI to manage remote repository clones"
+url="https://github.com/x-motemen/ghq"
+arch="all"
+license="MIT"
+makedepends="go"
+subpackages="$pkgname-bash-completion $pkgname-zsh-completion"
+source="$pkgname-$pkgver.tar.gz::https://github.com/x-motemen/ghq/archive/refs/tags/v$pkgver.tar.gz"
+
+export GOCACHE="${GOCACHE:-"$srcdir/go-cache"}"
+export GOTMPDIR="${GOTMPDIR:-"$srcdir"}"
+export GOMODCACHE="${GOMODCACHE:-"$srcdir/go"}"
+
+build() {
+	go build -v -ldflags "-X main.revision=AlpineLinux"
+}
+
+check() {
+	go test ./...
+}
+
+package() {
+	install -Dm755 ghq -t "$pkgdir"/usr/bin/
+
+	install -Dm644 misc/bash/_ghq \
+		"$pkgdir"/usr/share/bash-completion/completions/ghq
+	install -Dm644 misc/zsh/_ghq \
+		"$pkgdir"/usr/share/zsh/site-functions/_ghq
+}
+
+sha512sums="
+7f409511734e3633f6cfbc5f9833ff9e749a07279dff80eb3ea24c4d6e5665d4ffc0637867cc57f9ff23693512a078b2c7ea571ad26e379a5e9ff44e6e515f9a  ghq-1.4.2.tar.gz
+"

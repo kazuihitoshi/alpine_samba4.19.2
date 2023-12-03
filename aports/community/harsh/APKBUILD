@@ -1,0 +1,23 @@
+# Maintainer: Willow Barraco <contact@willowbarraco.fr>
+pkgname=harsh
+pkgver=0.8.30
+pkgrel=0
+pkgdesc="Habit tracking for geeks"
+url="https://github.com/wakatara/harsh"
+arch="all"
+license="MIT"
+makedepends="go"
+source="$pkgname-$pkgver.tar.gz::https://github.com/wakatara/harsh/archive/refs/tags/v$pkgver.tar.gz"
+options="!check" # no test suite
+
+build() {
+	go build -v -ldflags="-X main.version=$pkgver" -o harsh .
+}
+
+package() {
+	install -Dm0755 harsh "$pkgdir"/usr/bin/harsh
+}
+
+sha512sums="
+4992d7b19baabe062b3b6191667f3bdc46e2fbb899d2a4874ef0c5b1533f80ec3c9e932844332e957fddcae880bc82b6ae20b4f22fab77264d9ddd6f1ace3fd0  harsh-0.8.30.tar.gz
+"

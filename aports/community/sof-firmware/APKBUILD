@@ -1,0 +1,31 @@
+# Maintainer: Alex Xu (Hello71) <alex_y_xu@yahoo.ca>
+pkgname=sof-firmware
+pkgver=2.2.6
+pkgrel=0
+pkgdesc="Sound Open Firmware"
+url="https://github.com/thesofproject/sof-bin"
+arch="x86_64"
+license="BSD-3-Clause AND MIT AND ISC"
+options="!check"
+subpackages="$pkgname-doc"
+source="https://github.com/thesofproject/sof-bin/releases/download/v$pkgver/sof-bin-v$pkgver.tar.gz"
+builddir="$srcdir/sof-bin-v$pkgver"
+
+provides="sof-bin=$pkgver-r$pkgrel"
+replaces="sof-bin"
+
+package() {
+	mkdir -p "$pkgdir"/usr/share/licenses \
+		"$pkgdir"/lib/firmware/intel
+
+	cp -a sof-v$pkgver "$pkgdir"/lib/firmware/intel/
+	ln -s sof-v$pkgver "$pkgdir"/lib/firmware/intel/sof
+	cp -a sof-tplg-v$pkgver "$pkgdir"/lib/firmware/intel/
+	ln -s sof-tplg-v$pkgver "$pkgdir"/lib/firmware/intel/sof-tplg
+
+	install -m644 LICENCE.* Notice.* "$pkgdir"/usr/share/licenses/
+}
+
+sha512sums="
+33a836fdc9006aead24e14c15703040164b0878d48c6dd32f0a6ae558c99a43c768eb793e308550fd32dfb0e0f93783cff6c42f2618557ebac2a057425115e9e  sof-bin-v2.2.6.tar.gz
+"

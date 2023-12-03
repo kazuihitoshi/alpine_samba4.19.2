@@ -1,0 +1,35 @@
+# Maintainer: kpcyrd <git@rxv.cc>
+pkgname=osv-scanner
+pkgver=1.4.3
+pkgrel=0
+pkgdesc="Vulnerability scanner written in Go which uses the data provided by https://osv.dev"
+url="https://github.com/google/osv-scanner"
+arch="all"
+license="Apache-2.0"
+makedepends="go"
+checkdepends="tzdata"
+options="net"
+source="https://github.com/google/osv-scanner/archive/v$pkgver/osv-scanner-$pkgver.tar.gz"
+
+export GOCACHE="${GOCACHE:-"$srcdir/go-cache"}"
+export GOTMPDIR="${GOTMPDIR:-"$srcdir"}"
+export GOMODCACHE="${GOMODCACHE:-"$srcdir/go"}"
+
+build() {
+	mkdir build
+	go build -o build/ ./cmd/...
+}
+
+check() {
+	# TestRun fails because more ghsa's were published since it was made
+	# shellcheck disable=2046
+	go test $(go list ./... | grep -v cmd/osv-scanner)
+}
+
+package() {
+	install -Dm755 ./build/osv-scanner -t "$pkgdir"/usr/bin/
+}
+
+sha512sums="
+7566d726af1ccf13e42cdbfde51d939897997ef0212fa2e4c0608971e690216b83f5ebc6737b8a8f01017c13cb490e3e868ab249cd88dcdcb40be6b5a376017e  osv-scanner-1.4.3.tar.gz
+"

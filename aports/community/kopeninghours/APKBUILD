@@ -1,0 +1,52 @@
+# Contributor: Bart Ribbers <bribbers@disroot.org>
+# Maintainer: team/kde <bribbers@disroot.org>
+
+# The group tag is just to easily find this APKBUILD by some scripts for automation
+# group=kde-applications
+pkgname=kopeninghours
+pkgver=23.08.3
+pkgrel=0
+pkgdesc="Library for parsing and evaluating OSM opening hours expressions"
+url="https://invent.kde.org/libraries/kopeninghours"
+# armhf blocked by extra-cmake-modules
+arch="all !armhf"
+license="BSD-3-Clause AND CC0-1.0 AND LGPL-2.0-or-later"
+makedepends="
+	bison
+	doxygen
+	extra-cmake-modules
+	flex
+	graphviz
+	kholidays5-dev
+	ki18n5-dev
+	qt5-qtbase-dev
+	qt5-qttools-dev
+	samurai
+	"
+subpackages="$pkgname-dev $pkgname-doc $pkgname-lang"
+_repo_url="https://invent.kde.org/libraries/kopeninghours.git"
+source="https://download.kde.org/stable/release-service/$pkgver/src/kopeninghours-$pkgver.tar.xz"
+
+build() {
+	cmake -B build -G Ninja \
+		-DCMAKE_BUILD_TYPE=MinSizeRel \
+		-DCMAKE_INSTALL_PREFIX=/usr \
+		-DCMAKE_INSTALL_LIBDIR=lib \
+		-DBUILD_QCH=ON
+	cmake --build build
+}
+
+check() {
+	cd build
+
+	# evaluatetest and iterationtest are broken
+	CTEST_OUTPUT_ON_FAILURE=TRUE ctest -E "(evaluate|iteration)test"
+}
+
+package() {
+	DESTDIR="$pkgdir" cmake --install build
+}
+
+sha512sums="
+e62794d4405321ef7c81b3981e2610e3a5f91a0a65a1899fd1e24681f4bb6296e8ad26532bb039e0fa3f47a0c33269a8c46c87658e407c87b77619ea0a09f155  kopeninghours-23.08.3.tar.xz
+"

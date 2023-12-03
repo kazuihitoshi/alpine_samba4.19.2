@@ -1,0 +1,36 @@
+# Contributor: Grigory Kirillov <txgk@bk.ru>
+# Maintainer: Celeste <cielesti@protonmail.com>
+pkgname=newsraft
+pkgver=0.22
+pkgrel=0
+pkgdesc="Feed reader with ncurses user interface"
+url="https://codeberg.org/newsraft/newsraft"
+arch="all"
+license="ISC"
+makedepends="
+	curl-dev
+	expat-dev
+	gumbo-parser-dev
+	ncurses-dev
+	sqlite-dev
+	yajl-dev
+	"
+subpackages="$pkgname-doc"
+source="https://codeberg.org/newsraft/newsraft/archive/newsraft-$pkgver.tar.gz"
+builddir="$srcdir/newsraft"
+
+build() {
+	make -e all
+}
+
+check() {
+	./newsraft -v
+}
+
+package() {
+	make DESTDIR="$pkgdir" PREFIX=/usr install
+}
+
+sha512sums="
+6329ea9528b60308a04756e8eb97bb149feb626272ed7ef89d33ba7271edf27aa07d281e9c8ca5fa29bde8aaf02c834ec4745195fa1270db311eccb93777b6de  newsraft-0.22.tar.gz
+"

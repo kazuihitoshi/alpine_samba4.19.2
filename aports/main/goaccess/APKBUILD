@@ -1,0 +1,36 @@
+# Contributor: Łukasz Jendrysik <scadu@yandex.com>
+# Contributor: Fabian Affolter <fabian@affolter-engineering.ch>
+# Maintainer: Fabian Affolter <fabian@affolter-engineering.ch>
+pkgname=goaccess
+pkgver=1.8.1
+pkgrel=0
+pkgdesc="Real-time web log analyzer and interactive viewer"
+options="!check" # no test suite
+url="https://goaccess.io/"
+arch="all"
+license="MIT"
+makedepends="ncurses-dev geoip-dev glib-dev libmaxminddb-dev"
+subpackages="$pkgname-doc $pkgname-lang"
+source="https://tar.goaccess.io/goaccess-$pkgver.tar.gz"
+
+build() {
+	./configure \
+		--build=$CBUILD \
+		--host=$CHOST \
+		--prefix=/usr \
+		--sysconfdir=/etc \
+		--mandir=/usr/share/man \
+		--infodir=/usr/share/info \
+		--localstatedir=/var \
+		--enable-geoip=mmdb \
+		--enable-utf8
+	make
+}
+
+package() {
+	make DESTDIR="$pkgdir" install
+}
+
+sha512sums="
+96f0b73f13cfb77ad57748bce7d8791f8486bfd5ce47420d1c0016826a4deb9ab2d2742f4afd5d8b0eed003f9b596aae51f232fa71bf47f823b6ff8119f91354  goaccess-1.8.1.tar.gz
+"

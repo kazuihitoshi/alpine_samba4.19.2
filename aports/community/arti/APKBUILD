@@ -1,0 +1,49 @@
+# Contributor: omni <omni+alpine@hack.org>
+# Maintainer: omni <omni+alpine@hack.org>
+pkgname=arti
+pkgver=1.1.10
+pkgrel=0
+pkgdesc="An implementation of Tor, in Rust"
+url="https://docs.rs/arti/latest/arti/"
+license="GPL-3.0-or-later"
+# ppc64le & s390x blocked by ring crate
+arch="all !ppc64le !s390x !riscv64"
+makedepends="cargo openssl-dev>3 sqlite-dev zstd-dev xz-dev cargo-auditable"
+subpackages="$pkgname-doc"
+source="$pkgname-$pkgver.tar.gz::https://gitlab.torproject.org/tpo/core/arti/-/archive/arti-v$pkgver/arti-arti-v$pkgver.tar.gz"
+builddir="$srcdir/$pkgname-$pkgname-v$pkgver"
+
+
+prepare() {
+	default_prepare
+	cargo fetch --target="$CTARGET" --locked
+
+	# Rust target triple.
+	local target=$(rustc -vV | sed -n 's/host: //p')
+
+	# Build against system-provided libs
+	mkdir -p .cargo
+	cat >> .cargo/config.toml <<-EOF
+		[target.$target]
+		zstd = { rustc-link-lib = ["zstd"] }
+	EOF
+}
+
+build() {
+	cargo auditable build --release --frozen --bin arti
+}
+
+check() {
+	cargo test --frozen
+}
+
+package() {
+	install -Dm755 -t "$pkgdir"/usr/bin/ target/release/arti
+	install -Dm755 -t "$pkgdir"/usr/share/doc/"$pkgname"/ \
+		doc/bridges.md doc/Compatibility.md doc/FAQ.md doc/SupportPolicy.md \
+		CHANGELOG.md README.md
+}
+
+sha512sums="
+8dd7032bc82898f81815b50e6ceaabffc77ad8f6da1634325a75c22652fbce450079e04b79203d2b0e58d668f5a3afcd92abed1289ea6f7ec232e9a22e84e845  arti-1.1.10.tar.gz
+"

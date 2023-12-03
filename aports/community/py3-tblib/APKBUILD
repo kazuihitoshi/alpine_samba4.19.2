@@ -1,0 +1,31 @@
+# Contributor: Bart Ribbers <bribbers@disroot.org>
+# Maintainer: Bart Ribbers <bribbers@disroot.org>
+pkgname=py3-tblib
+pkgver=2.0.0
+pkgrel=0
+pkgdesc="Serialization library for Exceptions and Tracebacks"
+url="https://github.com/ionelmc/python-tblib"
+arch="noarch"
+license="BSD-2-Clause"
+depends="python3 py3-six"
+makedepends="py3-setuptools python3-dev py3-docutils"
+checkdepends="py3-pytest py3-twisted"
+subpackages="$pkgname-pyc"
+source="https://pypi.python.org/packages/source/t/tblib/tblib-$pkgver.tar.gz"
+builddir="$srcdir/tblib-$pkgver"
+
+build() {
+	python3 setup.py build
+}
+
+check() {
+	PYTHONPATH="$PWD/build/lib" pytest
+}
+
+package() {
+	python3 setup.py install --skip-build --root="$pkgdir"
+}
+
+sha512sums="
+740e7b02c4ae61b12ed1c0c3623c5c2dd142aaa24989e57d67ceed4894212bc18d51f0ab0a97953f1a0e16b30ef992ecee3730038e8b8fd4a3bc437d4a1a92b0  tblib-2.0.0.tar.gz
+"

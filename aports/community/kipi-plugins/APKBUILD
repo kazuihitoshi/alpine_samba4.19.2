@@ -1,0 +1,47 @@
+# Contributor: Bart Ribbers <bribbers@disroot.org>
+# Maintainer: team/kde <bribbers@disroot.org>
+
+# The group tag is just to easily find this APKBUILD by some scripts for automation
+# group=kde-applications
+pkgname=kipi-plugins
+pkgver=23.08.3
+pkgrel=0
+pkgdesc="A collection of plugins extending the KDE graphics and image applications"
+# armhf blocked by extra-cmake-modules
+arch="all !armhf"
+url="https://userbase.kde.org/KIPI"
+license="GPL-2.0-or-later AND GFDL-1.2-only"
+makedepends="
+	extra-cmake-modules
+	karchive5-dev
+	kconfig5-dev
+	ki18n5-dev
+	kio5-dev
+	kwindowsystem5-dev
+	kxmlgui5-dev
+	libkipi-dev
+	qt5-qtbase-dev
+	qt5-qtsvg-dev
+	qt5-qtxmlpatterns-dev
+	samurai
+	"
+_repo_url="https://invent.kde.org/graphics/kipi-plugins.git"
+source="https://download.kde.org/stable/release-service/$pkgver/src/kipi-plugins-$pkgver.tar.xz"
+subpackages="$pkgname-lang"
+options="!check" # No tests
+
+build() {
+	cmake -B build -G Ninja \
+		-DCMAKE_BUILD_TYPE=RelWithDebInfo \
+		-DCMAKE_INSTALL_PREFIX=/usr \
+		-DCMAKE_INSTALL_LIBDIR=lib
+	cmake --build build
+}
+
+package() {
+	DESTDIR="$pkgdir" cmake --install build
+}
+
+sha512sums="
+e761b9156678eceea28ed774411c83c7b02c993d40bb4e9c2b5e5840bb2ab2b8bf71e96d72ec9c8a5fcab670ba6c26f0ab58d973d4016e6e8fd90f925680cc22  kipi-plugins-23.08.3.tar.xz
+"

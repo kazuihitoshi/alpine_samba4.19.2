@@ -1,0 +1,37 @@
+# Maintainer: Krassy Boykinov <kboykinov@teamcentrixx.com>
+pkgname=libpanel
+pkgver=1.4.0
+pkgrel=0
+pkgdesc="Dock/panel library for GTK 4"
+url="https://gitlab.gnome.org/GNOME/libpanel"
+arch="all"
+license="LGPL-2.1-or-later"
+makedepends="
+	gobject-introspection-dev
+	gtk4.0-dev
+	libadwaita-dev
+	meson
+	vala
+	"
+subpackages="$pkgname-dev $pkgname-lang"
+source="https://gitlab.gnome.org/GNOME/libpanel/-/archive/$pkgver/libpanel-$pkgver.tar.gz"
+
+build() {
+	abuild-meson \
+		-Db_lto=true \
+		-Ddocs=disabled \
+		. output
+	meson compile -C output
+}
+
+check() {
+	meson test --no-rebuild --print-errorlogs -C output
+}
+
+package() {
+	DESTDIR="$pkgdir" meson install --no-rebuild -C output
+}
+
+sha512sums="
+668ccd5ee88bfdb1c81d92e1a042bb266d85c0db2e5583175cb7d5c1d137495e9f5b6bccf38c17b3d951ea8af41e189cd06dd88c7ac4d145e1807437acd5ff01  libpanel-1.4.0.tar.gz
+"

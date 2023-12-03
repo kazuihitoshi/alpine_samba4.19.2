@@ -1,0 +1,34 @@
+# Contributor: Michał Polański <michal@polanski.me>
+# Maintainer: Michał Polański <michal@polanski.me>
+pkgname=hexyl
+pkgver=0.13.1
+pkgrel=0
+pkgdesc="Command-line hex viewer with colored output"
+url="https://github.com/sharkdp/hexyl"
+license="MIT OR Apache-2.0"
+arch="all"
+makedepends="cargo cargo-auditable"
+source="https://github.com/sharkdp/hexyl/archive/v$pkgver/hexyl-$pkgver.tar.gz"
+options="net" # fetch dependencies
+
+prepare() {
+	default_prepare
+
+	cargo fetch --target="$CTARGET" --locked
+}
+
+build() {
+	cargo auditable build --frozen --release
+}
+
+check() {
+	cargo test --frozen
+}
+
+package() {
+	install -Dm755 target/release/$pkgname -t "$pkgdir"/usr/bin/
+}
+
+sha512sums="
+cffa229dafe9b9b87aaa4aa54bb3cc33689a4cee17a4364f2ba393e424ee82a9f1ceaa3cc11b47d595dfbe41b8fba7f51faf53c8c883387709f977e6e10411c8  hexyl-0.13.1.tar.gz
+"

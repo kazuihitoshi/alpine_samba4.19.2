@@ -1,0 +1,42 @@
+# Contributor: Thomas Kienlen <kommander@laposte.net>
+# Maintainer: Thomas Kienlen <kommander@laposte.net>
+pkgname=spotify-player
+pkgver=0.15.2
+pkgrel=0
+pkgdesc="Command driven spotify player"
+url="https://github.com/aome510/spotify-player"
+arch="x86_64 aarch64 x86 ppc64le" # limited by rust/cargo, does not compile on armv7, armhf
+license="MIT"
+makedepends="
+	alsa-lib-dev
+	cargo
+	cargo-auditable
+	dbus-dev
+	openssl-dev
+	wayland-dev
+	"
+source="$pkgname-$pkgver.tar.gz::https://github.com/aome510/spotify-player/archive/v$pkgver.tar.gz"
+
+
+prepare() {
+	default_prepare
+
+	cargo fetch --target="$CTARGET" --locked
+}
+
+build() {
+	cargo auditable build --release --frozen \
+		--no-default-features --features 'alsa-backend,media-control,notify,streaming,daemon'
+}
+
+check() {
+	cargo test --frozen
+}
+
+package() {
+	install -Dm755 target/release/spotify_player -t "$pkgdir"/usr/bin
+}
+
+sha512sums="
+285143841ace3947dfd35efd69ccdb895e98aae8ac3ed509528935b4bb2f39d8f9388e315c1261349ba73acc2af6a4a27625de407a357613fd819c0869600cfa  spotify-player-0.15.2.tar.gz
+"

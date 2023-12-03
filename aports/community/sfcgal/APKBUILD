@@ -1,0 +1,50 @@
+# Contributor: Holger Jaekel <holger.jaekel@gmx.de>
+# Maintainer: Holger Jaekel <holger.jaekel@gmx.de>
+pkgname=sfcgal
+pkgver=1.5.0
+pkgrel=0
+pkgdesc="Library for ISO 19107:2013 and OGC SFA 1.2 for 3D operations"
+url="https://sfcgal.gitlab.io/SFCGAL/index.html"
+arch="all"
+license="LGPL-2.0-or-later"
+makedepends="
+	boost-dev
+	cgal-dev
+	cmake
+	gmp-dev
+	mpfr-dev
+	samurai
+	"
+subpackages="$pkgname-dev"
+source="https://gitlab.com/sfcgal/SFCGAL/-/archive/v$pkgver/SFCGAL-v$pkgver.tar.bz2
+	10-fix_algo_visibility.patch
+	"
+builddir="$srcdir/SFCGAL-v$pkgver"
+
+[ "$CARCH" = s390x ] && options="$options !check" # hangs on the CI
+
+build() {
+	cmake -B build -G Ninja \
+		-DCMAKE_BUILD_TYPE=MinSizeRel \
+		-DCMAKE_INSTALL_PREFIX=/usr \
+		-DCMAKE_INSTALL_LIBDIR=lib \
+		-DSFCGAL_BUILD_TESTS="$(want_check && echo ON || echo OFF)" \
+		-DSFCGAL_WITH_OSG=OFF \
+		-DCMAKE_SKIP_INSTALL_RPATH=ON
+	cmake --build build
+}
+
+check() {
+	ctest --output-on-failure --test-dir build -E "garden-test"
+}
+
+package() {
+	DESTDIR="$pkgdir" cmake --install build
+	# installs tests
+	rm -rf "$pkgdir"/usr/bin/*test*
+}
+
+sha512sums="
+13cab83a02a99515b2ae741851907860242fc190b289710629fb0217c825f8458e5c977e495adb8bcc3e7a29750d35dd0bc8d277d19093e3c55f3eb825e86b30  SFCGAL-v1.5.0.tar.bz2
+c88c6877256bfb773941af88b3837fa1d2226211f6f84efed1a78ab914a1cbea9b607e50a8c74f500c174c92e8635aae2c52d3df29db12017a5876f4a058e1c9  10-fix_algo_visibility.patch
+"

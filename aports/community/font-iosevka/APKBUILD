@@ -1,0 +1,72 @@
+# Maintainer: Will Sinatra <wpsinatra@gmail.com>
+pkgname=font-iosevka
+pkgver=27.3.5
+pkgrel=0
+pkgdesc="Versatile typeface for code, from code"
+url="https://typeof.net/Iosevka/"
+arch="noarch"
+options="!check" # no testsuite
+license="OFL-1.1"
+depends="fontconfig"
+subpackages="
+	$pkgname-base
+	$pkgname-aile
+	$pkgname-slab
+	$pkgname-curly
+	$pkgname-curly-slab:curly_slab
+	"
+source="
+	https://github.com/be5invis/Iosevka/releases/download/v$pkgver/super-ttc-iosevka-$pkgver.zip
+	https://github.com/be5invis/Iosevka/releases/download/v$pkgver/super-ttc-iosevka-aile-$pkgver.zip
+	https://github.com/be5invis/Iosevka/releases/download/v$pkgver/super-ttc-iosevka-slab-$pkgver.zip
+	https://github.com/be5invis/Iosevka/releases/download/v$pkgver/super-ttc-iosevka-curly-$pkgver.zip
+	https://github.com/be5invis/Iosevka/releases/download/v$pkgver/super-ttc-iosevka-curly-slab-$pkgver.zip
+	"
+
+builddir="$srcdir"
+
+package() {
+	depends="
+		$pkgname-base=$pkgver-r$pkgrel
+		$pkgname-aile=$pkgver-r$pkgrel
+		$pkgname-slab=$pkgver-r$pkgrel
+		$pkgname-curly=$pkgver-r$pkgrel
+		$pkgname-curly-slab=$pkgver-r$pkgrel
+		"
+
+	install -Dm644 "$builddir"/*.ttc \
+		-t "$pkgdir"/usr/share/fonts/${pkgname#font-}
+}
+
+base() {
+	pkgdesc="$pkgdesc (Iosevka)"
+	amove usr/share/fonts/iosevka/iosevka.ttc
+}
+
+aile() {
+	pkgdesc="$pkgdesc (Iosevka Aile)"
+	amove usr/share/fonts/iosevka/iosevka-aile.ttc
+}
+
+slab() {
+	pkgdesc="$pkgdesc (Iosevka Slab)"
+	amove usr/share/fonts/iosevka/iosevka-slab.ttc
+}
+
+curly() {
+	pkgdesc="$pkgdesc (Iosevka Curly)"
+	amove usr/share/fonts/iosevka/iosevka-curly.ttc
+}
+
+curly_slab() {
+	pkgdesc="$pkgdesc (Iosevka Curly Slab)"
+	amove usr/share/fonts/iosevka/iosevka-curly-slab.ttc
+}
+
+sha512sums="
+a41682e8d38af85a1008f0983c6419bdcc66831a4c5af9fa1946eed0852a58abc0a6f7c9eb144702dd10b3bfab586678367e78b59797b5c5bbb886dbf4f65c5f  super-ttc-iosevka-27.3.5.zip
+a38ad47120dc4e35d9296a27a40044f955ff56271410a77fb96096fc5282c9b2056da88e54630c85c8411b85745e5300a40c7bf0edb87fbbe664eca2ce7eb9e5  super-ttc-iosevka-aile-27.3.5.zip
+c6e4f5e1bdf2e087e6d913df07160d25d1b441d448c059adafa04907e887e0f3d794bd3b83d026a1a6fffc3d4ed0e65de519b48df57ebb4098029f17f303995c  super-ttc-iosevka-slab-27.3.5.zip
+3f56aa2c24f73d63bd86e9d9726ef5687b4ef567e1500724e416e821b908cbd5f277e6ad8c62763a1c541d0f91b4515e0b5a441663c1c17e28787aee44928ac5  super-ttc-iosevka-curly-27.3.5.zip
+e454e8a58da1c343bd25761c42713b1c5d0f3ad556e8dc4de87c8022938ddd8ce1b4320ff055d9336d1ae5d9182b166440d43ffe94e10df9f969de39b03d8792  super-ttc-iosevka-curly-slab-27.3.5.zip
+"

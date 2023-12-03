@@ -1,0 +1,56 @@
+# Contributor: Luca Weiss <luca@z3ntu.xyz>
+# Maintainer: Luca Weiss <luca@z3ntu.xyz>
+pkgname=ayatana-indicator-sound
+pkgver=23.10.2
+pkgrel=0
+pkgdesc="Ayatana Indicator Sound Applet"
+url="https://github.com/AyatanaIndicators/ayatana-indicator-sound"
+arch="all !s390x !riscv64" # blocked by accountsservice
+license="GPL-3.0-only"
+makedepends="
+	accountsservice-dev
+	cmake
+	cmake-extras
+	dbus-test-runner-dev
+	gtest-dev
+	intltool
+	libayatana-common-dev
+	libgee-dev
+	libnotify-dev
+	libxml2-dev
+	pulseaudio-dev
+	qt5-qtbase-dev
+	samurai
+	vala
+	"
+checkdepends="dbus dbus-test-runner py3-dbusmock"
+subpackages="$pkgname-lang"
+source="https://github.com/AyatanaIndicators/ayatana-indicator-sound/archive/$pkgver/ayatana-indicator-sound-$pkgver.tar.gz"
+options="!check" # notifications-test fails
+
+build() {
+	if [ "$CBUILD" != "$CHOST" ]; then
+		CMAKE_CROSSOPTS="-DCMAKE_SYSTEM_NAME=Linux -DCMAKE_HOST_SYSTEM_NAME=Linux"
+	fi
+	cmake -B build -G Ninja \
+		-DCMAKE_INSTALL_PREFIX=/usr \
+		-DCMAKE_INSTALL_LIBDIR=lib \
+		-DBUILD_SHARED_LIBS=True \
+		-DCMAKE_BUILD_TYPE=MinSizeRel \
+		-DENABLE_TESTS=ON \
+		$CMAKE_CROSSOPTS .
+	cmake --build build
+}
+
+check() {
+	cd build
+	CTEST_OUTPUT_ON_FAILURE=TRUE ctest
+}
+
+package() {
+	DESTDIR="$pkgdir" cmake --install build
+}
+
+sha512sums="
+d75bfae3e4ca3f4d2d0d46a37e0452de12e2b7e8aed714655294d1a6f0f70df0192cc85ed732d784de940df1d943ec67a1318e10f8806048ca8206a9eb66e133  ayatana-indicator-sound-23.10.2.tar.gz
+"

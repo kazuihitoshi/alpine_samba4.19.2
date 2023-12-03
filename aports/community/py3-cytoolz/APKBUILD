@@ -1,0 +1,41 @@
+# Contributor: Iztok Fister, Jr. <iztok@iztok-jr-fister.eu>
+# Maintainer: Iztok Fister, Jr. <iztok@iztok-jr-fister.eu>
+pkgname=py3-cytoolz
+_pkgorig=cytoolz
+pkgver=0.12.2
+pkgrel=0
+pkgdesc="Cython implementation of Toolz: High performance functional utilities"
+url="https://github.com/pytoolz/cytoolz"
+arch="all"
+license="BSD-3-Clause"
+depends="python3 cython py3-toolz"
+checkdepends="py3-pytest"
+makedepends="python3-dev py3-setuptools"
+subpackages="$pkgname-pyc"
+source="$pkgname-$pkgver.tar.gz::https://files.pythonhosted.org/packages/source/c/cytoolz/cytoolz-$pkgver.tar.gz
+do-not-package-tests.patch"
+builddir="$srcdir/$_pkgorig-$pkgver"
+
+build() {
+	# C extension
+	python3 setup.py build_ext --inplace --with-cython
+
+	# Python extension
+	python3 setup.py build
+}
+
+check() {
+	local python_version=$(python3 -c 'import sys; print(".".join(map(str, sys.version_info[:2])))')
+	export PYTHONPATH="build/lib.linux-$CARCH-$python_version/:$PYTHONPATH"
+	echo "$PYTHONPATH"
+	pytest -v
+}
+
+package() {
+	python3 setup.py install --skip-build --root="$pkgdir"
+}
+
+sha512sums="
+5c60325b080fc0712cc6fc20ff45b5bcb50d8bba74ebe5e1cdc469d5bdcefabe2c0a2af5269ee9226a55e919d28f43b4810b7bd274badb7507882837ba4fd34f  py3-cytoolz-0.12.2.tar.gz
+d5a79048e053efccec379e73a185bd8002ad95246b696a8c612bbb849e2b55f1c06e203ccc164f25b9a9242515805590c26028da188ac789ffe965b5a7430707  do-not-package-tests.patch
+"

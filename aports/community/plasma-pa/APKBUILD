@@ -1,0 +1,58 @@
+# Contributor: Bart Ribbers <bribbers@disroot.org>
+# Maintainer: team/kde <bribbers@disroot.org>
+
+# The group tag is just to easily find this APKBUILD by some scripts for automation
+# group=kde-plasma
+pkgname=plasma-pa
+pkgver=5.27.9
+pkgrel=0
+pkgdesc="Plasma applet for audio volume management using PulseAudio"
+# armhf blocked by qt5-qtdeclarative
+arch="all !armhf"
+url="https://kde.org/plasma-desktop/"
+license="LGPL-2.1-only OR LGPL-3.0-only AND GPL-2.0-only"
+depends="pulseaudio kirigami2"
+makedepends="
+	extra-cmake-modules
+	qt5-qtbase-dev
+	qt5-qtdeclarative-dev
+	kcoreaddons5-dev
+	kdeclarative5-dev
+	kdoctools5-dev
+	kglobalaccel5-dev
+	knotifications5-dev
+	ki18n5-dev
+	plasma-workspace-dev
+	pulseaudio-dev
+	libcanberra-dev
+	samurai
+	"
+
+case "$pkgver" in
+	*.90*) _rel=unstable;;
+	*) _rel=stable;;
+esac
+_repo_url="https://invent.kde.org/plasma/plasma-pa.git"
+source="https://download.kde.org/$_rel/plasma/$pkgver/plasma-pa-$pkgver.tar.xz"
+subpackages="$pkgname-doc $pkgname-lang"
+
+build() {
+	cmake -B build -G Ninja \
+		-DCMAKE_BUILD_TYPE=RelWithDebInfo \
+		-DCMAKE_INSTALL_PREFIX=/usr \
+		-DCMAKE_INSTALL_LIBDIR=lib \
+		-DUSE_GCONF=OFF
+	cmake --build build
+}
+
+check() {
+	ctest --test-dir build --output-on-failure
+}
+
+package() {
+	DESTDIR="$pkgdir" cmake --install build
+}
+
+sha512sums="
+eba1ad3023f64c6ad1b173c1768dd94b6c14d008ed89f29312813122cee2d2ffab80dfec7d5935b8ddbc1757ccfa858c1f1b7a76c83754faf17bffcbc8a53466  plasma-pa-5.27.9.tar.xz
+"

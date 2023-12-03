@@ -1,0 +1,42 @@
+# Contributor: Jakub Jirutka <jakub@jirutka.cz>
+# Maintainer: Jakub Jirutka <jakub@jirutka.cz>
+pkgname=nghttp3
+pkgver=1.0.0
+pkgrel=0
+pkgdesc="HTTP/3 library written in C"
+url="https://github.com/ngtcp2/nghttp3"
+arch="all"
+license="MIT"
+makedepends="cmake samurai"
+checkdepends="cunit-dev"
+subpackages="$pkgname-dev"
+source="https://github.com/ngtcp2/nghttp3/releases/download/v$pkgver/nghttp3-$pkgver.tar.gz"
+
+build() {
+	local crossopts=
+	if [ "$CBUILD" != "$CHOST" ]; then
+		crossopts="-DCMAKE_SYSTEM_NAME=Linux -DCMAKE_HOST_SYSTEM_NAME=Linux"
+	fi
+	cmake -G Ninja -B build \
+		-DCMAKE_INSTALL_PREFIX=/usr \
+		-DCMAKE_INSTALL_LIBDIR=lib \
+		-DBUILD_SHARED_LIBS=True \
+		-DCMAKE_BUILD_TYPE=MinSizeRel \
+		$crossopts .
+	cmake --build build
+}
+
+check() {
+	cmake --build build --target check
+}
+
+package() {
+	DESTDIR="$pkgdir" cmake --install build
+
+	# Contains just README.rst.
+	rm -rf "$pkgdir"/usr/share/doc
+}
+
+sha512sums="
+53a627ebbdb1eeabd882ffce21b9db159cb586c275b604118e0535b798845a02c27d3c45ae4410513cc08d6e400075f6138faa40b4c3154cb451318b2925c87c  nghttp3-1.0.0.tar.gz
+"

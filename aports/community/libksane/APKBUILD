@@ -1,0 +1,48 @@
+# Contributor: Bart Ribbers <bribbers@disroot.org>
+# Maintainer: team/kde <bribbers@disroot.org>
+
+# The group tag is just to easily find this APKBUILD by some scripts for automation
+# group=kde-applications
+pkgname=libksane
+pkgver=23.08.3
+pkgrel=0
+# armhf blocked by extra-cmake-modules
+arch="all !armhf"
+url="https://www.kde.org/applications/graphics/"
+pkgdesc="An image scanning library"
+license="LGPL-2.1-only OR LGPL-3.0-only"
+depends_dev="
+	ki18n5-dev
+	ksanecore-dev
+	ktextwidgets5-dev
+	kwallet5-dev
+	kwidgetsaddons5-dev
+	qt5-qtbase-dev
+	"
+makedepends="$depends_dev
+	extra-cmake-modules
+	samurai
+	"
+_repo_url="https://invent.kde.org/graphics/libksane.git"
+source="https://download.kde.org/stable/release-service/$pkgver/src/libksane-$pkgver.tar.xz"
+subpackages="$pkgname-dev $pkgname-lang"
+
+build() {
+	cmake -B build -G Ninja \
+		-DCMAKE_BUILD_TYPE=RelWithDebInfo \
+		-DCMAKE_INSTALL_PREFIX=/usr \
+		-DCMAKE_INSTALL_LIBDIR=lib
+	cmake --build build
+}
+
+check() {
+	ctest --test-dir build --output-on-failure
+}
+
+package() {
+	DESTDIR="$pkgdir" cmake --install build
+}
+
+sha512sums="
+67502842375e0c56229e7496861c173e576c853545dc97bb0f0db461299c826a0c6c54dde56de63f88c549860422c3a1350994f110aa817241e118f18174e4df  libksane-23.08.3.tar.xz
+"

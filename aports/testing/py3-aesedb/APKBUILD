@@ -1,0 +1,50 @@
+# Contributor: Jonas <3426-spameier@users.gitlab.alpinelinux.org>
+# Maintainer: Jonas <3426-spameier@users.gitlab.alpinelinux.org>
+pkgname=py3-aesedb
+_pyname=aesedb
+pkgver=0.1.4
+pkgrel=0
+pkgdesc="NTDS parser toolkit"
+url="https://github.com/skelsec/aesedb"
+arch="noarch"
+license="MIT"
+depends="
+	py3-aiowinreg
+	py3-colorama
+	py3-tqdm
+	py3-unicrypto
+	python3
+	"
+makedepends="
+	py3-gpep517
+	py3-wheel
+	py3-setuptools
+	"
+checkdepends="
+	py3-pytest
+	py3-pytest-asyncio
+	"
+subpackages="$pkgname-pyc"
+source="$pkgname-$pkgver.tar.gz::https://github.com/skelsec/aesedb/archive/refs/tags/$pkgver.tar.gz"
+builddir="$srcdir/$_pyname-$pkgver"
+
+build() {
+	gpep517 build-wheel \
+		--wheel-dir .dist \
+		--output-fd 3 3>&1 >&2
+}
+
+check() {
+	python3 -m venv --clear --without-pip --system-site-packages .testenv
+	.testenv/bin/python3 -m installer .dist/*.whl
+	.testenv/bin/python3 -m pytest
+}
+
+package() {
+	python3 -m installer -d "$pkgdir" .dist/*.whl
+	rm -rf "$pkgdir"/usr/lib/python3.*/site-packages/tests/ # remove tests
+}
+
+sha512sums="
+4832100cafad970e63431129951d9d930f00826c58ce259033d2421f85b5faf7acd659800547ae04c7b23b5e036f1577fdc106e0c1fc717a69370d30ed81dd68  py3-aesedb-0.1.4.tar.gz
+"

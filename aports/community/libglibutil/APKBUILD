@@ -1,0 +1,29 @@
+# Contributor: Danct12 <danct12@disroot.org>
+# Maintainer: Bart Ribbers <bribbers@disroot.org>
+pkgname=libglibutil
+pkgver=1.0.74
+pkgrel=0
+pkgdesc="Library of glib utilities"
+url="https://github.com/sailfishos/libglibutil"
+arch="all"
+license="BSD-3-Clause"
+makedepends="glib-dev"
+subpackages="$pkgname-dev $pkgname-doc"
+source="https://github.com/sailfishos/libglibutil/archive/$pkgver/libglibutil-$pkgver.tar.gz"
+
+build() {
+	make KEEP_SYMBOLS=1 release pkgconfig
+}
+
+check() {
+	make test
+}
+
+package() {
+	make DESTDIR="$pkgdir" install-dev
+	install -Dm 644 LICENSE "$pkgdir"/usr/share/licenses/$pkgname/LICENSE
+}
+
+sha512sums="
+39d6230944cccc08f61fd421e4fde2c9d19a575197919d114cb9151088445376250bc251e6a8106e7cbe8a98f0847047ff9e36aaed44d4c28667898f48f5bb15  libglibutil-1.0.74.tar.gz
+"

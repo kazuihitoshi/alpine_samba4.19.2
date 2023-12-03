@@ -1,0 +1,60 @@
+# Maintainer: Noel Kuntze <noel.kuntze@contauro.com>
+pkgname=jitsi-videobridge
+pkgver=2.0.8719
+# the releases prefix the tag
+_pkgver="jitsi-meet_${pkgver##*.}"
+pkgrel=0
+pkgdesc="Videobridge for Jitsi Meet"
+url="https://github.com/jitsi/jitsi-videobridge"
+arch="x86_64"
+license="Apache-2.0"
+options="!check" # No test suite
+depends="openjdk11-jre-headless prosody bash"
+makedepends="maven"
+install="$pkgname.pre-install"
+subpackages="$pkgname-openrc"
+source="$pkgname-$pkgver.tar.gz::https://github.com/jitsi/jitsi-videobridge/archive/stable/$_pkgver.tar.gz
+	$pkgname.initd
+	$pkgname.confd
+	$pkgname.logrotate
+	sip-communicator.properties
+	"
+builddir="$srcdir/$pkgname-stable-$_pkgver"
+
+build() {
+	export JAVA_HOME=/usr/lib/jvm/java-11-openjdk
+	export PATH=$JAVA_HOME/bin:$PATH
+	mvn clean
+	mvn package -DskipTests -Dassembly.skipAssembly=true install
+	mvn dependency:copy-dependencies -DincludeScope=runtime
+}
+
+package() {
+	DESTDIR="$pkgdir"/usr/lib/$pkgname
+	CONFDIR="$pkgdir"/etc/$pkgname
+
+	install -Dm644 -t "$DESTDIR/lib" \
+		jvb/target/dependency/* \
+		jvb/lib/videobridge.rc
+
+	install -Dm644 jvb/target/$pkgname*.jar "$DESTDIR/$pkgname.jar"
+	install -Dm755 -t "$DESTDIR" "jvb/resources/jvb.sh"
+
+	install -dm700 "$CONFDIR"
+	install -Dm600 -t "$CONFDIR" "jvb/lib/logging.properties"
+	install -Dm600 "jvb/src/main/resources/reference.conf" "$CONFDIR/jvb.conf"
+	install -Dm644 "config/20-jvb-udp-buffers.conf" "$pkgdir/etc/sysctl.d/$pkgname.conf"
+
+	# init scripts and logrotate
+	install -m755 -D "$srcdir"/$pkgname.initd "$pkgdir"/etc/init.d/$pkgname
+	install -m644 -D "$srcdir"/$pkgname.confd "$pkgdir"/etc/conf.d/$pkgname
+	install -m644 -D "$srcdir"/$pkgname.logrotate "$pkgdir"/etc/logrotate.d/$pkgname
+}
+
+sha512sums="
+5e0e218e99231293ba2db034424549ccc43b5e90f92a1ffdea9f358a86c00d87f5a3f22fb0ace134227603aeb65abcc09e0f2718145b0b5a4864bbbdc11a11a4  jitsi-videobridge-2.0.8719.tar.gz
+2a1fdf5829cbb7bd9c154f4a5029f9e45f32f70b9f3d5bc121bd44d4bb08745db769ebf4a61e5e4976b09e0c676249d5d58adf6fbc52889a6d9bb8c82d4079fa  jitsi-videobridge.initd
+eec4d4a644727f238b8e59fb70738e910bf98d4c37f68bd32f5339ce04851afbfa87df6965e2efa059febdebe8f02a2f6b8a81c69d65c895f0326bd0965988e6  jitsi-videobridge.confd
+86806b7fd222d5a3d0fc50daf8f2f0f2ef757011f44c8ce7ddd8836455393a7ac3e6f6d73bb6a929b796c3e877e1220c8bc2a3fe8178ed70cdede16d13ddce85  jitsi-videobridge.logrotate
+ad3bea4485f4c3d74194ab77f40086e6086eb294b68c96732e7a42059981afe33585f5152da7ac9dd81bf4a2a604d15a8d5c0cd54641afb04e58c812de31e996  sip-communicator.properties
+"

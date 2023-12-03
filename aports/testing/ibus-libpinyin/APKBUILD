@@ -1,0 +1,42 @@
+# Contributor: Peng Huang <shawn.p.huang@gmail.com>
+# Contributor: BYVoid <byvoid1@gmail.com>
+# Contributor: Peng Wu <alexepico@gmail.com>
+# Maintainer: Ziyao <ziyao@disroot.org>
+pkgname=ibus-libpinyin
+pkgver=1.15.5
+pkgrel=0
+pkgdesc="Intelligent Pinyin engine based on libpinyin for IBus"
+url="https://github.com/libpinyin/ibus-libpinyin"
+# armhf: no libpinyin
+arch="all !armhf"
+license="GPL-3.0-only"
+makedepends="
+	ibus-dev
+	libpinyin-dev
+	sqlite-dev
+	"
+subpackages="$pkgname-lang"
+source="https://github.com/libpinyin/ibus-libpinyin/releases/download/$pkgver/ibus-libpinyin-$pkgver.tar.gz"
+options="!check" # there are none
+
+build() {
+	CFLAGS="$CFLAGS -flto=auto" \
+	CXXFLAGS="$CXXFLAGS -flto=auto" \
+	./configure \
+		--host=$CHOST \
+		--build=$CBUILD \
+		--prefix=/usr \
+		--libexecdir=/usr/lib/ibus
+	make
+}
+
+package() {
+	make install DESTDIR=$pkgdir
+
+	# remove duplicate python bytecode
+	find "$pkgdir" -name "*.opt-1.pyc" -delete
+}
+
+sha512sums="
+ed12b2e607f8ad7996f7e160eb581a677edecc088ca52eb58f2f40977281d2baf962123db23ebee142acf57ce03d35605f074478c7db1cc47e3a1af15a1fd981  ibus-libpinyin-1.15.5.tar.gz
+"

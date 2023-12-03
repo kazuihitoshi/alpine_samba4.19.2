@@ -1,0 +1,48 @@
+# Contributor: Milan P. Stanić <mps@arvanta.net>
+# Maintainer: mio <miyopan@e.email>
+pkgname=timg
+pkgver=1.5.3
+pkgrel=0
+pkgdesc="24-Bit color image viewer for terminal"
+url="https://github.com/hzeller/timg"
+arch="all"
+options="!check" # package doesn't have test
+license="GPL-2.0-only"
+makedepends="
+	cmake
+	ffmpeg-dev
+	freetype-dev
+	graphicsmagick-dev
+	libdeflate-dev
+	libexif-dev
+	libjpeg-turbo-dev
+	libsixel-dev
+	libwebp-dev
+	samurai
+	xz-dev
+	zlib-dev
+	"
+subpackages="$pkgname-doc"
+source="$pkgname-$pkgver.tar.gz::https://github.com/hzeller/timg/archive/v$pkgver.tar.gz
+	missing-include.patch
+	"
+
+build() {
+	cmake -B build -G Ninja \
+		-DCMAKE_BUILD_TYPE=MinSizeRel \
+		-DCMAKE_INSTALL_PREFIX=/usr \
+		-DCMAKE_INSTALL_LIBDIR=lib \
+		-DTIMG_VERSION_FROM_GIT=OFF \
+		-DDISTRIBUTION_VERSION="$pkgver"
+	cmake --build build
+}
+
+package() {
+	DESTDIR="$pkgdir" cmake --install build
+	install -Dm0644 LICENSE "$pkgdir"/usr/share/licenses/"$pkgname"/LICENSE
+}
+
+sha512sums="
+26d02ede0bf139e46e867ff36bcc66ada6979a934c2ac609aa014cd880dbf9de9fbc2351e34e369c1f6cbbf35ce27a200e335c1f0398b5df9df419f1e809fcde  timg-1.5.3.tar.gz
+ebb3cba19abc2fce580c6d6a5d991f0ce09ab34795fc41662938c5e34a1c72939bed9642a13657d445205762d42f01efa7adfb11f6732104a069d9f681262cf6  missing-include.patch
+"

@@ -1,0 +1,34 @@
+# Maintainer: j.r <j.r@jugendhacker.de>
+pkgname=libstrophe
+pkgver=0.12.3
+pkgrel=0
+pkgdesc="Simple, lightweight C library for writing XMPP clients"
+url="https://strophe.im/libstrophe/"
+arch="all"
+license="GPL-3.0-only MIT"
+makedepends="expat-dev openssl-dev>3"
+subpackages="$pkgname-dev"
+source="https://github.com/strophe/libstrophe/releases/download/$pkgver/libstrophe-$pkgver.tar.gz"
+
+build() {
+	./configure \
+		--build=$CBUILD \
+		--host=$CHOST \
+		--prefix=/usr \
+		--sysconfdir=/etc \
+		--mandir=/usr/share/man \
+		--localstatedir=/var
+	make
+}
+
+check() {
+	make check
+}
+
+package() {
+	make DESTDIR="$pkgdir" install
+}
+
+sha512sums="
+2859e01a3d2f96613695c8e324ec04da9f4ab59b17dd5f6161f14bb1906c2e6a010d055f5d4466c354cf42df922ceeee8263e4a23f5b615e531beef13ab11060  libstrophe-0.12.3.tar.gz
+"

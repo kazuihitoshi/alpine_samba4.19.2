@@ -1,0 +1,48 @@
+# Contributor: Bart Ribbers <bribbers@disroot.org>
+# Maintainer: Bart Ribbers <bribbers@disroot.org>
+pkgname=android-translation-layer
+pkgver=0_git20231123
+pkgrel=0
+_commit="e3e9f4654b26db8ef96c2d4f2e964ce21f895e54"
+pkgdesc="A translation layer for running Android apps on a Linux system"
+url="https://gitlab.com/android_translation_layer/android_translation_layer"
+arch="x86_64 aarch64"
+license="GPL-3.0-only"
+# libopensles-standalone is not strictly required but some Android applications depend on it
+depends="libopensles-standalone"
+makedepends="
+	alsa-lib-dev
+	bionic_translation-dev
+	dalvik-standalone-dev
+	ffmpeg-dev
+	glib-dev
+	gtk4.0-dev
+	java-common
+	libportal-dev
+	meson
+	openjdk8-jdk
+	openxr-dev
+	skia-sharp-dev
+	vulkan-loader-dev
+	"
+subpackages="$pkgname-dbg"
+source="https://gitlab.com/mis012/android_translation_layer/-/archive/$_commit/android_translation_layer-$_commit.tar.gz"
+builddir="$srcdir/android_translation_layer-$_commit"
+
+build() {
+	abuild-meson \
+		. output
+	meson compile -C output
+}
+
+check() {
+	meson test --no-rebuild --print-errorlogs -C output
+}
+
+package() {
+	DESTDIR="$pkgdir" meson install --no-rebuild -C output
+}
+
+sha512sums="
+6cd5ba30922d01b4c9e2119c2d8bed27b4e5280fa6de5d3f7da0b6c0516f63a7d7926165864625ef26e686c33371ee2d9b066bf0106ce61fb87781f8b24e80eb  android_translation_layer-e3e9f4654b26db8ef96c2d4f2e964ce21f895e54.tar.gz
+"

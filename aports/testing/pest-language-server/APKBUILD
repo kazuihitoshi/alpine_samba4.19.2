@@ -1,0 +1,34 @@
+# Contributor: lauren n. liberda <lauren@selfisekai.rocks>
+# Maintainer: lauren n. liberda <lauren@selfisekai.rocks>
+pkgname=pest-language-server
+pkgver=0.3.6
+pkgrel=0
+pkgdesc="Language Server for Pest"
+url="https://github.com/pest-parser/pest-ide-tools"
+arch="all"
+license="Apache-2.0"
+makedepends="cargo cargo-auditable openssl-dev"
+source="https://github.com/pest-parser/pest-ide-tools/archive/refs/tags/v$pkgver/pest-ls-$pkgver.tar.gz"
+builddir="$srcdir/pest-ide-tools-$pkgver"
+
+prepare() {
+	default_prepare
+
+	cargo fetch --locked --target="$CBUILD"
+}
+
+build() {
+	cargo auditable build -p pest-language-server --frozen --release
+}
+
+check() {
+	cargo test -p pest-language-server --frozen
+}
+
+package() {
+	install -Dm755 target/release/pest-language-server "$pkgdir"/usr/bin/pest-language-server
+}
+
+sha512sums="
+8693c4936f4a126e22f1bf741678b53bf5de4f44e48e4a64245cf4b6bb90d9457937e713c29445b20d8c59e1124da29118423746180f4fd8b7d8e89fa6c9bce3  pest-ls-0.3.6.tar.gz
+"

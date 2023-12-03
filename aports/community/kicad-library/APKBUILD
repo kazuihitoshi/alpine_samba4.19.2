@@ -1,0 +1,54 @@
+# Maintainer: Marian Buschsieweke <marian.buschsieweke@ovgu.de>
+# Contributor: Marian Buschsieweke <marian.buschsieweke@ovgu.de>
+pkgname=kicad-library
+pkgver=7.0.9
+pkgrel=0
+pkgdesc="Kicad component and footprint libraries"
+url="https://kicad.github.io/"
+# limited by kicad
+arch="noarch !armv7 !armhf !riscv64 !s390x"
+license="GPL-3.0-or-later"
+makedepends="cmake samurai"
+depends="kicad"
+subpackages="$pkgname-3d:three_d"
+source="
+	https://gitlab.com/kicad/libraries/kicad-symbols/-/archive/$pkgver/kicad-symbols-$pkgver.tar.gz
+	https://gitlab.com/kicad/libraries/kicad-footprints/-/archive/$pkgver/kicad-footprints-$pkgver.tar.gz
+	https://gitlab.com/kicad/libraries/kicad-packages3D/-/archive/$pkgver/kicad-packages3D-$pkgver.tar.gz
+	"
+options="!check" # package only provides data files, so not tests possible
+
+build() {
+	cd "$srcdir"/kicad-symbols-$pkgver
+	cmake -B build -G Ninja \
+		-DCMAKE_INSTALL_PREFIX=/usr
+	cmake --build build
+
+	cd "$srcdir"/kicad-footprints-$pkgver
+	cmake -B build -G Ninja \
+		-DCMAKE_INSTALL_PREFIX=/usr
+	cmake --build build
+
+	cd "$srcdir"/kicad-packages3D-$pkgver
+	cmake -B build -G Ninja \
+		-DCMAKE_INSTALL_PREFIX=/usr
+	cmake --build build
+}
+
+package() {
+	DESTDIR="$pkgdir" cmake --install "$srcdir"/kicad-symbols-$pkgver/build
+	DESTDIR="$pkgdir" cmake --install "$srcdir"/kicad-footprints-$pkgver/build
+}
+
+three_d() {
+	DESTDIR="$subpkgdir" cmake --install "$srcdir"/kicad-packages3D-$pkgver/build
+
+	# Remove .step version of 3D models; only .wrl versions are needed
+	find "$subpkgdir" -name '*.step' -exec rm {} \;
+}
+
+sha512sums="
+981d303636872a81e0624283c1a2cea02a601e2b829e133301502c71a88063ca41d2224805268db7d5501c3be5642c1e9ae96dae29d9a60cd343b84b834832b6  kicad-symbols-7.0.9.tar.gz
+9f683b528ff602a67bd6552d7d458486d4a868de9d0af7951d78e8009fcbed2d7ba57aef7b9cda943ed245cef7bd3d05fdea57e47c7aa361b8c7026e147e5cb8  kicad-footprints-7.0.9.tar.gz
+71bcfb79729445f1918c68af86dfe983fbbc5c9997f56a787e538fbbb8f075561458c0bcbed60b2462dc58b695a095305b6a9f8e4a366871fb7731ce688f0b03  kicad-packages3D-7.0.9.tar.gz
+"

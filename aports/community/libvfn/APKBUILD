@@ -1,0 +1,31 @@
+# Contributor: Duncan Bellamy <dunk@denkimushi.com>
+# Maintainer: Duncan Bellamy <dunk@denkimushi.com>
+pkgname=libvfn
+pkgver=3.0.0
+pkgrel=0
+pkgdesc="Low-level NVM Express library"
+url="https://github.com/OpenMPDK/libvfn"
+# others arches are unsupported
+arch="aarch64 x86_64"
+license="MIT OR LGPL-2.1-or-later"
+makedepends="libnvme-dev linux-headers meson perl"
+subpackages="$pkgname-dev"
+source="$pkgname-$pkgver.tar.gz::https://github.com/OpenMPDK/libvfn/archive/refs/tags/v$pkgver.tar.gz"
+
+build() {
+	abuild-meson \
+		. output
+	meson compile -C output
+}
+
+check() {
+	meson test --no-rebuild --print-errorlogs -C output
+}
+
+package() {
+	DESTDIR="$pkgdir" meson install --no-rebuild -C output
+}
+
+sha512sums="
+e5fbc83b6a6097c84337f337e2a25d301816518485b12a9429c11fa7ccf06cd700d8e4d3a46131f0608f10af30283033cd084387c1be54120e6b58ff1e1507cb  libvfn-3.0.0.tar.gz
+"

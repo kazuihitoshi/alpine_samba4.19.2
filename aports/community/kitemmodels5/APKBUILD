@@ -1,0 +1,51 @@
+# Contributor: Bart Ribbers <bribbers@disroot.org>
+# Maintainer: team/kde <bribbers@disroot.org>
+
+# The group tag is just to easily find this APKBUILD by some scripts for automation
+# group=kde-frameworks
+pkgname=kitemmodels5
+pkgver=5.112.0
+pkgrel=0
+pkgdesc="Models for Qt Model/View system"
+arch="all !armhf" # armhf blocked by extra-cmake-modules
+url="https://community.kde.org/Frameworks"
+license="LGPL-2.0-only AND LGPL-2.0-or-later"
+depends_dev="qt5-qtbase-dev"
+makedepends="$depends_dev
+	doxygen
+	extra-cmake-modules
+	graphviz
+	qt5-qtdeclarative-dev
+	qt5-qttools-dev
+	samurai
+	"
+checkdepends="xvfb-run"
+_repo_url="https://invent.kde.org/frameworks/kitemmodels.git"
+source="https://download.kde.org/stable/frameworks/${pkgver%.*}/kitemmodels-$pkgver.tar.xz"
+subpackages="$pkgname-dev $pkgname-doc"
+builddir="$srcdir/kitemmodels-$pkgver"
+
+replaces="kitemmodels<=5.110.0-r0"
+
+build() {
+	cmake -B build -G Ninja \
+		-DCMAKE_BUILD_TYPE=RelWithDebInfo \
+		-DCMAKE_INSTALL_PREFIX=/usr \
+		-DCMAKE_INSTALL_LIBDIR=lib \
+		-DBUILD_QCH=ON
+	cmake --build build
+}
+
+check() {
+	# kdescendantsproxymodel_smoketest and kdescendantsproxymodeltest are broken
+	# # kselectionproxymodeltest
+	xvfb-run ctest --test-dir build --output-on-failure -E "(kselectionproxymodel|kdescendantsproxymodel(_smoke|))test"
+}
+
+package() {
+	DESTDIR="$pkgdir" cmake --install build
+}
+
+sha512sums="
+6d059603ce63979d580cb5659482c5a82a1b1d973a6f4a6912075e978c4ec4365fc0852e1ff01f5dc59721d51fc11fa33d1c49907f7b095ea7b6a720d659bb10  kitemmodels-5.112.0.tar.xz
+"

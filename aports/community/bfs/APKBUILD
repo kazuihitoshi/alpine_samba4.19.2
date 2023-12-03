@@ -1,0 +1,33 @@
+# Contributor: dai9ah <dai9ah@protonmail.com>
+# Maintainer: dai9ah <dai9ah@protonmail.com>
+pkgname=bfs
+pkgver=3.0.4
+pkgrel=0
+pkgdesc="Breadth-first variant of the UNIX find command"
+url="https://github.com/tavianator/bfs"
+arch="all"
+license="0BSD"
+makedepends="acl-dev attr-dev libcap-dev linux-headers oniguruma-dev"
+checkdepends="bash acl coreutils"
+subpackages="$pkgname-doc
+	$pkgname-bash-completion
+	$pkgname-zsh-completion
+	$pkgname-fish-completion
+	"
+source="bfs-$pkgver.tar.gz::https://github.com/tavianator/bfs/archive/$pkgver.tar.gz"
+
+build() {
+	make
+}
+
+check() {
+	TEST_FLAGS="--verbose" make check
+}
+
+package() {
+	make DESTDIR="$pkgdir" install
+}
+
+sha512sums="
+a62a96f8dafd9d79c230eaadd8f42b6eef9f9b6b266ccaa95e2dd0ca0c10a8d72824a119316fc8003c0f6068c045ac872414b7f0f01de681038e16a5d6327b67  bfs-3.0.4.tar.gz
+"

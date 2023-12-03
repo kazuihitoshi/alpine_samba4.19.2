@@ -1,0 +1,48 @@
+# Contributor: Sean Summers <seansummers@gmail.com>
+# Maintainer: Jakub Jirutka <jakub@jirutka.cz>
+pkgname=tomcat-native
+pkgver=2.0.6
+pkgrel=0
+pkgdesc="Native resources optional component for Apache Tomcat"
+url="https://tomcat.apache.org/native-doc/"
+# riscv64: blocked by java-jdk
+arch="all !riscv64"
+license="Apache-2.0"
+makedepends="
+	apr-dev
+	chrpath
+	java-jdk
+	libtool
+	openssl-dev
+	"
+subpackages="$pkgname-dev"
+source="https://archive.apache.org/dist/tomcat/tomcat-connectors/native/$pkgver/source/tomcat-native-$pkgver-src.tar.gz"
+builddir="$srcdir/$pkgname-$pkgver-src/native"
+options="!check" # package has no tests
+
+build() {
+	./configure \
+		--prefix=/usr \
+		--with-apr=/usr/bin/apr-1-config \
+		--with-java-home=/usr/lib/jvm/default-jvm \
+		--with-ssl=/usr/lib
+	make
+}
+
+package() {
+	make DESTDIR="$pkgdir" install
+
+	# Remove redundant rpath.
+	chrpath --delete "$pkgdir"/usr/lib/libtcnative-*.so
+
+	rm -f "$pkgdir"/usr/lib/*.la
+}
+
+dev() {
+	default_dev
+	mv "$subpkgdir"/usr/lib/libtcnative-*.so "$pkgdir"/usr/lib/
+}
+
+sha512sums="
+d714fb96f880d0d565c58d25bb803fa9a144a6d87e825ad8d00aeac833b40a5512f888b94b3109853f8ee28b176b24fde95fb2d2a70ce65181a51ca7fc60cdab  tomcat-native-2.0.6-src.tar.gz
+"

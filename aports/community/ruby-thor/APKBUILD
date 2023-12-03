@@ -1,0 +1,43 @@
+# Contributor: Kevin Daudt <kdaudt@alpinelinux.org>
+# Maintainer: Kevin Daudt <kdaudt@alpinelinux.org>
+pkgname=ruby-thor
+pkgver=1.2.2
+pkgrel=0
+pkgdesc="toolkit for building powerfull command-line interfaces"
+url="http://whatisthor.com/"
+arch="noarch"
+license="MIT"
+depends="ruby"
+checkdepends="ruby-rspec"
+options="!check" # requires simplecov / coverall
+source="$pkgname-$pkgver.tar.gz::https://github.com/rails/thor/archive/refs/tags/v$pkgver.tar.gz"
+builddir="$srcdir/thor-$pkgver"
+
+build() {
+	gem build thor.gemspec
+}
+
+check() {
+	rspec
+}
+
+package() {
+	local gemdir="$pkgdir/$(ruby -e 'puts Gem.default_dir')"
+
+	gem install \
+		--local \
+		--install-dir "$gemdir" \
+		--bindir "$pkgdir/usr/bin" \
+		--ignore-dependencies \
+		--no-document \
+		--verbose \
+		thor
+
+	rm -r "$gemdir"/cache \
+		"$gemdir"/extensions \
+		"$gemdir"/doc
+}
+
+sha512sums="
+2c8af5d59f33691af63e813ba8dfe3392c279593f3e3ccf0ab2d6eb2ccce4220d93b7cb3413ad853e4bba14f4e2182c54caaf4944627cbcbefa31cdc0fabefc7  ruby-thor-1.2.2.tar.gz
+"

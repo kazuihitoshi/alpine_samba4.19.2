@@ -1,0 +1,25 @@
+# Maintainer: Patrycja Rosa <alpine@ptrcnull.me>
+pkgname=symbiyosys
+pkgver=0.35
+pkgrel=0
+pkgdesc="Front-end for Yosys-based formal verification flows"
+url="https://github.com/YosysHQ/sby"
+# s390x, riscv64: blocked by yosys
+arch="noarch !s390x !riscv64"
+license="ISC"
+depends="python3 py3-click yosys"
+checkdepends="bash"
+source="$pkgname-$pkgver.tar.gz::https://github.com/YosysHQ/sby/archive/yosys-$pkgver.tar.gz"
+builddir="$srcdir/sby-yosys-$pkgver"
+
+check() {
+	make test
+}
+
+package() {
+	make DESTDIR="$pkgdir" PREFIX=/usr install
+}
+
+sha512sums="
+72acffd7deefec6e2383605c4b008b44fc77f5d3df12e68ec920d85fa7973270374d721c0cc5444206f92a44127abeca2b9123db41cd4805d6d04af6eae98ca6  symbiyosys-0.35.tar.gz
+"

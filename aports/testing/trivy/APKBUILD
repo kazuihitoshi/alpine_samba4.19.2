@@ -1,0 +1,36 @@
+# Contributor: TBK <alpine@jjtc.eu>
+# Maintainer: TBK <alpine@jjtc.eu>
+pkgname=trivy
+pkgver=0.47.0
+pkgrel=0
+pkgdesc="Simple and comprehensive vulnerability scanner for containers"
+url="https://github.com/aquasecurity/trivy"
+arch="all"
+# s390x: tests SIGSEGV: https://github.com/aquasecurity/trivy/issues/430
+arch="$arch !s390x"
+license="Apache-2.0"
+makedepends="btrfs-progs-dev go linux-headers lvm2-dev"
+source="https://github.com/aquasecurity/trivy/archive/v$pkgver/trivy-$pkgver.tar.gz"
+options="net !check" # needs tinygo to turn go into wasm for tests
+
+export GOCACHE="${GOCACHE:-"$srcdir/go-cache"}"
+export GOTMPDIR="${GOTMPDIR:-"$srcdir"}"
+export GOMODCACHE="${GOMODCACHE:-"$srcdir/go"}"
+
+build() {
+	export CGO_ENABLED=0
+
+	go build -o trivy -ldflags "-X main.version=$pkgver" cmd/trivy/main.go
+}
+
+check() {
+	go test ./...
+}
+
+package() {
+	install -Dm755 trivy -t "$pkgdir"/usr/bin/
+}
+
+sha512sums="
+9918b6bfe457f410d1246070f850560dfe2b670f83e90c21b26d7522366e391645f7ad146acf74a2a9433e1a9fa2958207abd5da2744fc11a600198b96095a8a  trivy-0.47.0.tar.gz
+"

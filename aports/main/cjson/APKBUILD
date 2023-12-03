@@ -1,0 +1,39 @@
+# Contributor: Leo <thinkabit.ukim@gmail.com>
+# Maintainer: Jakub Jirutka <jakub@jirutka.cz>
+pkgname=cjson
+pkgver=1.7.16
+pkgrel=1
+pkgdesc="Lighweight JSON parser in C"
+url="https://github.com/DaveGamble/cJSON"
+arch="all"
+license="MIT"
+makedepends="cmake samurai"
+subpackages="$pkgname-dev"
+source="$pkgname-$pkgver.tar.gz::https://github.com/DaveGamble/cJSON/archive/v$pkgver.tar.gz"
+builddir="$srcdir/cJSON-$pkgver"
+
+build() {
+	if [ "$CBUILD" != "$CHOST" ]; then
+		CMAKE_CROSSOPTS="-DCMAKE_SYSTEM_NAME=Linux -DCMAKE_HOST_SYSTEM_NAME=Linux"
+	fi
+	cmake -B build -G Ninja \
+		-DCMAKE_INSTALL_PREFIX=/usr \
+		-DCMAKE_INSTALL_LIBDIR=lib \
+		-DBUILD_SHARED_AND_STATIC_LIBS=True \
+		-DCMAKE_BUILD_TYPE=MinSizeRel \
+		$CMAKE_CROSSOPTS
+	cmake --build build
+}
+
+check() {
+	cd build
+	CTEST_OUTPUT_ON_FAILURE=TRUE ctest
+}
+
+package() {
+	DESTDIR="$pkgdir" cmake --build build --target install
+}
+
+sha512sums="
+3a894de03c33d89f1e7ee572418d5483c844d38e1e64aa4f6297ddaa01f4111f07601f8d26617b424b5af15d469e3955dae075d9f30b5c25e16ec348fdb06e6f  cjson-1.7.16.tar.gz
+"

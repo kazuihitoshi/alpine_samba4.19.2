@@ -1,0 +1,34 @@
+# Contributor: Iztok Fister, Jr. <iztok@iztok-jr-fister.eu>
+# Maintainer: Iztok Fister, Jr. <iztok@iztok-jr-fister.eu>
+pkgname=py3-permetrics
+pkgver=1.5.0
+pkgrel=1
+pkgdesc="Artificial intelligence (AI, ML, DL) performance metrics implemented in Python"
+url="https://github.com/thieu1995/permetrics"
+arch="noarch"
+license="Apache-2.0 license"
+depends="python3 py3-numpy py3-scipy"
+makedepends="py3-gpep517 py3-setuptools py3-wheel"
+subpackages="$pkgname-pyc"
+source="$pkgname-$pkgver.tar.gz::https://files.pythonhosted.org/packages/source/p/permetrics/permetrics-$pkgver.tar.gz"
+builddir="$srcdir/permetrics-$pkgver"
+
+build() {
+	gpep517 build-wheel \
+		--wheel-dir .dist \
+		--output-fd 3 3>&1 >&2
+}
+
+# no tests provided by the upstream; use smoke tests
+check() {
+	PYTHONPATH=build/lib python3 -c "import permetrics"
+}
+
+package() {
+	python3 -m installer -d "$pkgdir" \
+		.dist/*.whl
+}
+
+sha512sums="
+d00602cb77ea6b6e58280d5761beafc0f52ff4f25338c9cf4dbb61140593b17da2a839d56f219421cf5c5f937c0c22fd453b4d6a1bca9bd951b20fc0c1d9ff3f  py3-permetrics-1.5.0.tar.gz
+"

@@ -1,0 +1,58 @@
+# Maintainer: Karel Gardas <karel@functional.vision>
+pkgname=aravis
+pkgver=0.8.30
+pkgrel=0
+pkgdesc="Aravis is a glib/gobject based library for video acquisition using Genicam cameras."
+url="https://github.com/AravisProject/aravis"
+# arm: sigbus
+arch="x86 x86_64 aarch64 ppc64le"
+license="LGPL-2.0-or-later"
+depends_dev="$pkgname=$pkgver-r$pkgrel"
+makedepends="
+	gst-plugins-base-dev
+	gstreamer-dev
+	gtk+3.0-dev
+	libusb-dev
+	libxml2-dev
+	meson
+	"
+subpackages="$pkgname-dev $pkgname-libs $pkgname-viewer $pkgname-viewer-lang"
+source="$pkgname-$pkgver.tar.xz::https://github.com/AravisProject/aravis/releases/download/$pkgver/aravis-$pkgver.tar.xz
+	aravis-0.8.22.patch
+	"
+
+build() {
+	abuild-meson \
+		-Db_lto=true \
+		-Dusb=enabled \
+		-Dviewer=enabled \
+		. output
+	meson compile -C output
+}
+
+check() {
+	meson test --no-rebuild --print-errorlogs -C output
+}
+
+package() {
+	DESTDIR="$pkgdir" meson install --no-rebuild -C output
+}
+
+viewer() {
+	pkgdesc="$pkgdesc (camera viewer)"
+	amove usr/bin/arv-viewer* \
+		usr/lib/gstreamer-* \
+		usr/share/applications \
+		usr/share/icons \
+		usr/share/metainfo
+}
+
+viewer_lang() {
+	default_lang
+	install_if="$subpkgname=$pkgver-r$pkgrel lang"
+}
+
+sha512sums="
+4f94e2445fd20375f58a96de72cc81d6ad70896851b305813a8054286df7950441c35c6da348bd65a965ef8dfe25d61e40fa31a533c9b987e93704cabe4b88f1  aravis-0.8.30.tar.xz
+b69356e9867b431d5c1a194c78dc188e5981dcb84683ebfc608cac0fbc5c6e9f773b5d14c69b81731925190a798c53f9eb1160b947711419aea8b22c4f1cafb0  aravis-0.8.22.patch
+"

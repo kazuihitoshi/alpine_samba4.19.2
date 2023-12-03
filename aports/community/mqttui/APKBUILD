@@ -1,0 +1,47 @@
+# Contributor: guddaff <alpine@guddaff.de>
+# Maintainer: guddaff <alpine@guddaff.de>
+pkgname=mqttui
+pkgver=0.19.0
+pkgrel=1
+pkgdesc="Subscribe to a MQTT Topic or publish something quickly from the terminal"
+url="https://github.com/EdJoPaTo/mqttui"
+# ppc64le: blocked by ring
+# riscv64, s390x: blocked by cargo/rust
+arch="all !ppc64le !riscv64 !s390x"
+license="GPL-3.0-or-later"
+makedepends="cargo cargo-auditable"
+subpackages="
+	$pkgname-bash-completion
+	$pkgname-fish-completion
+	$pkgname-zsh-completion
+	"
+source="https://github.com/EdJoPaTo/mqttui/archive/v$pkgver/mqttui-$pkgver.tar.gz
+	deps.patch
+	"
+
+prepare() {
+	default_prepare
+
+	cargo fetch --target="$CTARGET" --locked
+}
+
+build() {
+	cargo auditable build --release --frozen
+}
+
+check() {
+	cargo test --frozen
+}
+
+package() {
+	install -Dm755 target/release/mqttui -t "$pkgdir"/usr/bin/
+
+	install -Dm644 "target/completions/$pkgname.bash" "$pkgdir"/usr/share/bash-completion/completions/$pkgname
+	install -Dm644 "target/completions/$pkgname.fish" -t "$pkgdir"/usr/share/fish/vendor_completions.d/
+	install -Dm644 "target/completions/_$pkgname" -t "$pkgdir"/usr/share/zsh/site-functions/
+}
+
+sha512sums="
+26f2ec1b40e7821c3a455c9232dfd2b5af145658b683cb2d57c42b417b6b68ee05df1db5349c1e6d5ab7e30d63ed20dbf4f23d49e7adbb47d9b8f8bf751e7c25  mqttui-0.19.0.tar.gz
+0698f69763b8100c717dd92d2a98fe2e64e6d30c9b1a0fba9c6faaa98ac69896a717dc02729ec83b864daabab2ba4764e5ceac53f8c65889ae5e1646467380ac  deps.patch
+"

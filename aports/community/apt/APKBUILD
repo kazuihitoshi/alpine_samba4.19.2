@@ -1,0 +1,58 @@
+# Maintainer: Celeste <cielesti@protonmail.com>
+pkgname=apt
+pkgver=2.7.6
+pkgrel=0
+pkgdesc="APT package management tool"
+url="https://salsa.debian.org/apt-team/apt"
+arch="all"
+license="GPL-2.0-or-later"
+makedepends="
+	bzip2-dev
+	db-dev
+	cmake
+	dpkg-dev
+	eudev-dev
+	gettext-dev
+	gnutls-dev
+	libgcrypt-dev
+	lz4-dev
+	samurai
+	triehash
+	xxhash-dev
+	xz-dev
+	zlib-dev
+	zstd-dev
+	"
+checkdepends="gtest-dev"
+subpackages="
+	$pkgname-dev
+	$pkgname-libs
+	"
+source="https://salsa.debian.org/apt-team/apt/-/archive/$pkgver/apt-$pkgver.tar.bz2"
+options="!check" # todo
+
+build() {
+	cmake -B build -G Ninja -Wno-dev \
+		-DCMAKE_BUILD_TYPE=None \
+		-DCMAKE_INSTALL_PREFIX=/usr \
+		-DWITH_DOC=OFF \
+		-DUSE_NLS=ON \
+		-DWITH_TESTS="$(want_check && echo ON || echo OFF)"
+	cmake --build build
+}
+
+check() {
+	ctest --test-dir build --output-on-failure
+}
+
+package() {
+	DESTDIR="$pkgdir" cmake --install build
+
+	# libraries only
+	cd "$pkgdir"
+	rm -r usr/bin usr/libexec usr/share var etc
+}
+
+sha512sums="
+46a74e2210b6b2a27b71f2591dc696c8ac468d705791cc8cf0afd37a8b7dc9b60c11ead36d8382f2ae50f217d3e8f1818aeff5c96f7944594da28808409125da  apt-2.7.6.tar.bz2
+"

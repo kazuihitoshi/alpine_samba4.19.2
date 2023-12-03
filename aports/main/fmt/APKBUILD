@@ -1,0 +1,40 @@
+# Contributor: Luca Weiss <luca@z3ntu.xyz>
+# Maintainer: Duncan Bellamy <dunk@denkimushi.com>
+pkgname=fmt
+pkgver=10.1.1
+pkgrel=0
+pkgdesc="Open-source formatting library for C++"
+url="https://fmt.dev/latest/index.html"
+arch="all"
+license="MIT"
+makedepends="cmake doxygen python3 samurai"
+subpackages="$pkgname-dev $pkgname-doc"
+source="https://github.com/fmtlib/fmt/releases/download/$pkgver/fmt-$pkgver.zip"
+
+build() {
+	if [ "$CBUILD" != "$CHOST" ]; then
+		CMAKE_CROSSOPTS="-DCMAKE_SYSTEM_NAME=Linux -DCMAKE_HOST_SYSTEM_NAME=Linux"
+	fi
+	# Build in-tree so the prebuilt docs get installed correctly.
+	# See https://github.com/fmtlib/fmt/issues/2837
+	cmake -B . -G Ninja \
+		-DCMAKE_INSTALL_PREFIX=/usr \
+		-DCMAKE_INSTALL_LIBDIR=lib \
+		-DBUILD_SHARED_LIBS=True \
+		-DCMAKE_BUILD_TYPE=None \
+		$CMAKE_CROSSOPTS
+	cmake --build .
+}
+
+check() {
+	# libstdc++ locale stuff broken
+	CTEST_OUTPUT_ON_FAILURE=TRUE ctest -E 'chrono-test|unicode-test|xchar-test'
+}
+
+package() {
+	DESTDIR="$pkgdir" cmake --install .
+}
+
+sha512sums="
+ea5fec1330e14a7e73f5820afbcb0131320ae00e567e9f66479592dfc5eae7f275fa42b2be3d6afe034e14460365cb5be8bfd8c975d3b71143308e3cbf788e27  fmt-10.1.1.zip
+"

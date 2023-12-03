@@ -1,0 +1,37 @@
+# Contributor: Rasmus Thomsen <oss@cogitri.dev>
+# Maintainer: Rasmus Thomsen <oss@cogitri.dev>
+pkgname=py3-cattrs
+pkgver=23.1.2
+pkgrel=0
+pkgdesc="Complex custom class converters for attrs"
+url="https://github.com/python-attrs/cattrs"
+arch="noarch"
+license="MIT"
+depends="python3 py3-attrs"
+makedepends="
+	py3-gpep517
+	py3-poetry-core
+	"
+options="!check" # loads of missing deps
+subpackages="$pkgname-pyc"
+source="https://files.pythonhosted.org/packages/source/c/cattrs/cattrs-$pkgver.tar.gz"
+builddir="$srcdir/cattrs-$pkgver"
+
+build() {
+	gpep517 build-wheel \
+		--wheel-dir .dist \
+		--output-fd 3 3>&1 >&2
+}
+
+check() {
+	python3 setup.py test
+}
+
+package() {
+	python3 -m installer -d "$pkgdir" \
+		.dist/*.whl
+}
+
+sha512sums="
+bd55b75911ae44b554ea5e9d1d218c968c4906d9679adc40986c3e9b2b57af51e4b711e39e6e09997db1a2d41c22c6144ec259405c158273cbb9aa2f262c95c5  cattrs-23.1.2.tar.gz
+"

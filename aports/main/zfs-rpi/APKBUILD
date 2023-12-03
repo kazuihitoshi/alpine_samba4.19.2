@@ -1,0 +1,117 @@
+# Contributor: Carlo Landmeter <clandmeter@alpinelinux.org>
+# Maintainer: Natanael Copa <ncopa@alpinelinux.org>
+
+# when changing _ver we *must* bump _rel
+_name=zfs
+_ver=2.2.2
+_rel=2
+# when changing _kver/_krel make sure _rel=0
+_flavor=${FLAVOR:-rpi}
+_kpkg=linux-$_flavor
+_kver=6.6.3
+_krel=0
+
+_kpkgver="$_kver-r$_krel"
+
+# for custom kernels set $FLAVOR
+case $CARCH in
+	armhf|armv7) _extra_flavors="";;
+	aarch64) _extra_flavors="";;
+esac
+
+_kpkg=linux-$_flavor
+_kabi="$_kver-$_krel-$_flavor"
+
+pkgname=$_name-$_flavor
+pkgver=$_kver
+pkgrel=$(( _krel + _rel ))
+
+pkgdesc="ZFS Linux kernel modules"
+url="https://openzfs.org"
+# armhf: NEON SIMD not available in BCM2835 (rpi1 & rpiZ)
+arch="aarch64 armv7"
+license="CDDL-1.0"
+depends="$_kpkg=$_kpkgver"
+depends_dev="glib-dev e2fsprogs-dev util-linux-dev libtirpc-dev
+	$_kpkg-dev=$_kpkgver"
+
+makedepends="$depends_dev linux-headers xz"
+install_if="zfs $_kpkg=$_kpkgver"
+subpackages="$pkgname-dev"
+source="https://github.com/openzfs/zfs/releases/download/zfs-$_ver/zfs-$_ver.tar.gz
+	aarch64-disable-neon.patch
+	"
+builddir="$srcdir/$_name-$_ver"
+
+# secfixes:
+#   2.2.1-r1:
+#     - CVE-2023-49298
+
+for f in $_extra_flavors; do
+	makedepends="$makedepends linux-$f-dev=$_kpkgver"
+	subpackages="$subpackages zfs-$f:_extra"
+done
+
+prepare() {
+	default_prepare
+	# verify the kernel version
+	local _kapkbuild="$startdir"/../../main/linux-$_flavor-/APKBUILD
+	if [ -f $_kapkbuild ]; then
+		(	. $_kapkbuild
+			pkgname=$_name-$_flavor
+			[ "$_kver" != "$pkgver" ] && die "please update _kver to $pkgver"
+			[ "$_krel" != "$pkgrel" ] && die "please update _krel to $pkgrel"
+			return 0
+		)
+	fi
+}
+
+build() {
+	local flavor= kabi=
+	for flavor in $_flavor $_extra_flavors; do
+		kabi="$_kver-$_krel-$flavor"
+		mkdir -p "$kabi"
+		(cd $kabi
+		../configure --prefix=/usr \
+			--with-tirpc \
+			--sysconfdir=/etc \
+			--mandir=/usr/share/man \
+			--infodir=/usr/share/info \
+			--localstatedir=/var \
+			--with-config=kernel \
+			--with-linux=/usr/src/linux-headers-$kabi
+
+		make
+		)
+	done
+}
+
+package() {
+	local flavor= kabi=
+	for flavor in $_flavor $_extra_flavors; do
+		kabi="$_kver-$_krel-$flavor"
+		(cd $kabi && make DESTDIR="$pkgdir" install)
+	done
+}
+
+_extra() {
+	local flavor=${subpkgname##*-}
+	depends="linux-$flavor=$_kpkgver"
+	install_if="zfs linux-$flavor=$_kpkgver"
+	pkgdesc="ZFS Linux kernel modules for $flavor"
+
+	kabi="$_kver-$_krel-$flavor"
+	mkdir -p "$subpkgdir"/lib/modules
+	mv "$pkgdir"/lib/modules/$kabi "$subpkgdir"/lib/modules
+}
+
+dev() {
+	mkdir -p "$subpkgdir"/usr
+	mv "$pkgdir"/usr/src "$subpkgdir"/usr
+	default_dev
+}
+
+sha512sums="
+bba252cbf7986f2cce154dd18a34aa478cf98f70106337188dc894de2446d60a58fa643706927757d1787506b44d4ff404897a2d0e16aacb0a7bf27765703332  zfs-2.2.2.tar.gz
+50499c40a670e8b447279912953732c015dfb3559372d5e203be30e1e22663920747c3a65f995e94b70bed0d5fdf82f72e260422792097578a50b49001df7aee  aarch64-disable-neon.patch
+"

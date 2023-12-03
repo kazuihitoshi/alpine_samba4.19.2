@@ -1,0 +1,37 @@
+# Maintainer: Hugo Osvaldo Barrera <hugo@whynothugo.nl>
+pkgname=xendmail
+pkgver=0.3.1
+pkgrel=0
+pkgdesc="Like sendmail, for users"
+url="https://git.sr.ht/~whynothugo/xendmail"
+# rust-ring
+arch="all !s390x !ppc64le !riscv64"
+license="Apache-2.0"
+makedepends="cargo cargo-auditable"
+source="xendmail-$pkgver.tar.gz::https://git.sr.ht/~whynothugo/xendmail/archive/v$pkgver.tar.gz"
+builddir="$srcdir/$pkgname-v$pkgver"
+options="net" # fetch dependencies
+
+prepare() {
+	default_prepare
+
+	cargo fetch --locked
+}
+
+build() {
+	cargo auditable build --release --frozen
+}
+
+check() {
+	cargo test --frozen
+}
+
+package() {
+	install -Dm 0755 target/release/$pkgname "$pkgdir/usr/bin/$pkgname"
+	install -dm 0755 "$pkgdir/usr/sbin"
+	ln -s /usr/bin/$pkgname "$pkgdir/usr/sbin/sendmail"
+}
+
+sha512sums="
+d94fc1358f04abdfb84beffaa8aef338dbd164a315a27012f41cfe131e9a9c671139991245faade77153fd1275b5ecc5d52bfdf6da0065b5b7ad7637c71533d2  xendmail-0.3.1.tar.gz
+"

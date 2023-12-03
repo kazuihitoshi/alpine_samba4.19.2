@@ -1,0 +1,95 @@
+# Maintainer: Natanael Copa <ncopa@alpinelinux.org>
+pkgname=iproute2
+pkgver=6.6.0
+pkgrel=0
+pkgdesc="IP Routing Utilities"
+url="https://wiki.linuxfoundation.org/networking/iproute2"
+arch="all"
+license="GPL-2.0-or-later"
+install="$pkgname.post-install"
+depends="
+	$pkgname-minimal
+	$pkgname-tc
+	$pkgname-ss
+	"
+makedepends="
+	bash
+	bison
+	libcap-dev
+	libmnl-dev
+	flex
+	iptables-dev
+	"
+subpackages="
+	$pkgname-doc
+	$pkgname-dev
+	$pkgname-bash-completion
+	$pkgname-minimal
+	$pkgname-tc
+	$pkgname-ss
+	$pkgname-rdma
+	"
+source="https://kernel.org/pub/linux/utils/net/iproute2/iproute2-$pkgver.tar.xz"
+options="!check"  # requires namespaces support and root
+
+# secfixes:
+#   5.1.0-r0:
+#     - CVE-2019-20795
+
+case $CARCH in
+	ppc64le) ;;
+	*) makedepends="$makedepends elfutils-dev";;
+esac
+
+build() {
+	export CFLAGS="$CFLAGS -flto=auto"
+	make V=1
+}
+
+package() {
+	make DESTDIR="$pkgdir" install
+
+	install -D -m644 include/libnetlink.h "$pkgdir"/usr/include/libnetlink.h
+	install -D -m644 lib/libnetlink.a "$pkgdir"/usr/lib/libnetlink.a
+}
+
+minimal() {
+	pkgdesc="IP Routing Utilities (/sbin/ip only)"
+	depends=""
+	replaces="$pkgname"  # for backward compatibility (Alpine <3.13)
+
+	amove sbin/ip
+	amove usr/lib/iproute2
+}
+
+tc() {
+	pkgdesc="$pkgdesc (traffic control and XDP support)"
+	depends=""
+	replaces="$pkgname"  # for backward compatibility (Alpine <3.13)
+
+	amove sbin/tc
+	amove usr/lib/tc
+}
+
+ss() {
+	pkgdesc="$pkgdesc (socket statistics tool)"
+	depends=""
+	replaces="$pkgname"  # for backward compatibility (Alpine <3.13)
+
+	amove sbin/ss
+}
+
+rdma() {
+	pkgdesc="$pkgdesc (rdma utilities)"
+	depends=""
+
+	amove sbin/dcb
+	amove sbin/devlink
+	amove sbin/rdma
+	amove sbin/tipc
+	amove sbin/vdpa
+}
+
+sha512sums="
+21c99a3ba8e1d0047933e99b48fb00901eef18899cd5854000ae910d9d84d13aeafa48b32184775531285782909f4d283d0784491691a1f10462dab147de359d  iproute2-6.6.0.tar.xz
+"

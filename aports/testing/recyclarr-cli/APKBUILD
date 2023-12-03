@@ -1,0 +1,55 @@
+# Contributor: Fabricio Silva <hi@fabricio.dev>
+# Maintainer: Fabricio Silva <hi@fabricio.dev>
+pkgname=recyclarr-cli
+pkgver=6.0.1
+pkgrel=0
+pkgdesc="Automatically sync TRaSH guides to your Sonarr and Radarr instances"
+url="https://github.com/recyclarr/recyclarr"
+arch="x86_64 aarch64 armv7"
+license="MIT"
+options="net !check !strip" # strip breaks the package
+depends="
+	dotnet7-runtime
+	git
+	"
+makedepends="dotnet7-sdk"
+source="
+	$pkgname-$pkgver.tar.gz::https://github.com/recyclarr/recyclarr/archive/refs/tags/v$pkgver.tar.gz
+	0001-disable-gitversion.patch
+	"
+builddir="$srcdir/recyclarr-$pkgver"
+
+# map arch to dotnet
+case $CARCH in
+	x86_64) _dotnet_arch="x64" ;;
+	aarch64) _dotnet_arch="arm64" ;;
+	armv7) _dotnet_arch="arm" ;;
+	*) _dotnet_arch="$CARCH" ;;
+esac
+
+prepare() {
+	default_prepare
+
+	# apply patch version
+	sed -i "s/{Version}/$pkgver-r$pkgrel.alpine/" src/Recyclarr.Cli/Program.cs
+}
+
+build() {
+	# build the package and generate artifact
+	dotnet publish src/Recyclarr.Cli \
+		-p:RuntimeIdentifier="linux-musl-$_dotnet_arch" \
+		-p:Configuration=Release \
+		-p:SelfContained=false \
+		-p:PublishSingleFile=true \
+		-p:DisableGitVersionTask=true \
+		--output publish
+}
+
+package() {
+	install -Dm755 publish/recyclarr -t "$pkgdir"/usr/bin
+}
+
+sha512sums="
+ada4c7a10b1c5e64274da78cab47705c313228a7719d13c7899fc4d39423da10d344256d2f257f7016e8371ad33928eed012b3952c3c1ba9acc7e609b2cb27e7  recyclarr-cli-6.0.1.tar.gz
+68bbe5a566fabc49f3382c76550f1462f318ddcbfbad33300551b651ba36e853ce4fed2a39d9dae8e9de1309b2dd5cb73df6f78b9dff1d2a9983b8c0cddda357  0001-disable-gitversion.patch
+"

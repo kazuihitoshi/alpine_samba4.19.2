@@ -1,0 +1,25 @@
+# Contributor: Grigory Kirillov <txgk@bk.ru>
+# Maintainer: Will Sinatra <wpsinatra@gmail.com>
+pkgname=ytfzf
+pkgver=2.6.1
+pkgrel=0
+pkgdesc="Posix script to find and watch Youtube videos from the terminal"
+url="https://github.com/pystardust/ytfzf"
+arch="noarch"
+license="GPL-3.0-only"
+depends="curl jq"
+subpackages="$pkgname-doc"
+source="https://github.com/pystardust/ytfzf/archive/v$pkgver/ytfzf-$pkgver.tar.gz"
+install="$pkgname.post-install"
+
+check() {
+	./ytfzf --version
+}
+
+package() {
+	make DESTDIR="$pkgdir" PREFIX=/usr install doc addons
+}
+
+sha512sums="
+9266065352ae797bd5b8a2c71681b15599347ca38a519a21e84b42a0e8bb102c0937a02cbd6027c736ac0bdd7a6bc67fea664ecce5698032b4fef1ef0ec92c65  ytfzf-2.6.1.tar.gz
+"

@@ -1,0 +1,56 @@
+# Contributor: Daniel Everett <deverett@gmail.com>
+# Maintainer: Rasmus Thomsen <oss@cogitri.dev>
+pkgname=yubikey-manager
+pkgver=5.2.1
+pkgrel=0
+pkgdesc="Python library and command line tool for configuring any YubiKey over all USB interfaces"
+url="https://developers.yubico.com/yubikey-manager/"
+arch="noarch"
+license="BSD-2-Clause"
+depends="
+	ccid
+	pcsc-lite
+	pcsc-lite-libs
+	py3-click
+	py3-cryptography
+	py3-fido2
+	py3-keyring
+	py3-pyscard
+	py3-ykman
+	python3
+	yubico-c
+	"
+makedepends="
+	py3-poetry-core
+	py3-gpep517
+	"
+checkdepends="py3-pytest py3-makefun"
+subpackages="$pkgname-pyc py3-ykman"
+source="https://github.com/Yubico/yubikey-manager/releases/download/$pkgver/yubikey_manager-$pkgver.tar.gz"
+builddir="$srcdir/yubikey_manager-$pkgver"
+
+build() {
+	gpep517 build-wheel \
+		--wheel-dir .dist \
+		--output-fd 3 3>&1 >&2
+}
+
+check() {
+	python3 -m venv --clear --without-pip --system-site-packages .testenv
+	.testenv/bin/python3 -m installer .dist/*.whl
+	.testenv/bin/python3 -m pytest
+}
+
+package() {
+	python3 -m installer -d "$pkgdir" \
+		.dist/*.whl
+}
+
+ykman() {
+	depends=
+	amove usr/lib
+}
+
+sha512sums="
+96118f1b4e9509f9b299f8dfea2b29f7ac2958797facfae6bacb425fd4aa4cf5c91a14dcdbb9edbc9cf5785cfb9d5e4c465ad3e3813fd902cf12ad2d6b072329  yubikey_manager-5.2.1.tar.gz
+"

@@ -1,0 +1,37 @@
+# Contributor: Patrycja Rosa <alpine@ptrcnull.me>
+# Maintainer: Patrycja Rosa <alpine@ptrcnull.me>
+pkgname=py3-findpython
+pkgver=0.4.0
+pkgrel=0
+pkgdesc="Utility to find python versions on your system"
+url="https://github.com/frostming/findpython"
+arch="noarch"
+license="MIT"
+depends="py3-packaging"
+makedepends="py3-gpep517 py3-installer py3-pdm-backend"
+checkdepends="py3-pytest"
+subpackages="$pkgname-pyc"
+source="https://github.com/frostming/findpython/archive/$pkgver/py3-findpython-$pkgver.tar.gz"
+builddir="$srcdir/findpython-$pkgver"
+
+build() {
+	export PDM_BUILD_SCM_VERSION=$pkgver
+	gpep517 build-wheel \
+		--wheel-dir .dist \
+		--output-fd 3 3>&1 >&2
+}
+
+check() {
+	python3 -m venv --clear --without-pip --system-site-packages .testenv
+	.testenv/bin/python3 -m installer .dist/*.whl
+	.testenv/bin/python3 -m pytest
+}
+
+package() {
+	python3 -m installer -d "$pkgdir" \
+		.dist/*.whl
+}
+
+sha512sums="
+aedde450c8aa19407556f6f15123f9373b903b1ee222006704fde408316a10b871b527ccaafb864520e5f626224e0e369ded980473dc6f1d9cf3412d9a15c8b5  py3-findpython-0.4.0.tar.gz
+"

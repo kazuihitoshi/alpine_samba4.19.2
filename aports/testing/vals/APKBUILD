@@ -1,0 +1,35 @@
+# Maintainer: Hoang Nguyen <folliekazetani@protonmail.com>
+pkgname=vals
+pkgver=0.29.0
+pkgrel=0
+pkgdesc="Helm-like configuration values loader with support for various sources"
+url="https://github.com/helmfile/vals"
+arch="all"
+license="Apache-2.0"
+makedepends="go"
+source="$pkgname-$pkgver.tar.gz::https://github.com/helmfile/vals/archive/refs/tags/v$pkgver.tar.gz"
+
+export GOCACHE="${GOCACHE:-"$srcdir/go-cache"}"
+export GOTMPDIR="${GOTMPDIR:-"$srcdir"}"
+export GOMODCACHE="${GOMODCACHE:-"$srcdir/go"}"
+
+build() {
+	go build -v \
+		-o bin/$pkgname \
+		-ldflags "-X main.version=v$pkgver -X main.commit=AlpineLinux" \
+		./cmd/vals
+}
+
+check() {
+	# TestValues_.* tests require the running backend services
+	# TestGetStringMap fails (TODO: need more investigation)
+	go test -skip 'TestValues_.*|TestGetStringMap' ./...
+}
+
+package() {
+	install -Dm755 bin/$pkgname -t "$pkgdir"/usr/bin/
+}
+
+sha512sums="
+245ab9f1442e2afcdc108fb25ed822adbb2c8eba50a92210d2c234a3f483a8b63c1da54c42c34f2ef988a937490391ca106a8efde96ad8922ec12196525c3923  vals-0.29.0.tar.gz
+"

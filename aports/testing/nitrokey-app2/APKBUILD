@@ -1,0 +1,41 @@
+# Contributor: Bart Ribbers <bribbers@disroot.org>
+# Maintainer: Bart Ribbers <bribbers@disroot.org>
+pkgname=nitrokey-app2
+pkgver=2.1.2
+pkgrel=0
+pkgdesc="Nitrokey management application"
+url="https://github.com/Nitrokey/nitrokey-app2"
+# s390x, ppc64le and riscv64 blocked by py3-spsdk -> py3-pynitrokey
+arch="noarch !s390x !ppc64le !riscv64"
+license="Apache-2.0"
+depends="
+	py3-pynitrokey
+	py3-qt-material
+	py3-qt5
+	py3-udev
+	"
+makedepends="
+	py3-flit-core
+	py3-gpep517
+	py3-installer
+	py3-setuptools
+	"
+subpackages="$pkgname-pyc"
+source="$pkgname-$pkgver.tar.gz::https://github.com/Nitrokey/nitrokey-app2/archive/refs/tags/v$pkgver.tar.gz"
+options="!check" # No tests
+
+build() {
+	make build-ui
+	gpep517 build-wheel \
+		--wheel-dir .dist \
+		--output-fd 3 3>&1 >&2
+}
+
+package() {
+	python3 -m installer -d "$pkgdir" \
+		.dist/*.whl
+}
+
+sha512sums="
+7e1208a822a14b46a57ec3bf5acaca47e9b79b239ab77f58ac576f14e4e2c271d13bfc71b2af9a36d421aaae06d5e40b16f426c56f79b53c6a777c1b201cdbea  nitrokey-app2-2.1.2.tar.gz
+"

@@ -1,0 +1,60 @@
+# Contributor: Bart Ribbers <bribbers@disroot.org>
+# Maintainer: team/kde <bribbers@disroot.org>
+
+# The group tag is just to easily find this APKBUILD by some scripts for automation
+# group=kde-frameworks
+pkgname=kdesignerplugin5
+pkgver=5.112.0
+pkgrel=0
+pkgdesc="Integration of Frameworks widgets in Qt Designer/Creator"
+# armhf blocked by extra-cmake-modules
+arch="all !armhf"
+url="https://community.kde.org/Frameworks"
+license="LGPL-2.1-only"
+depends_dev="
+	kcompletion5-dev
+	kconfig5-dev
+	kconfigwidgets5-dev
+	kcoreaddons5-dev
+	kiconthemes5-dev
+	kio5-dev
+	kitemviews5-dev
+	kplotting5-dev
+	ktextwidgets5-dev
+	kwidgetsaddons5-dev
+	kxmlgui5-dev
+	sonnet5-dev
+	"
+makedepends="$depends_dev
+	extra-cmake-modules
+	kdoctools5-dev
+	qt5-qttools-dev
+	samurai
+	"
+checkdepends="xvfb-run"
+_repo_url="https://invent.kde.org/frameworks/kdesignerplugin.git"
+source="https://download.kde.org/stable/frameworks/${pkgver%.*}/portingAids/kdesignerplugin-$pkgver.tar.xz"
+subpackages="$pkgname-dev $pkgname-doc"
+builddir="$srcdir/kdesignerplugin-$pkgver"
+
+replaces="kdesignerplugin<=5.110.0-r0"
+
+build() {
+	cmake -B build -G Ninja \
+		-DCMAKE_BUILD_TYPE=RelWithDebInfo \
+		-DCMAKE_INSTALL_PREFIX=/usr \
+		-DCMAKE_INSTALL_LIBDIR=lib
+	cmake --build build
+}
+
+check() {
+	xvfb-run ctest --test-dir build --output-on-failure
+}
+
+package() {
+	DESTDIR="$pkgdir" cmake --install build
+}
+
+sha512sums="
+2e2b50199443c4b5e3ebb4a47fefd2155b2d3fb70f26fe425bd2fc6a84562a57f7d344331e639d6bb1db8a1da7b6cec0bfb002d700096c4583c6f5ebb6b749ab  kdesignerplugin-5.112.0.tar.xz
+"

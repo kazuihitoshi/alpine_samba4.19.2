@@ -1,0 +1,40 @@
+# Contributor: Orhun Parmaksız <orhunparmaksiz@gmail.com>
+# Maintainer: Orhun Parmaksız <orhunparmaksiz@gmail.com>
+pkgname=cargo-machete
+pkgver=0.6.0
+pkgrel=0
+pkgdesc="Cargo subcommand for removing unused Rust dependencies"
+url="https://github.com/bnjbvr/cargo-machete"
+arch="all"
+license="MIT"
+makedepends="
+	cargo
+	cargo-auditable
+	"
+subpackages="$pkgname-doc"
+source="$pkgname-$pkgver.tar.gz::https://github.com/bnjbvr/cargo-machete/archive/v$pkgver.tar.gz"
+options="net" # cargo fetch
+
+prepare() {
+	default_prepare
+
+	cargo fetch --target="$CTARGET" --locked
+}
+
+build() {
+	cargo auditable build --release --frozen
+}
+
+check() {
+	cargo test --frozen
+}
+
+package() {
+	install -Dm 755 "target/release/cargo-machete" -t "$pkgdir/usr/bin"
+	install -Dm 644 README.md -t "$pkgdir/usr/share/doc/$pkgname"
+	install -Dm 644 LICENSE.md -t "$pkgdir/usr/share/licenses/$pkgname"
+}
+
+sha512sums="
+009dad7ae24f80952f7d9a42707ac2cfd8ff06d57201620a346cfde3f36fac6b905cc7b10ea562edd83ce05bcbe17784d525da19d249b9b896c46891fe100455  cargo-machete-0.6.0.tar.gz
+"

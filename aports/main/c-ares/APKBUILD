@@ -1,0 +1,45 @@
+# Contributor: Carlo Landmeter <clandmeter@alpinelinux.org>
+# Maintainer: Carlo Landmeter <clandmeter@alpinelinux.org>
+pkgname=c-ares
+pkgver=1.22.1
+pkgrel=0
+pkgdesc="Asynchronous DNS/names resolver library"
+url="https://c-ares.org/"
+arch="all"
+license="MIT"
+subpackages="$pkgname-doc $pkgname-static $pkgname-dev $pkgname-utils::noarch"
+source="https://c-ares.haxx.se/download/c-ares-$pkgver.tar.gz"
+
+# secfixes:
+#   1.17.2-r0:
+#     - CVE-2021-3672
+
+build() {
+	./configure \
+		--build=$CBUILD \
+		--host=$CHOST \
+		--prefix=/usr \
+		--mandir=/usr/share/man \
+		--infodir=/usr/share/info \
+		--enable-shared
+	make
+}
+
+check() {
+	test/arestest --gtest_filter=-*.Live*
+}
+
+package() {
+	make DESTDIR="$pkgdir" install
+	cd src/tools
+	install -Dm755 -t "$pkgdir"/usr/bin \
+		adig ahost
+}
+
+utils() {
+	amove usr/bin
+}
+
+sha512sums="
+9b9aa3ff48a76e7d1464f5fc644e736d09898b2245c81292c510d1a3b967dca13e4711bab564947ec99c118094c385d12a92ddd767a84153fdd21df03da75349  c-ares-1.22.1.tar.gz
+"

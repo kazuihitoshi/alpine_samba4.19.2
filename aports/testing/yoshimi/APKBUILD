@@ -1,0 +1,44 @@
+# Contributor: Patrycja Rosa <alpine@ptrcnull.me>
+# Maintainer: Patrycja Rosa <alpine@ptrcnull.me>
+pkgname=yoshimi
+pkgver=2.3.1.2
+pkgrel=0
+pkgdesc="Sophisticated software synthesizer"
+url="https://yoshimi.github.io/"
+arch="all"
+license="GPL-2.0-or-later"
+depends="fltk-fluid"
+makedepends="
+	alsa-lib-dev
+	argp-standalone
+	cairo-dev
+	cmake
+	fftw-dev
+	fltk-dev
+	fontconfig-dev
+	jack-dev
+	lv2-dev
+	mesa-dev
+	mxml-dev
+	readline-dev
+	samurai
+	"
+subpackages="$pkgname-doc"
+source="https://github.com/Yoshimi/yoshimi/archive/$pkgver/yoshimi-$pkgver.tar.gz"
+options="!check" # not sure if they even exist
+
+build() {
+	cmake -B build -G Ninja -S src \
+		-DCMAKE_BUILD_TYPE=MinSizeRel \
+		-DCMAKE_INSTALL_PREFIX=/usr \
+		-DCMAKE_INSTALL_LIBDIR=lib
+	cmake --build build
+}
+
+package() {
+	DESTDIR="$pkgdir" cmake --install build
+}
+
+sha512sums="
+df1c5900b9499d8b6180cb26ef52e5448035984cb151d0eec4c6ed5031d635f943a7c91c71e2954f893ba9a397c6a9e92523b3fa8a661934629661100704dcb2  yoshimi-2.3.1.2.tar.gz
+"

@@ -1,0 +1,49 @@
+# Contributor: Bart Ribbers <bribbers@disroot.org>
+# Maintainer: team/kde <bribbers@disroot.org>
+
+# The group tag is just to easily find this APKBUILD by some scripts for automation
+# group=kde-applications
+pkgname=kimap
+pkgver=23.08.3
+pkgrel=0
+pkgdesc="Job-based API for interacting with IMAP servers"
+# armhf blocked by extra-cmake-modules
+arch="all !armhf"
+url="https://community.kde.org/KDE_PIM"
+license="LGPL-2.0-or-later"
+depends_dev="
+	cyrus-sasl-dev
+	kcoreaddons5-dev
+	ki18n5-dev
+	kio5-dev
+	kmime-dev
+	qt5-qtbase-dev
+	"
+makedepends="$depends_dev
+	extra-cmake-modules
+	samurai
+	"
+_repo_url="https://invent.kde.org/pim/kimap.git"
+source="https://download.kde.org/stable/release-service/$pkgver/src/kimap-$pkgver.tar.xz"
+subpackages="$pkgname-dev"
+
+build() {
+	cmake -B build -G Ninja \
+		-DCMAKE_BUILD_TYPE=RelWithDebInfo \
+		-DCMAKE_INSTALL_PREFIX=/usr \
+		-DCMAKE_INSTALL_LIBDIR=lib
+	cmake --build build
+}
+
+check() {
+	# loginjobtest is broken
+	ctest --test-dir build --output-on-failure -E "loginjobtest" -j1
+}
+
+package() {
+	DESTDIR="$pkgdir" cmake --install build
+}
+
+sha512sums="
+60a12426a6cec25d9aa92bc5cc8e0de17b54b9a7676d7a627c42890543178ccfabb70ddc29d73748202a488b5d1b426ae3a3ecf1cb253936430673899cdf02bb  kimap-23.08.3.tar.xz
+"

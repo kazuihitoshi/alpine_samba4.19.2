@@ -1,0 +1,32 @@
+# Contributor: Anjandev Momi <anjan@momi.ca>
+# Maintainer: Anjandev Momi <anjan@momi.ca>
+pkgname=go-sendxmpp
+pkgver=0.6.0
+pkgrel=3
+pkgdesc="Tool to send messages to an XMPP contact or MUC"
+url="https://salsa.debian.org/mdosch/go-sendxmpp"
+arch="all"
+license="BSD-2-Clause"
+makedepends="go"
+source="$pkgname-v$pkgver.tar.gz::https://salsa.debian.org/mdosch/go-sendxmpp/-/archive/v$pkgver/go-sendxmpp-v$pkgver.tar.gz"
+builddir="$srcdir/$pkgname-v$pkgver"
+
+export GOCACHE="${GOCACHE:-"$srcdir/go-cache"}"
+export GOTMPDIR="${GOTMPDIR:-"$srcdir"}"
+export GOMODCACHE="${GOMODCACHE:-"$srcdir/go"}"
+
+build() {
+	go build
+}
+
+check() {
+	go test
+}
+
+package() {
+	install -Dm755 go-sendxmpp "$pkgdir"/usr/bin/go-sendxmpp
+}
+
+sha512sums="
+0ab6e583814bd8da6f3a3dbad68f7a4b45cfa378b89b65459e9b0a982ab3fa432e1497f73df5c770fc4b6bde2dd22fa16575c986a803f2e130efc768e6dcfc66  go-sendxmpp-v0.6.0.tar.gz
+"

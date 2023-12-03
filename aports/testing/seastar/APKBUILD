@@ -1,0 +1,95 @@
+# Maintainer: Duncan Bellamy <dunk@denkimushi.com>
+pkgname=seastar
+pkgver=22.11.0_git20231201
+pkgrel=0
+_commit="d6f9c3051bc92bc37280d0be3e432ae89fa23ae4"
+_ver="${_commit:=$pkgver}"
+pkgdesc="High performance server-side application framework"
+url="https://seastar.io"
+# riscv64: valgrind
+# armhf armv7 x86 32bit not supported
+arch="all !x86 !armhf !armv7 !riscv64"
+license="Apache-2.0"
+depends_dev="
+	$pkgname=$pkgver-r$pkgrel
+	$pkgname-testing=$pkgver-r$pkgrel
+	"
+makedepends="
+	boost-dev
+	bsd-compat-headers
+	c-ares-dev
+	cmake
+	crypto++-dev
+	fmt-dev
+	gnutls-dev
+	hwloc-dev
+	libpciaccess-dev
+	libucontext-dev
+	libunwind-dev
+	liburing-dev
+	lksctp-tools-dev
+	lz4-dev
+	numactl-dev
+	ragel
+	samurai
+	util-linux-dev
+	valgrind-dev
+	xfsprogs-dev
+	yaml-cpp-dev
+	"
+case "$CARCH" in
+aarch64|x86_64) makedepends="$makedepends dpdk-dev" ;;
+esac
+subpackages="$pkgname-dev $pkgname-testing"
+source="$pkgname-$_ver.tar.gz::https://github.com/scylladb/seastar/archive/$_ver.tar.gz"
+builddir="$srcdir/$pkgname-$_ver"
+
+build() {
+	case "$CARCH" in
+		aarch64|x86_64) local _dpdk=ON ;;
+		*) 		local _dpdk=OFF ;;
+	esac
+	if [ "$CBUILD" != "$CHOST" ]; then
+		local crossopts="-DCMAKE_SYSTEM_NAME=Linux -DCMAKE_HOST_SYSTEM_NAME=Linux"
+	fi
+	export CXXFLAGS="$CXXFLAGS -DSEASTAR_DEFAULT_ALLOCATOR -Wno-cpp"
+	cmake -B build -G Ninja \
+		-DBUILD_SHARED_LIBS=ON \
+		-DCMAKE_INSTALL_PREFIX=/usr \
+		-DCMAKE_INSTALL_LIBDIR=lib \
+		-DCMAKE_BUILD_TYPE=MinSizeRel \
+		-DSeastar_APPS=OFF \
+		-DSeastar_DEMOS=OFF \
+		-DSeastar_DOCS=OFF \
+		-DSeastar_DPDK="$_dpdk" \
+		$crossopts
+	cmake --build build
+}
+
+check() {
+	# rest: needs root (doesn't work in container) for hardware access
+	# see also: https://github.com/scylladb/seastar/issues/1826
+	local _tests="chunk_parsers|coroutines|fair_queue|file_io|httpd|request_parser|semaphore|stall_detector|tls"
+	case "$CARCH" in
+		ppc64le) _ppc64="|fsnotifier|network_interface|futures|execution_stage|fstream" ;;
+	esac
+	ctest --test-dir build --output-on-failure \
+		-E "($_tests$_ppc64)"
+}
+
+package() {
+	DESTDIR="$pkgdir" cmake --install build
+}
+
+dev() {
+	default_dev
+	amove usr/bin
+}
+
+testing() {
+	amove usr/lib/libseastar_*testing.so
+}
+
+sha512sums="
+d989493ed7d1b0e434ae8049301769989d4a8d6bf3e5ebc23509285e089783641118344dd8aa2a3aae1ca9faa19c3c7fc73751764caa83557e5eed490a24cd59  seastar-d6f9c3051bc92bc37280d0be3e432ae89fa23ae4.tar.gz
+"

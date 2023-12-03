@@ -1,0 +1,28 @@
+# Contributor: Milan P. Stanić <mps@arvanta.net>
+# Maintainer: Milan P. Stanić <mps@arvanta.net>
+pkgname=xca
+pkgver=2.5.0
+pkgrel=2
+pkgdesc="X certificate and key management"
+url="https://hohnstaedt.de/xca/"
+arch="all"
+license="BSD-3-Clause"
+options="!check" # no tests
+depends="qt6-qtbase-sqlite"
+makedepends="qt6-qttools-dev openssl-dev libtool cmake"
+subpackages="$pkgname-doc $pkgname-bash-completion"
+source="https://github.com/chris2511/xca/releases/download/RELEASE.$pkgver/xca-$pkgver.tar.gz
+	"
+
+build() {
+	cmake -B build xca
+	cmake --build build
+}
+
+package() {
+	DESTDIR="$pkgdir" cmake --install build --prefix /usr
+}
+
+sha512sums="
+36b9b97ff0649934fbe78e38048e75883555aab5d86ee2cbd629f9789326d16463f182cf0bbcc76b1ac8f631b24fa187f1b64c466e04de010724ea5f9ebfa11e  xca-2.5.0.tar.gz
+"

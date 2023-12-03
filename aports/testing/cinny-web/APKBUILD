@@ -1,0 +1,35 @@
+# Contributor: Lindsay Zhou <i@lin.moe>
+# Maintainer: Lindsay Zhou <i@lin.moe>
+_pkgname=cinny
+pkgname="$_pkgname"-web
+pkgver=3.1.0
+pkgrel=0
+pkgdesc="A Matrix client focusing primarily on simple, elegant and secure interface. (website)"
+url="https://cinny.in/"
+arch="noarch"
+license="AGPL3"
+makedepends="npm"
+source="
+	$_pkgname-$pkgver.tar.gz::https://github.com/cinnyapp/cinny/archive/v$pkgver.tar.gz
+"
+builddir="$srcdir/$_pkgname-$pkgver"
+options="!check" # no test suite
+
+build() {
+	export NODE_OPTIONS="--max-old-space-size=4000"
+	npm ci
+	npm run build
+}
+
+package() {
+	local webroot="$pkgdir"/usr/share/webapps/cinny
+	install -d "$webroot"
+	cp -r "$builddir"/dist/* "$webroot"
+
+	install -Dm644 "$builddir"/dist/config.json "$pkgdir"/etc/cinny/config.json
+	ln -sf /etc/cinny/config.json "$pkgdir"/usr/share/webapps/cinny/config.json
+}
+
+sha512sums="
+7e2a335328b932b1f5c0e5d531803e0e12a480d3a41fa8d5ec854088dd09f03b7b91a28f9f413495470f4b06a2c49c4a677014bc06c51ad79c40b8c8f956b8b1  cinny-3.1.0.tar.gz
+"

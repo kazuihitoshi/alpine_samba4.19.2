@@ -1,0 +1,24 @@
+#!/sbin/openrc-run
+
+description="Jitsi Videobridge"
+
+pidfile="/run/jvb/jvb.pid"
+# launcher script below will work on OpenRC also
+command="/usr/lib/jitsi-videobridge/jvb.sh"
+command_args="${JVB_OPTS}"
+command_user="jvb:jitsi"
+command_background=true
+output_log="$JVB_LOGFILE"
+error_log="$JVB_LOGFILE"
+
+export JAVA_SYS_PROPS
+
+depend() {
+	need net
+	want jabber-server
+}
+
+start_pre() {
+	checkpath -d -m 770 -o $command_user /run/jvb
+	checkpath -f -m 640 -o $command_user "$JVB_LOGFILE"
+}

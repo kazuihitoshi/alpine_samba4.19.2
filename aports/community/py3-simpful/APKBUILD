@@ -1,0 +1,37 @@
+# Contributor: Iztok Fister, Jr. <iztok@iztok-jr-fister.eu>
+# Maintainer: Iztok Fister, Jr. <iztok@iztok-jr-fister.eu>
+pkgname=py3-simpful
+_pkgorig=simpful
+pkgver=2.11.1
+pkgrel=0
+pkgdesc="A friendly python library for fuzzy logic reasoning"
+url="https://github.com/aresio/simpful"
+arch="noarch"
+license="GPL-3.0-or-later"
+depends="python3 py3-numpy py3-scipy"
+checkdepends="py3-matplotlib py3-pytest-xdist"
+makedepends="py3-gpep517 py3-setuptools py3-wheel"
+subpackages="$pkgname-pyc"
+source="https://github.com/aresio/simpful/archive/$pkgver/$_pkgorig-$pkgver.tar.gz"
+builddir="$srcdir/simpful-$pkgver"
+
+build() {
+	gpep517 build-wheel \
+		--wheel-dir .dist \
+		--output-fd 3 3>&1 >&2
+}
+
+check() {
+	python3 -m venv --clear --without-pip --system-site-packages .testenv
+	.testenv/bin/python3 -m installer .dist/*.whl
+	.testenv/bin/python3 -m pytest -n auto
+}
+
+package() {
+	python3 -m installer -d "$pkgdir" \
+		.dist/*.whl
+}
+
+sha512sums="
+09121899bf0da3846528f74ea97d11f48da72cffce062311687f02c6a3ca87c2c1bf223dc60974a1a95b33bedcefe0825251200bd0e21ca2a9ec1048925c3181  simpful-2.11.1.tar.gz
+"

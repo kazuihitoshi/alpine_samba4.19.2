@@ -1,0 +1,46 @@
+# Contributor: Martijn Braam <martijn@brixit.nl>
+# Maintainer: Oliver Smith <ollieparanoid@postmarketos.org>
+pkgname=megapixels
+pkgver=1.7.0
+pkgrel=0
+pkgdesc="GTK+4 camera app for mobile devices"
+url="https://gitlab.com/postmarketOS/megapixels"
+# s390x: doubt anyone would use a mainframe to take photosj
+arch="all !s390x"
+license="GPL-3.0-only"
+# Required by postprocess.sh
+# depends="cmd:dcraw_emu cmd:convert cmd:exiftool"
+depends="libraw-tools imagemagick exiftool"
+makedepends="
+	feedbackd-dev
+	glib-dev
+	gtk4.0-dev
+	libxrandr-dev
+	meson
+	tiff-dev
+	zbar-dev
+	"
+subpackages="$pkgname-tools"
+source="https://gitlab.com/postmarketOS/megapixels/-/archive/$pkgver/megapixels-$pkgver.tar.bz2"
+options="!check" # There's no testsuite
+
+build() {
+	abuild-meson . output
+	meson compile -C output
+}
+
+package() {
+	DESTDIR="$pkgdir" meson install --no-rebuild -C output
+}
+
+tools() {
+	pkgdesc="Extra megapixels utilities for debugging"
+	depends=""
+
+	amove usr/bin/megapixels-list-devices
+	amove usr/bin/megapixels-camera-test
+}
+
+sha512sums="
+5c6c2eff1100d0c5bd333cca0dcbcad557ba5d936c04d9214f8247c75f6a234533b63e86aa3dca5bc7cea4eaefb836055a5c3960c6de40c231b33d3bcdd51a51  megapixels-1.7.0.tar.bz2
+"

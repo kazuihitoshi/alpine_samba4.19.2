@@ -1,0 +1,41 @@
+# Maintainer: Simon Rupf <simon@rupf.net>
+pkgname=convert2json
+pkgver=0.5.2
+pkgrel=0
+pkgdesc="Utilities to convert CSV, TOML, XML & YAML to JSON, including jq wrappers."
+url="https://github.com/simonrupf/convert2json"
+arch="all"
+license="MIT"
+depends="jq"
+makedepends="
+	cargo
+	cargo-auditable
+	clang15-dev
+	"
+source="https://github.com/simonrupf/convert2json/archive/$pkgver/convert2json-$pkgver.tar.gz"
+options="net"
+
+prepare() {
+	default_prepare
+
+	cargo fetch --target="$CTARGET" --locked
+}
+
+build() {
+	cargo auditable build --release --frozen
+}
+
+check() {
+	cargo test --frozen
+}
+
+package() {
+	install -Dm755 target/release/cq target/release/tq target/release/xq \
+	    target/release/yq target/release/csv2json target/release/toml2json \
+	    target/release/xml2json target/release/yaml2json \
+		-t "$pkgdir"/usr/bin
+}
+
+sha512sums="
+0e45ea5b463aece81f578de5a9fb84a72b677ebde22cac97bb36d0550fefbf3f5bf2c28864f14836bae733cffeb79cca7e53a30cf037f480d60bef055c981423  convert2json-0.5.2.tar.gz
+"

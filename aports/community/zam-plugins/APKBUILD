@@ -1,0 +1,90 @@
+# Maintainer:
+pkgname=zam-plugins
+pkgver=4.1
+_dpf=88180608a206b529fcb660d406ddf6f934002806
+_pugl=844528e197c51603f6cef3238b4a48d23bf60eb7
+pkgrel=2
+pkgdesc="Collection of LADSPA/LV2/VST/JACK audio plugins for high-quality processing"
+url="https://github.com/zamaudio/zam-plugins"
+arch="all"
+license="GPL-2.0-or-later"
+options="!check" # no testsuite
+install="$pkgname.post-upgrade"
+makedepends="
+	bash
+	fftw-dev
+	jack-dev
+	ladspa-dev
+	liblo-dev
+	libsamplerate-dev
+	lv2-dev
+	mesa-dev
+	zita-convolver-dev
+	"
+subpackages="
+	$pkgname-clap
+	$pkgname-ladspa
+	$pkgname-lv2
+	$pkgname-vst2
+	$pkgname-vst3
+	"
+source="
+	$pkgname-$pkgver.tar.gz::https://github.com/zamaudio/zam-plugins/archive/refs/tags/$pkgver.tar.gz
+	dpf-$_dpf.tar.gz::https://github.com/DISTRHO/DPF/archive/$_dpf.tar.gz
+	pugl-$_pugl.tar.gz::https://github.com/DISTRHO/pugl/archive/$_pugl.tar.gz
+	"
+
+prepare() {
+	default_prepare
+
+	# overwrite folders
+	rmdir dpf
+	ln -sfv "$srcdir"/DPF-$_dpf dpf
+
+	rmdir dpf/dgl/src/pugl-upstream
+	ln -sfv "$srcdir"/pugl-$_pugl dpf/dgl/src/pugl-upstream
+}
+
+build() {
+	make PREFIX=/usr
+}
+
+package() {
+	make DESTDIR="$pkgdir" PREFIX=/usr install
+}
+
+clap() {
+	pkgdesc="$pkgdesc (clap integration)"
+
+	amove usr/lib/clap
+}
+
+ladspa() {
+	pkgdesc="$pkgdesc (ladspa integration)"
+
+	amove usr/lib/ladspa
+}
+
+lv2() {
+	pkgdesc="$pkgdesc (lv2 plugins)"
+
+	amove usr/lib/lv2
+}
+
+vst2() {
+	pkgdesc="$pkgdesc (vst2 plugins)"
+
+	amove usr/lib/vst
+}
+
+vst3() {
+	pkgdesc="$pkgdesc (vst3 plugins)"
+
+	amove usr/lib/vst3
+}
+
+sha512sums="
+53ffd7f4cebbb65fcdaae53b7d0ad922dd2b1e76479da7caa2c4100d04b5258e0aec4bbfb3b8632b4198375e6677659139abb907bfe9fc11ded772c4e14d5e14  zam-plugins-4.1.tar.gz
+7ea26d27bfb17fe67d2c4c4077d203b447407986594b833ee545319221c9c08fb434c1ca11ad425a8d9369df41b331c1286ddd85aabdd7a8570ab7a25b88b0e7  dpf-88180608a206b529fcb660d406ddf6f934002806.tar.gz
+ad2eb02099d8539dfcffdda093cf4a8dcb1c959d8c4f860bba2a9777f0bfe3d4f2471ae56d5f7be779a8402c5b446e44c2c7aa66ff07bb87787cf0bd8add6772  pugl-844528e197c51603f6cef3238b4a48d23bf60eb7.tar.gz
+"

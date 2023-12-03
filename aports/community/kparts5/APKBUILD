@@ -1,0 +1,60 @@
+# Contributor: Bart Ribbers <bribbers@disroot.org>
+# Maintainer: team/kde <bribbers@disroot.org>
+
+# The group tag is just to easily find this APKBUILD by some scripts for automation
+# group=kde-frameworks
+pkgname=kparts5
+pkgver=5.112.0
+pkgrel=0
+pkgdesc="Document centric plugin system"
+# armhf blocked by extra-cmake-modules
+arch="all !armhf"
+url="https://community.kde.org/Frameworks"
+license="LGPL-2.1-only AND LGPL-2.1-or-later AND (LGPL-2.1-only OR LGPL-3.0-only)"
+depends_dev="
+	kconfig5-dev
+	kcoreaddons5-dev
+	ki18n5-dev
+	kiconthemes5-dev
+	kio5-dev
+	kjobwidgets5-dev
+	kservice5-dev
+	ktextwidgets5-dev
+	kwidgetsaddons5-dev
+	kxmlgui5-dev
+	qt5-qtbase-dev
+	"
+makedepends="$depends_dev
+	doxygen
+	extra-cmake-modules
+	qt5-qttools-dev
+	samurai
+	"
+checkdepends="xvfb-run"
+_repo_url="https://invent.kde.org/frameworks/kparts.git"
+source="https://download.kde.org/stable/frameworks/${pkgver%.*}/kparts-$pkgver.tar.xz"
+subpackages="$pkgname-dev $pkgname-doc $pkgname-lang"
+builddir="$srcdir/kparts-$pkgver"
+
+replaces="kparts<=5.110.0-r0"
+
+build() {
+	cmake -B build -G Ninja \
+		-DCMAKE_BUILD_TYPE=RelWithDebInfo \
+		-DCMAKE_INSTALL_PREFIX=/usr \
+		-DCMAKE_INSTALL_LIBDIR=lib \
+		-DBUILD_QCH=ON
+	cmake --build build
+}
+
+check() {
+	xvfb-run ctest --test-dir build --output-on-failure
+}
+
+package() {
+	DESTDIR="$pkgdir" cmake --install build
+}
+
+sha512sums="
+1b1ff85cbbebd0dd763d1649d7bcfce59faaaeb49bc8387600e436bd2d9c8ff9405aae99ddc5de2331a6ddb4f947f610b1fad414692dfaeddc07c283eb597aef  kparts-5.112.0.tar.xz
+"

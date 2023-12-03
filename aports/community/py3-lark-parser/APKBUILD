@@ -1,0 +1,39 @@
+# Contributor: Russ Webber <russ@rw.id.au>
+# Maintainer: Russ Webber <russ@rw.id.au>
+pkgname=py3-lark-parser
+pkgver=1.1.7
+pkgrel=0
+pkgdesc="modern parsing library for Python, implementing Earley & LALR(1) and an easy interface"
+url="https://github.com/lark-parser/lark"
+arch="noarch"
+license="MIT"
+options="!check" # requires python dependency js2py
+depends="python3"
+makedepends="py3-setuptools py3-gpep517 py3-installer py3-wheel"
+subpackages="$pkgname-pyc"
+source="$pkgname-$pkgver.tar.gz::https://github.com/lark-parser/lark/archive/$pkgver.tar.gz
+	package-data.patch
+	"
+builddir="$srcdir/lark-$pkgver"
+
+build() {
+	gpep517 build-wheel \
+		--wheel-dir .dist \
+		--output-fd 3 3>&1 >&2
+}
+
+check() {
+	python3 -m venv --clear --without-pip --system-site-packages .testenv
+	.testenv/bin/python3 -m installer .dist/*.whl
+	.testenv/bin/python3 -m pytest
+}
+
+package() {
+	python3 -m installer -d "$pkgdir" \
+		.dist/*.whl
+}
+
+sha512sums="
+83c8acc147d9649762b1300d19f0819e61dfd4756c81eb973e2c6e82dcf887daef03fe47fb490f8135c806aeb3abb7d0322132f72e472ee71b54b09a3581826b  py3-lark-parser-1.1.7.tar.gz
+97dae149e19e37f00ca35b5b2569924194432dc3c661d3e14a3851f771569e7bd57e3f4caa9a045c92b75c422188d059085b93576070f2a1af68a7d94138c53e  package-data.patch
+"

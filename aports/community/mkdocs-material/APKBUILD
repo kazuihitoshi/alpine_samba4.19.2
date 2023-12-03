@@ -1,0 +1,42 @@
+# Contributor: David Demelier <markand@malikania.fr>
+# Maintainer: David Demelier <markand@malikania.fr>
+pkgname=mkdocs-material
+pkgver=9.1.21
+pkgrel=0
+pkgdesc="Material Design theme for MkDocs"
+url="https://squidfunk.github.io/mkdocs-material"
+arch="noarch"
+license="MIT"
+depends="
+	mkdocs
+	mkdocs-material-extensions
+	py3-jinja2
+	py3-markdown
+	py3-pygments
+	py3-pymdown-extensions
+	python3
+	"
+makedepends="
+	py3-gpep517
+	py3-hatch-nodejs-version
+	py3-hatch-requirements-txt
+	py3-hatchling
+	"
+subpackages="$pkgname-pyc"
+source="$pkgname-$pkgver.tar.gz::https://github.com/squidfunk/mkdocs-material/archive/$pkgver.tar.gz"
+options="!check" # No tests.
+
+build() {
+	gpep517 build-wheel \
+		--wheel-dir .dist \
+		--output-fd 3 3>&1 >&2
+}
+
+package() {
+	python3 -m installer -d "$pkgdir" \
+		.dist/mkdocs*.whl
+}
+
+sha512sums="
+3a89f1312d19cab7b21e5976d7242b4f46894dcb4b2d4fd43d8907160f937d95ba35edb457e490c05c6cb00ba772b1d9a18f45a05b58e24aa4a19999d9b8a6f4  mkdocs-material-9.1.21.tar.gz
+"

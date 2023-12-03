@@ -1,0 +1,46 @@
+# Contributor: Bart Ribbers <bribbers@disroot.org>
+# Maintainer:
+pkgname=py3-telethon
+pkgver=1.28.5
+pkgrel=0
+pkgdesc="Full-featured Telegram client library"
+url="https://docs.telethon.dev/"
+arch="noarch"
+license="MIT"
+depends="
+	py3-pyaes
+	py3-rsa
+	"
+makedepends="
+	py3-gpep517
+	py3-setuptools
+	py3-wheel
+	"
+checkdepends="
+	py3-pytest
+	py3-pytest-asyncio
+	"
+subpackages="$pkgname-pyc"
+source="https://github.com/LonamiWebs/Telethon/archive/v$pkgver/Telethon-v$pkgver.tar.gz"
+builddir="$srcdir/Telethon-$pkgver"
+
+build() {
+	gpep517 build-wheel \
+		--wheel-dir .dist \
+		--output-fd 3 3>&1 >&2
+}
+
+check() {
+	python3 -m venv --clear --without-pip --system-site-packages .testenv
+	.testenv/bin/python3 -m installer .dist/*.whl
+	.testenv/bin/python3 -m pytest -k 'not test_all_methods_present'
+}
+
+package() {
+	python3 -m installer -d "$pkgdir" \
+		.dist/*.whl
+}
+
+sha512sums="
+164c7dd9554c09e7e9f36499975665c54735a4476271fa736114d70d49b8a66f6c33c09be641658334ce2bca5aabeba4659f87de5fedd98b9e2d7de4017ea018  Telethon-v1.28.5.tar.gz
+"

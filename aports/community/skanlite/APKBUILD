@@ -1,0 +1,48 @@
+# Contributor: Bart Ribbers <bribbers@disroot.org>
+# Maintainer: team/kde <bribbers@disroot.org>
+
+# The group tag is just to easily find this APKBUILD by some scripts for automation
+# group=kde-applications
+pkgname=skanlite
+pkgver=23.08.3
+pkgrel=0
+# armhf blocked by extra-cmake-modules
+arch="all !armhf"
+url="https://kde.org/applications/graphics/skanlite"
+pkgdesc="Lite image scanning application"
+license="LicenseRef-KDE-Accepted-GPL"
+makedepends="
+	extra-cmake-modules
+	kcoreaddons5-dev
+	kdoctools5-dev
+	ki18n5-dev
+	kio5-dev
+	kxmlgui5-dev
+	libksane-dev
+	qt5-qtbase-dev
+	samurai
+	"
+checkdepends="xvfb-run"
+_repo_url="https://invent.kde.org/graphics/skanlite.git"
+source="https://download.kde.org/stable/release-service/$pkgver/src/skanlite-$pkgver.tar.xz"
+subpackages="$pkgname-doc $pkgname-lang"
+
+build() {
+	cmake -B build -G Ninja \
+		-DCMAKE_BUILD_TYPE=RelWithDebInfo \
+		-DCMAKE_INSTALL_PREFIX=/usr \
+		-DCMAKE_INSTALL_LIBDIR=lib
+	cmake --build build
+}
+
+check() {
+	ctest --test-dir build --output-on-failure
+}
+
+package() {
+	DESTDIR="$pkgdir" cmake --install build
+}
+
+sha512sums="
+fcf93fb9f74b74ffda3453d884573df07e839be4a44cde3dc133971018e579345983eae5d325bd59f804d25d485fd5f8853092e3cf1989e0d4574398a7e3e50c  skanlite-23.08.3.tar.xz
+"

@@ -1,0 +1,49 @@
+# Contributor: Nick Black <dankamongmen@gmail.com>
+# Maintainer: Luca Weiss <luca@z3ntu.xyz>
+pkgname=capnproto
+pkgver=1.0.1.1
+pkgrel=0
+pkgdesc="Tools for working with the Cap'n Proto format"
+url="https://capnproto.org/"
+arch="all"
+license="MIT"
+depends_dev="libucontext-dev"
+makedepends="$depends_dev cmake linux-headers samurai"
+subpackages="$pkgname-dev"
+source="https://capnproto.org/$pkgname-c++-$pkgver.tar.gz
+	ucontext.patch"
+builddir="$srcdir/$pkgname-c++-$pkgver"
+
+case "$CARCH" in
+	s390x|armhf|armv7) options="!check";; # FAIL: capnp-test
+esac
+
+build() {
+	cmake -B build -G Ninja \
+		-DCMAKE_INSTALL_PREFIX=/usr \
+		-DCMAKE_INSTALL_LIBDIR=lib \
+		-DBUILD_SHARED_LIBS=True \
+		-DCMAKE_BUILD_TYPE=None
+	cmake --build build
+}
+
+check() {
+	CTEST_OUTPUT_ON_FAILURE=TRUE ctest
+}
+
+package() {
+	DESTDIR="$pkgdir" cmake --install build
+}
+
+# We want to move the schema compilers into the dev package.
+# See https://wiki.alpinelinux.org/wiki/APKBUILD_Reference#dev.28.29
+dev() {
+	default_dev
+
+	amove usr/bin
+}
+
+sha512sums="
+5fbd8d96112fdfeda36f6684590fd2fe5571c18dbc96fbf8f195a0e36d2477e75f93a632ad4e4841a1ec5fca1f188594a9dbde5d95fcb12e48f9b5073fe31745  capnproto-c++-1.0.1.1.tar.gz
+d2a3bd6a639356437a86e5e7fb4fe620a78b417cd20afd5b5b6fe672b95bdfa831cfaf176487cbbc2aed6345aa40dd5d7912ed05b3777b2407a0fd5bc89244f0  ucontext.patch
+"

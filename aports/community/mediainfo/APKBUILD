@@ -1,0 +1,84 @@
+# Contributor: Jakub Jirutka <jakub@jirutka.cz>
+# Maintainer: Jakub Jirutka <jakub@jirutka.cz>
+pkgname=mediainfo
+pkgver=23.11
+pkgrel=0
+pkgdesc="Supplies technical and tag information about media files"
+url="https://mediaarea.net/en/MediaInfo"
+arch="all"
+license="BSD-2-Clause"
+makedepends="
+	autoconf
+	automake
+	libmediainfo-dev~=${pkgver%.*}
+	libtool
+	libzen-dev
+	wxwidgets-dev
+	"
+subpackages="$pkgname-gui"
+source="https://mediaarea.net/download/source/mediainfo/$pkgver/mediainfo_$pkgver.tar.xz"
+builddir="$srcdir/MediaInfo"
+_clidir="$builddir/Project/GNU/CLI"
+_guidir="$builddir/Project/GNU/GUI"
+
+prepare() {
+	default_prepare
+
+	rm -Rf "$builddir"/Project/MS*
+
+	cd "$_clidir"
+	sh ./autogen.sh
+	cd "$_guidir"
+	sh ./autogen.sh
+}
+
+build() {
+	export CFLAGS="$CFLAGS -flto=auto"
+	export CXXFLAGS="$CXXFLAGS -flto=auto"
+
+	cd "$_clidir"
+	./configure \
+		--build=$CBUILD \
+		--host=$CHOST \
+		--prefix=/usr \
+		--libdir=/usr/lib \
+		--sysconfdir=/etc \
+		--enable-static=no
+	make
+	cd "$_guidir"
+	./configure \
+		--build=$CBUILD \
+		--host=$CHOST \
+		--prefix=/usr \
+		--libdir=/usr/lib \
+		--sysconfdir=/etc
+	make
+}
+
+check() {
+	cd "$_clidir"
+	./mediainfo --version
+}
+
+package() {
+	pkgdesc="$pkgdesc (CLI)"
+	make -C "$_clidir" DESTDIR="$pkgdir" install
+	make -C "$_guidir" DESTDIR="$pkgdir" install
+
+	cd "$pkgdir"
+	# legacy
+	rm -r usr/share/pixmaps
+	rm -r usr/share/kde4
+}
+
+gui() {
+	pkgdesc="$pkgdesc (GUI)"
+
+	amove \
+		usr/bin/mediainfo-gui \
+		usr/share
+}
+
+sha512sums="
+4b853801c5de981c883a9cc16d5eaedc329b7f055e2bb0e509e96ff727c29095711768b32f7d119748f9002d44c0488bd7e0b161bea89d040d7ce85aa75ac183  mediainfo_23.11.tar.xz
+"

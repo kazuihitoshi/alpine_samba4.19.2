@@ -1,0 +1,33 @@
+# Contributor: omni <omni+alpine@hack.org>
+# Maintainer: omni <omni+alpine@hack.org>
+pkgname=py3-sqlglot
+_pkgname=sqlglot
+pkgver=18.15.1
+pkgrel=0
+pkgdesc="Python SQL Parser and Transpiler"
+url="https://github.com/tobymao/sqlglot"
+arch="noarch"
+license="MIT"
+depends="python3"
+makedepends="py3-gpep517 py3-setuptools_scm py3-wheel"
+options="!check"
+# tests are included in the github release tarball but seem to require
+# additional aports to be added, see requirements.txt
+subpackages="$pkgname-pyc"
+source="https://files.pythonhosted.org/packages/source/s/sqlglot/$_pkgname-$pkgver.tar.gz"
+builddir="$srcdir/$_pkgname-$pkgver"
+
+build() {
+	gpep517 build-wheel \
+		--wheel-dir .dist \
+		--output-fd 3 3>&1 >&2
+}
+
+package() {
+	python3 -m installer -d "$pkgdir" \
+		.dist/*.whl
+}
+
+sha512sums="
+487646147ed2084c54e93326ba8df0225ae26e780e1ed3375f3eb2fc7fc6c82f0a4bf41a1967ce7719df1bd92b09b0fc175cd70659fe692507b6bfc4eafe6791  sqlglot-18.15.1.tar.gz
+"

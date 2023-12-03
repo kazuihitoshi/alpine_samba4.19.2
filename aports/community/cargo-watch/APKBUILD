@@ -1,0 +1,42 @@
+# Contributor: kpcyrd <git@rxv.cc>
+# Maintainer: kpcyrd <git@rxv.cc>
+pkgname=cargo-watch
+pkgver=8.4.1
+pkgrel=0
+pkgdesc="Utility for Cargo to compile projects when sources change"
+url="https://github.com/watchexec/cargo-watch"
+# s390x and riscv64 blocked by cargo
+arch="all !s390x !riscv64"
+license="CC0-1.0"
+makedepends="cargo cargo-auditable"
+subpackages="
+	$pkgname-doc
+	$pkgname-zsh-completion
+	"
+options="net"
+source="$pkgname-$pkgver.tar.gz::https://github.com/watchexec/cargo-watch/archive/v$pkgver.tar.gz"
+
+prepare() {
+	default_prepare
+
+	cargo fetch --target="$CTARGET" --locked
+}
+
+build() {
+	cargo auditable build --release --frozen
+}
+
+check() {
+	PATH="$PWD/target/release:$PATH" cargo test --release --frozen
+}
+
+package() {
+	install -Dm755 target/release/$pkgname -t "$pkgdir"/usr/bin/
+
+	install -Dm644 $pkgname.1 -t "$pkgdir"/usr/share/man/man1/
+	install -Dm644 completions/zsh "$pkgdir"/usr/share/zsh/site-functions/_$pkgname
+}
+
+sha512sums="
+d268837b0604b83f4e825894d7f68fd2b4144ae330443efc013bcb5d52f0803d3b7d375ed3e21d04d95c617440ab62d33ceeecba1fbd9aa917a0ccb753b6d88d  cargo-watch-8.4.1.tar.gz
+"

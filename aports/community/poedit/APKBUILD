@@ -1,0 +1,47 @@
+# Contributor: Rasmus Thomsen <oss@cogitri.dev>
+# Maintainer: Rasmus Thomsen <oss@cogitri.dev>
+pkgname=poedit
+pkgver=3.4
+pkgrel=1
+pkgdesc="cross-platform translations editor"
+url="https://www.poedit.net"
+# s390x: cpprestsdk; nobody would use this there
+arch="all !s390x"
+license="MIT"
+depends="gettext"
+makedepends="
+	boost-dev
+	cpprestsdk-dev
+	enchant2-dev
+	gettext-dev
+	gtk+3.0-dev
+	gtkspell3-dev
+	lucene++-dev
+	pugixml-dev
+	wxwidgets-dev
+	"
+subpackages="$pkgname-lang $pkgname-doc"
+source="https://github.com/vslavik/poedit/releases/download/v$pkgver-oss/poedit-$pkgver.tar.gz"
+
+build() {
+	./configure \
+		--build=$CBUILD \
+		--host=$CHOST \
+		--prefix=/usr \
+		--sysconfdir=/etc \
+		--mandir=/usr/share/man \
+		--localstatedir=/var
+	make
+}
+
+check() {
+	make check
+}
+
+package() {
+	make DESTDIR="$pkgdir" install
+}
+
+sha512sums="
+347d77288b7a91fa901195242e74124a5369c6c4cd4f9581284f17e6f16acfb5b8dff83fe35c2121be7700c40828c88186e5682d9091a7614317b5488bb4faba  poedit-3.4.tar.gz
+"

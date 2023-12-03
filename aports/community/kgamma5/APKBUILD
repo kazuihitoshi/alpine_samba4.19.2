@@ -1,0 +1,50 @@
+# Contributor: Bart Ribbers <bribbers@disroot.org>
+# Maintainer: team/kde <bribbers@disroot.org>
+
+# The group tag is just to easily find this APKBUILD by some scripts for automation
+# group=kde-plasma
+pkgname=kgamma5
+pkgver=5.27.9
+pkgrel=0
+pkgdesc="Adjust your monitor's gamma settings"
+# armhf blocked by extra-cmake-modules
+arch="all !armhf"
+url="https://kde.org/plasma-desktop/"
+license="GPL-2.0-or-later"
+makedepends="
+	extra-cmake-modules
+	kconfig5-dev
+	kconfigwidgets5-dev
+	kdoctools5-dev
+	ki18n5-dev
+	qt5-qtbase-dev
+	samurai
+	"
+
+case "$pkgver" in
+	*.90*) _rel=unstable;;
+	*) _rel=stable;;
+esac
+_repo_url="https://invent.kde.org/plasma/kgamma5.git"
+source="https://download.kde.org/$_rel/plasma/$pkgver/kgamma5-$pkgver.tar.xz"
+subpackages="$pkgname-doc $pkgname-lang"
+
+build() {
+	cmake -B build -G Ninja \
+		-DCMAKE_BUILD_TYPE=RelWithDebInfo \
+		-DCMAKE_INSTALL_PREFIX=/usr \
+		-DCMAKE_INSTALL_LIBDIR=lib
+	cmake --build build
+}
+
+check() {
+	ctest --test-dir build --output-on-failure
+}
+
+package() {
+	DESTDIR="$pkgdir" cmake --install build
+}
+
+sha512sums="
+2caccfe119c3669f3f1e75e6219b4db24c6076a5df1ea0429e719594f7ec41e63877fa30e7e1376ff23c8d2cdd518a89c57621d7a8f331035dfe7cd8aabe213b  kgamma5-5.27.9.tar.xz
+"

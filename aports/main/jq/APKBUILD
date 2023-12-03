@@ -1,0 +1,40 @@
+# Contributor: Johannes Matheis <jomat+alpinebuild@jmt.gr>
+# Maintainer: Patrycja Rosa <alpine@ptrcnull.me>
+pkgname=jq
+pkgver=1.7
+pkgrel=2
+pkgdesc="A lightweight and flexible command-line JSON processor"
+url="https://jqlang.github.io/jq/"
+arch="all"
+license="MIT"
+makedepends="oniguruma-dev"
+subpackages="$pkgname-doc $pkgname-dev"
+source="jq-$pkgver.tar.gz::https://github.com/jqlang/jq/releases/download/jq-$pkgver/jq-$pkgver.tar.gz"
+
+# secfixes:
+#   1.6_rc1-r0:
+#     - CVE-2016-4074
+
+build() {
+	./configure \
+		--build=$CBUILD \
+		--host=$CHOST \
+		--prefix=/usr \
+		--sysconfdir=/etc \
+		--mandir=/usr/share/man \
+		--localstatedir=/var \
+		--disable-docs
+	make
+}
+
+check() {
+	make check
+}
+
+package() {
+	make DESTDIR="$pkgdir" prefix=/usr install
+}
+
+sha512sums="
+4f8a6b0401e6c881dcb97d948fe38871062599a43fff667ede21cf185ec9de33e61878f0a6ea12786d0a632eea592ea0ff860520ba02dbb32f2fa2d2b5db7a0a  jq-1.7.tar.gz
+"

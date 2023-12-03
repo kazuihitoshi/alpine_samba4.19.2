@@ -1,0 +1,35 @@
+# Contributor: Sergiy Stupar <owner@sestolab.pp.ua>
+# Maintainer: Sergiy Stupar <owner@sestolab.pp.ua>
+pkgname=katana
+pkgver=1.0.4
+pkgrel=1
+pkgdesc="Next-generation crawling and spidering framework"
+url="https://github.com/projectdiscovery/katana"
+arch="all"
+license="MIT"
+makedepends="go"
+source="$pkgname-$pkgver.tar.gz::https://github.com/projectdiscovery/katana/archive/v$pkgver.tar.gz"
+
+export GOCACHE="${GOCACHE:-"$srcdir/go-cache"}"
+export GOTMPDIR="${GOTMPDIR:-"$srcdir"}"
+export GOMODCACHE="${GOMODCACHE:-"$srcdir/go"}"
+
+build() {
+	go build \
+		-mod=readonly \
+		-ldflags "-extldflags \"$LDFLAGS\"" \
+		-o "$pkgname" \
+		-v "./cmd/$pkgname/main.go"
+}
+
+check() {
+	go test -v ./...
+}
+
+package() {
+	install -Dm755 "$pkgname" -t "$pkgdir"/usr/bin
+}
+
+sha512sums="
+b0404c478af61b42b493f0d4f3a9584bb18f11689f7d7e6f26fd3e7e20bf4b3f5f6092e8084eead391c363bcdc12ac6ce7c1f6cc66614f8d468985e6eebb7cc6  katana-1.0.4.tar.gz
+"

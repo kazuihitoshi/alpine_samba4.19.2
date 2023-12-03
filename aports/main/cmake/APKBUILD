@@ -1,0 +1,99 @@
+# Contributor: Valery Kartel <valery.kartel@gmail.com>
+# Maintainer: Natanael Copa <ncopa@alpinelinux.org>
+pkgname=cmake
+pkgver=3.27.8
+pkgrel=0
+pkgdesc="Cross-platform, open-source make system"
+url="https://www.cmake.org/"
+arch="all"
+license="BSD-3-Clause"
+makedepends="
+	bzip2-dev
+	expat-dev
+	libarchive-dev
+	libuv-dev
+	linux-headers
+	ncurses-dev
+	nghttp2-dev
+	py3-sphinx
+	rhash-dev
+	samurai
+	xz-dev
+	zlib-dev
+	"
+checkdepends="file"
+subpackages="
+	ccmake
+	$pkgname-doc
+	$pkgname-bash-completion
+	$pkgname-emacs::noarch
+	$pkgname-vim::noarch
+	"
+case $pkgver in
+*.*.*.*) _v=v${pkgver%.*.*};;
+*.*.*) _v=v${pkgver%.*};;
+esac
+source="https://www.cmake.org/files/$_v/cmake-$pkgver.tar.gz
+	pkgconfig-whitespace.patch
+	"
+options="!check"
+
+build() {
+	# jsoncpp/cppdap/curl needs cmake to build so to avoid recursive build
+	# dependency, we use the bundled version.
+	# Do NOT remove --no-system-jsoncpp, --no-system-cppdap or --no-system-curl
+
+	./bootstrap \
+		--prefix=/usr \
+		--mandir=/share/man \
+		--datadir=/share/$pkgname \
+		--docdir=/share/doc/$pkgname \
+		--sphinx-man \
+		--no-system-cppdap \
+		--no-system-curl \
+		--no-system-jsoncpp \
+		--system-bzip2 \
+		--system-expat \
+		--system-libarchive \
+		--system-liblzma \
+		--system-librhash \
+		--system-libuv \
+		--system-nghttp2 \
+		--system-zlib \
+		--generator=Ninja \
+		--parallel="${JOBS:-2}"
+	ninja
+}
+
+check() {
+	CTEST_OUTPUT_ON_FAILURE=TRUE bin/ctest
+}
+
+package() {
+	DESTDIR="$pkgdir" ninja install
+}
+
+ccmake() {
+	pkgdesc="$pkgdesc (ccmake configurator)"
+
+	amove usr/bin/ccmake
+}
+
+emacs() {
+	pkgdesc="$pkgdesc (emacs mode)"
+	install_if="$pkgname=$pkgver-r$pkgrel emacs"
+
+	amove usr/share/emacs
+}
+
+vim() {
+	pkgdesc="$pkgdesc (vim files)"
+	install_if="$pkgname=$pkgver-r$pkgrel vim"
+
+	amove usr/share/vim
+}
+
+sha512sums="
+ca7782caee11d487a21abcd1c00fce03f3172c718c70605568d277d5a8cad95a18f2bf32a52637935afb0db1102f0da92d5a412a7166e3f19be2767d6f316f3d  cmake-3.27.8.tar.gz
+675c27a8ef1445381fdb20da354621f232964484e9806ba17f67b5840f2e132baf51db3007f8aa580bd68ef48ef76c0a10e155bb68890b3cbb821ffab660cd34  pkgconfig-whitespace.patch
+"

@@ -1,0 +1,49 @@
+# Contributor: Jonas <3426-spameier@users.gitlab.alpinelinux.org>
+# Maintainer: Jonas <3426-spameier@users.gitlab.alpinelinux.org>
+pkgname=py3-igraph
+_pyname=python-igraph
+pkgver=0.10.8
+pkgrel=0
+pkgdesc="Python interface for igraph"
+url="https://github.com/igraph/python-igraph"
+# s390x: libigraph-dev
+arch="all !s390x"
+license="GPL-2.0-only"
+depends="py3-texttable"
+depends_dev="$pkgname=$pkgver-r$pkgrel"
+makedepends="
+	libigraph-dev
+	py3-gpep517
+	py3-wheel
+	py3-setuptools
+	python3-dev
+	"
+checkdepends="
+	py3-pillow
+	py3-pytest
+	"
+subpackages="$pkgname-dev $pkgname-pyc"
+source="$pkgname-$pkgver.tar.gz::https://github.com/igraph/python-igraph/archive/refs/tags/$pkgver.tar.gz"
+builddir="$srcdir/$_pyname-$pkgver"
+
+build() {
+	IGRAPH_USE_PKG_CONFIG=yes \
+	gpep517 build-wheel \
+		--wheel-dir .dist \
+		--output-fd 3 3>&1 >&2
+}
+
+check() {
+	python3 -m venv --clear --without-pip --system-site-packages .testenv
+	.testenv/bin/python3 -m installer .dist/*.whl
+	.testenv/bin/python3 -m pytest
+}
+
+package() {
+	python3 -m installer -d "$pkgdir" \
+		.dist/*.whl
+}
+
+sha512sums="
+34423ee321a99d021f5da1a7f69f405d79eab68d40403c71deae99bcc2c476c042dd08c56cf90216b8b4c6e39a5a8a6e0575c1e5f725e4a97557bb2ff5c23335  py3-igraph-0.10.8.tar.gz
+"

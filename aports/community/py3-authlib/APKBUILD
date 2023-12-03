@@ -1,0 +1,35 @@
+# Contributor: Rasmus Thomsen <oss@cogitri.dev>
+# Maintainer:
+pkgname=py3-authlib
+pkgver=1.2.1
+pkgrel=1
+pkgdesc="Python library for building OAuth and OpenID Connect servers"
+url="https://github.com/lepture/authlib"
+arch="noarch"
+license="BSD-3-Clause"
+depends="python3 py3-cryptography"
+makedepends="py3-gpep517 py3-setuptools py3-wheel"
+#checkdepends="py3-django py3-flask-sqlalchemy"
+options="!check" # missing deps: py3-httpx, py3-starlette,py3-pytest-django
+subpackages="$pkgname-pyc"
+source="https://pypi.io/packages/source/A/Authlib/Authlib-$pkgver.tar.gz"
+builddir="$srcdir/Authlib-$pkgver"
+
+build() {
+	gpep517 build-wheel \
+		--wheel-dir .dist \
+		--output-fd 3 3>&1 >&2
+}
+
+check() {
+	python3 setup.py test
+}
+
+package() {
+	python3 -m installer -d "$pkgdir" \
+		.dist/Authlib*.whl
+}
+
+sha512sums="
+916ee851299b637bfee9aae9fc5ac71701f70093fcbe8e99d8ca0e2d7aafde3a3ec32ff2b796ff41fdda3c3d7447307ae7deef8ab18c398fdcd34396b946710b  Authlib-1.2.1.tar.gz
+"

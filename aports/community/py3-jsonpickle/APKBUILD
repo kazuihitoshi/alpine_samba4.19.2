@@ -1,0 +1,45 @@
+# Maintainer: Patrycja Rosa <alpine@ptrcnull.me>
+pkgname=py3-jsonpickle
+pkgver=3.0.2
+pkgrel=0
+pkgdesc="Serializing any arbitrary object graph into JSON"
+url="https://pypi.org/project/jsonpickle/"
+arch="noarch"
+license="BSD-3-Clause"
+depends="python3"
+makedepends="py3-gpep517 py3-setuptools py3-setuptools_scm py3-wheel"
+checkdepends="py3-pytest py3-numpy py3-pandas"
+subpackages="$pkgname-pyc"
+source="https://files.pythonhosted.org/packages/source/j/jsonpickle/jsonpickle-$pkgver.tar.gz
+	pandas2.patch
+	noaddopts.patch
+	"
+builddir="$srcdir/jsonpickle-$pkgver"
+
+replaces="py-jsonpickle" # Backwards compatibility
+provides="py-jsonpickle=$pkgver-r$pkgrel" # Backwards compatibility
+
+build() {
+	gpep517 build-wheel \
+		--wheel-dir .dist \
+		--output-fd 3 3>&1 >&2
+}
+
+check() {
+	python3 -m venv --clear --without-pip --system-site-packages .testenv
+	.testenv/bin/python3 -m installer .dist/*.whl
+	# ecdsa: no gmpy
+	# roundtrip: breaks on 32bit
+	.testenv/bin/python3 -m pytest --deselect tests/ecdsa_test.py -k 'not test_multindex_dataframe_roundtrip'
+}
+
+package() {
+	python3 -m installer -d "$pkgdir" \
+		.dist/*.whl
+}
+
+sha512sums="
+bb871c8982a3012ced11e98c2e2c5930a897d37611b1d9e6fbfef4a80f5eac1a471607018da12aed40fd48bb98bdeaf575aa687f247c372c8da0ce09b0222c0d  jsonpickle-3.0.2.tar.gz
+4a1849e607fb4422641f95c32c0fb7ce108ae1f0291d67c95c9bb39fdce04ebcec7ab7f9053c69064d2d5c59d1e85ca7f043ffe0585337f42b414cdb151cf338  pandas2.patch
+f39146b62acd02e900157a0e541f12882f0024567ee83b5327ddfcf610fe8aada35f563e62aa92fbe504ef79a1ef51705ef22e023c2879eca9f24c8d80c11331  noaddopts.patch
+"

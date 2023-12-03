@@ -1,0 +1,48 @@
+# Contributor: Thomas Kienlen <kommander@laposte.net>
+# Maintainer: Thomas Kienlen <kommander@laposte.net>
+pkgname=ruby-build
+pkgver=20231114
+pkgrel=0
+pkgdesc="Compile and install Ruby"
+url="https://github.com/rbenv/ruby-build"
+arch="noarch"
+license="MIT"
+depends="
+	bash
+	"
+subpackages="
+	$pkgname-doc
+	$pkgname-runtime
+	"
+source="$pkgname-$pkgver.tar.gz::https://github.com/rbenv/ruby-build/archive/v$pkgver.tar.gz"
+options="!check" # No test suite
+install="$pkgname.post-install"
+
+package() {
+	PREFIX="$pkgdir/usr" ./install.sh
+
+	install -Dvm644 LICENSE \
+		-t "$pkgdir"/usr/share/licenses/$pkgname/
+}
+
+runtime() {
+	pkgdesc="ruby-build runtime dependencies"
+
+	depends="
+		autoconf
+		coreutils
+		libffi-dev
+		linux-headers
+		gdbm-dev
+		openssl-dev>3
+		readline-dev
+		yaml-dev
+		zlib-dev
+		"
+
+	mkdir -p "$subpkgdir"
+}
+
+sha512sums="
+d079d5f5e44fc571c1d2d68761c07365927ad6bc4904da726b321e93330ca03c9019b585de1498be9463beb94b5838e381a2d830a89b2db328f8cfdf3b8bd6bf  ruby-build-20231114.tar.gz
+"

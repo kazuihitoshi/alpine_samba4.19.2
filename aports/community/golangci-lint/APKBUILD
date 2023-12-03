@@ -1,0 +1,53 @@
+# Maintainer: Hoang Nguyen <folliekazetani@protonmail.com>
+pkgname=golangci-lint
+pkgver=1.55.2
+pkgrel=0
+pkgdesc="Fast linters runner for Go"
+url="https://golangci-lint.run/"
+arch="all"
+license="GPL-3.0-or-later"
+makedepends="go"
+subpackages="
+	$pkgname-bash-completion
+	$pkgname-zsh-completion
+	$pkgname-fish-completion
+	"
+source="$pkgname-$pkgver.tar.gz::https://github.com/golangci/golangci-lint/archive/refs/tags/v$pkgver.tar.gz"
+
+export GOCACHE="${GOCACHE:-"$srcdir/go-cache"}"
+export GOTMPDIR="${GOTMPDIR:-"$srcdir"}"
+export GOMODCACHE="${GOMODCACHE:-"$srcdir/go"}"
+
+build() {
+	local _goldflags="
+	-X main.version=$pkgver
+	-X main.commit=AlpineLinux
+	-X main.date=$(date -u "+%Y-%m-%dT%TZ" ${SOURCE_DATE_EPOCH:+-d @$SOURCE_DATE_EPOCH})
+	"
+	go build -v -ldflags "$_goldflags" ./cmd/golangci-lint
+
+	for shell in bash fish zsh; do
+		./golangci-lint completion $shell > golangci-lint.$shell
+	done
+}
+
+check() {
+	# Testsuite enforces an old version of Go
+	# shellcheck disable=2046
+	GOLANGCI_LINT_INSTALLED=true go test $(go list ./... | grep -v /test)
+}
+
+package() {
+	install -Dm755 golangci-lint -t "$pkgdir"/usr/bin
+
+	install -Dm644 golangci-lint.bash \
+		"$pkgdir"/usr/share/bash-completion/completions/golangci-lint
+	install -Dm644 golangci-lint.zsh \
+		"$pkgdir"/usr/share/zsh/site-functions/_golangci-lint
+	install -Dm644 golangci-lint.fish \
+		"$pkgdir"/usr/share/fish/vendor_completions.d/golangci-lint.fish
+}
+
+sha512sums="
+286749a6aaa89ae7400894b04fa64490543cbc4703c0d5a9252cfe01fba331e1323828b57d5051bf13dc041b5266a979ed31facba610d0814fce0462f5571718  golangci-lint-1.55.2.tar.gz
+"

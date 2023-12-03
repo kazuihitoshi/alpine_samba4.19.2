@@ -1,0 +1,34 @@
+# Contributor: omni <omni+alpine@hack.org>
+# Maintainer: omni <omni+alpine@hack.org>
+pkgname=podman-tui
+pkgver=0.12.0
+pkgrel=0
+pkgdesc="Terminal user interface for Podman v4"
+url="https://github.com/containers/podman-tui"
+license="Apache-2.0"
+# podman (netavark & aardvark-dns -> rust/cargo)
+arch="all !s390x"
+makedepends="go gpgme-dev linux-headers btrfs-progs-dev lvm2-dev"
+depends="podman"
+options="!check"
+source="$pkgname-$pkgver.tar.gz::https://github.com/containers/podman-tui/archive/v$pkgver.tar.gz"
+
+export GOFLAGS="$GOFLAGS -trimpath -mod=readonly -modcacherw"
+export GOCACHE="${GOCACHE:-"$srcdir/go-cache"}"
+export GOTMPDIR="${GOTMPDIR:-"$srcdir"}"
+export GOMODCACHE="${GOMODCACHE:-"$srcdir/go"}"
+
+build() {
+	# https://github.com/mattn/go-sqlite3/issues/1164
+	export CGO_CFLAGS="$CFLAGS -D_LARGEFILE64_SOURCE"
+
+	go build -v .
+}
+
+package() {
+	install -Dm0755 "$pkgname" -t "$pkgdir"/usr/bin
+}
+
+sha512sums="
+753932fef58746c80752c142aae17ef61b4632af51f8d9bd5aee29246ffc8179f98f4e38c7607a82efd25d0b809e9065a5b537b1a3a823eabae23a87b5b6dd74  podman-tui-0.12.0.tar.gz
+"

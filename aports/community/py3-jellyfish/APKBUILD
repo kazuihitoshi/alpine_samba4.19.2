@@ -1,0 +1,36 @@
+# Contributor: Carlo Landmeter <clandmeter@alpinelinux.org>
+# Maintainer: Carlo Landmeter <clandmeter@alpinelinux.org>
+pkgname=py3-jellyfish
+pkgver=1.0.1
+pkgrel=0
+pkgdesc="Python library for approximate and phonetic string matching"
+url="https://github.com/jamesturk/jellyfish"
+arch="all"
+license="BSD-2-Clause"
+replaces="py-jellyfish" # for backwards compatibility
+provides="py-jellyfish=$pkgver-r$pkgrel" # for backwards compatibility
+makedepends="
+	cargo
+	py3-gpep517
+	py3-maturin
+	python3-dev
+	"
+subpackages="$pkgname-pyc"
+source="https://files.pythonhosted.org/packages/source/j/jellyfish/jellyfish-$pkgver.tar.gz"
+builddir="$srcdir/jellyfish-$pkgver"
+options="net"
+
+build() {
+	gpep517 build-wheel \
+		--wheel-dir .dist \
+		--output-fd 3 3>&1 >&2
+}
+
+package() {
+	python3 -m installer -d "$pkgdir" \
+		.dist/*.whl
+}
+
+sha512sums="
+12cf8ea56c42cd91fdf9199802af6e8f97bb9d6f44fd291c46e9d1a445d39e2eee1fce2677eeb22c9d27453a54e95d5a2c4fae011846ec16178b2c5a588a342e  jellyfish-1.0.1.tar.gz
+"

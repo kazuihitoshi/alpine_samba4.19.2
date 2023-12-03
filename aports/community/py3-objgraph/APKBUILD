@@ -1,0 +1,28 @@
+# Maintainer:
+pkgname=py3-objgraph
+pkgver=3.6.0
+pkgrel=1
+pkgdesc="Visually explore Python object graphs"
+url="https://github.com/mgedmin/objgraph"
+arch="noarch"
+license="MIT"
+makedepends="py3-setuptools"
+subpackages="$pkgname-pyc"
+source="$pkgname-$pkgver.tar.gz::https://github.com/mgedmin/objgraph/archive/refs/tags/$pkgver.tar.gz"
+builddir="$srcdir/objgraph-$pkgver"
+
+build() {
+	python3 setup.py build
+}
+
+check() {
+	python3 -m unittest discover
+}
+
+package() {
+	python3 setup.py install --skip-build --root="$pkgdir"
+}
+
+sha512sums="
+a0f1cea41ef17ab5bf7c5ac635c37ecb1ddb624087a520ab50817c8a5cc56762f95dd7a74bb7d59966e2b66cacbb9eabe48614087f0fa6a520265aac85cedfbc  py3-objgraph-3.6.0.tar.gz
+"

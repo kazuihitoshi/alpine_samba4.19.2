@@ -1,0 +1,32 @@
+# Maintainer: Willow Barraco <contact@willowbarraco.fr>
+pkgname=sxmobar
+pkgver=1.0.3
+pkgrel=0
+pkgdesc="A status bar component manager"
+url="https://git.sr.ht/~stacyharper/sxmobar/"
+arch="x86_64 aarch64 riscv64" # hare
+license="AGPL-3.0-or-later"
+makedepends="hare hare-ev scdoc"
+subpackages="$pkgname-doc"
+source="$pkgname-v$pkgver.tar.gz::https://git.sr.ht/~stacyharper/sxmobar/archive/v$pkgver.tar.gz"
+builddir="$srcdir/$pkgname-v$pkgver"
+
+build() {
+	# Don't use user's global Hare cache
+	export XDG_CACHE_HOME="$srcdir"/hare-cache
+	mkdir -p "$XDG_CACHE_HOME"
+
+	make -j1
+}
+
+check() {
+	make check
+}
+
+package() {
+	make DESTDIR="$pkgdir" PREFIX="/usr" install
+}
+
+sha512sums="
+42205ad4062dba6aee0153182be8681ded97148d049ba181ecccd00eaad2b8387579138ea7ab68ce50fa8ced53cc7b0faacf8d73c7c90fc877acfccefcc9cb17  sxmobar-v1.0.3.tar.gz
+"

@@ -1,0 +1,84 @@
+# Contributor: Sören Tempel <soeren+alpine@soeren-tempel.net>
+# Contributor: Łukasz Jendrysik <scadu@yandex.com>
+# Maintainer: Natanael Copa <ncopa@alpinelinux.org>
+pkgname=sudo
+pkgver=1.9.15_p2
+if [ "${pkgver%_*}" != "$pkgver" ]; then
+	_realver=${pkgver%_*}${pkgver#*_}
+else
+	_realver=$pkgver
+fi
+pkgrel=0
+pkgdesc="Give certain users the ability to run some commands as root"
+url="https://www.sudo.ws/sudo/"
+arch="all"
+license="custom ISC"
+makedepends="zlib-dev"
+subpackages="$pkgname-doc-extra::noarch $pkgname-doc $pkgname-dev"
+source="https://www.sudo.ws/dist/sudo-$_realver.tar.gz"
+options="suid"
+builddir="$srcdir/sudo-$_realver"
+
+provides="sudo-virt"
+provider_priority=100
+replaces="sudo-ldap"
+
+# secfixes:
+#   1.9.12_p2-r0:
+#     - CVE-2023-22809
+#   1.9.5_p2-r0:
+#     - CVE-2021-3156
+#   1.9.5-r0:
+#     - CVE-2021-23239
+#     - CVE-2021-23240
+#   1.8.31-r0:
+#     - CVE-2019-18634
+#   1.8.28-r0:
+#     - CVE-2019-14287
+#   1.8.20_p2-r0:
+#     - CVE-2017-1000368
+
+build() {
+	CFLAGS="$CFLAGS -flto=auto" \
+	./configure \
+		--build=$CBUILD \
+		--host=$CHOST \
+		--prefix=/usr \
+		--libexecdir=/usr/lib \
+		--mandir=/usr/share/man \
+		--disable-nls \
+		--enable-pie \
+		--with-env-editor \
+		--with-mdoc \
+		--without-pam \
+		--without-skey \
+		--with-sendmail=/usr/sbin/sendmail \
+		--with-passprompt="[sudo] password for %p: "
+
+	make
+}
+
+check() {
+	make check
+}
+
+package() {
+	# the sudo's mkinstalldir script miscreates the leading
+	# path components with bad permissions. fix this.
+	install -d -m0755 "$pkgdir"/var "$pkgdir"/var/db
+	make -j1 DESTDIR="$pkgdir" install
+	rm -rf "$pkgdir"/var/run
+
+	# Exactly the same as /etc/sudoers
+	rm "$pkgdir"/etc/sudoers.dist
+}
+
+extra() {
+	pkgdesc="$pkgdesc (examples and news)"
+
+	amove usr/share/doc
+}
+
+sha512sums="
+219fc138fb4850fff30c44a6dab767402172d545a83d31dba4a2a9ce27f8a9fe14f1f24f4e328517f2dd26e84906db5d2be388a9c82e89f5ca59740bb782a608  sudo-1.9.15p2.tar.gz
+"

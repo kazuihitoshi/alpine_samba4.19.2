@@ -1,0 +1,29 @@
+# Maintainer: Willow Barraco <contact@willowbarraco.fr>
+pkgname=hare-cairo
+pkgver=0_git20231112
+_commit=91e7381f29e57f58e4350b8c72b0dced289da364
+pkgrel=0
+pkgdesc="Hare interface to the cairo 2D graphics library"
+url="https://sr.ht/~une/hare-cairo"
+arch="x86_64 aarch64 riscv64" # hare
+license="MPL-1.1"
+makedepends="hare"
+source="
+	$pkgname-$_commit.tar.gz::https://git.sr.ht/~une/hare-cairo/archive/$_commit.tar.gz
+"
+builddir="$srcdir/$pkgname-$_commit"
+
+build() {
+	make -j1 PREFIX=/usr
+}
+
+check() {
+	make check
+}
+
+package() {
+	make DESTDIR="$pkgdir" PREFIX=/usr install
+}
+sha512sums="
+6c29e053552fb2d729c6f59827ac0f5946386a318f6284368a8d592b22db11c42818b2a2b3c4acea5a5dccf29aadb19ddee20e2c54fbf4913648f49ec6b3b317  hare-cairo-91e7381f29e57f58e4350b8c72b0dced289da364.tar.gz
+"

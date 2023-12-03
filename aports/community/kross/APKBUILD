@@ -1,0 +1,53 @@
+# Contributor: Bart Ribbers <bribbers@disroot.org>
+# Maintainer: team/kde <bribbers@disroot.org>
+
+# The group tag is just to easily find this APKBUILD by some scripts for automation
+# group=kde-frameworks
+pkgname=kross
+pkgver=5.112.0
+pkgrel=0
+pkgdesc="Framework for scripting KDE applications"
+# armhf blocked by extra-cmake-modules
+arch="all !armhf"
+url="https://community.kde.org/Frameworks"
+license="LGPL-2.1-or-later"
+depends_dev="
+	kcompletion5-dev
+	kcoreaddons5-dev
+	ki18n5-dev
+	kiconthemes5-dev
+	kio5-dev
+	kparts5-dev
+	kwidgetsaddons5-dev
+	kxmlgui5-dev
+	qt5-qtbase-dev
+	qt5-qttools-dev
+	"
+makedepends="$depends_dev
+	extra-cmake-modules
+	kdoctools5-dev
+	samurai
+	"
+_repo_url="https://invent.kde.org/frameworks/kross.git"
+source="https://download.kde.org/stable/frameworks/${pkgver%.*}/portingAids/kross-$pkgver.tar.xz"
+subpackages="$pkgname-dev $pkgname-doc $pkgname-lang"
+
+build() {
+	cmake -B build -G Ninja \
+		-DCMAKE_BUILD_TYPE=RelWithDebInfo \
+		-DCMAKE_INSTALL_PREFIX=/usr \
+		-DCMAKE_INSTALL_LIBDIR=lib
+	cmake --build build
+}
+
+check() {
+	ctest --test-dir build --output-on-failure
+}
+
+package() {
+	DESTDIR="$pkgdir" cmake --install build
+}
+
+sha512sums="
+13c9fff9c6948bab6cded8415921200e8cf21b851cb0931f240e2bda5c13839f5da34ddb13eedc26dc583cc0ee6bc22254e8041059e2e70ed477365f555251db  kross-5.112.0.tar.xz
+"

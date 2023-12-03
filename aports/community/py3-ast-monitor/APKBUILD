@@ -1,0 +1,50 @@
+# Contributor: Iztok Fister, Jr. <iztok@iztok-jr-fister.eu>
+# Maintainer: Iztok Fister, Jr. <iztok@iztok-jr-fister.eu>
+pkgname=py3-ast-monitor
+pkgver=0.4.2
+pkgrel=3
+pkgdesc="A wearable Raspberry Pi computer for cyclists"
+url="https://github.com/firefly-cpp/AST-Monitor"
+arch="noarch !s390x !riscv64 !armv7 !armhf !ppc64le" # py3-sport-activities-features # py3-pyqt-feedback-flow
+# armv7 py3-pyqt6-webengine -> qt6-qtwebengine
+license="MIT"
+depends="
+	python3
+	py3-geopy
+	py3-matplotlib
+	py3-pyqt-feedback-flow
+	py3-qt6
+	py3-pyqt6-webengine
+	py3-sport-activities-features
+	py3-tcxreader
+	"
+checkdepends="py3-pytest"
+makedepends="py3-gpep517 py3-poetry-core"
+subpackages="$pkgname-doc $pkgname-pyc"
+source="https://github.com/firefly-cpp/AST-Monitor/archive/$pkgver/ast_monitor-$pkgver.tar.gz"
+builddir="$srcdir/AST-Monitor-$pkgver"
+
+build() {
+	gpep517 build-wheel \
+		--wheel-dir .dist \
+		--output-fd 3 3>&1 >&2
+}
+
+check() {
+	python3 -m venv --clear --without-pip --system-site-packages .testenv
+	.testenv/bin/python3 -m installer .dist/*.whl
+	.testenv/bin/python3 -m pytest
+}
+
+package() {
+	python3 -m installer -d "$pkgdir" \
+		.dist/*.whl
+	install -Dm644 docs/preprints/2109-13334.pdf -t "$pkgdir"/usr/share/doc/$pkgname
+	install -Dm644 HARDWARE_CONFIGURATION.md -t "$pkgdir"/usr/share/doc/$pkgname
+	install -Dm644 README.md -t "$pkgdir"/usr/share/doc/$pkgname
+	install -Dm644 CITATION.cff -t "$pkgdir"/usr/share/doc/$pkgname
+}
+
+sha512sums="
+47f0cadf741483f0792288240d689eb9d2fdd8834a67bb9a507fd6035828ae3cbb863a505677c1ad4999d61dce4f8192402eb295758ea98107d1c7284d67cc2d  ast_monitor-0.4.2.tar.gz
+"

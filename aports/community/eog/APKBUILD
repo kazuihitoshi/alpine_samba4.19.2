@@ -1,0 +1,50 @@
+# Contributor: Rasmus Thomsen <oss@cogitri.dev>
+# Maintainer:
+pkgname=eog
+pkgver=44.3
+pkgrel=1
+pkgdesc="Image viewer for GNOME"
+url="https://wiki.gnome.org/Apps/EyeOfGnome"
+# s390x: blocked by exempi-dev
+arch="all !s390x"
+license="GPL-2.0-or-later"
+depends="gsettings-desktop-schemas"
+depends_dev="
+	exempi-dev
+	gnome-desktop-dev
+	gvfs-dev
+	jpeg-dev
+	lcms2-dev
+	libexif-dev
+	libpeas-dev
+	libportal-dev
+	librsvg-dev
+	libxml2-dev
+	"
+makedepends="
+	$depends_dev
+	itstool
+	libhandy1-dev
+	meson
+	"
+subpackages="$pkgname-dev $pkgname-doc $pkgname-lang"
+source="https://download.gnome.org/sources/eog/${pkgver%.*}/eog-$pkgver.tar.xz"
+
+build() {
+	abuild-meson \
+		-Db_lto=true \
+		. output
+	meson compile -C output
+}
+
+check() {
+	meson test --no-rebuild --print-errorlogs -C output
+}
+
+package() {
+	DESTDIR="$pkgdir" meson install --no-rebuild -C output
+}
+
+sha512sums="
+088d8d504e5ad5ca14a5da44ee559b30cb7749d752f7b5c1f3fa111c9d1ba7a97edaff3183e0c6d6ebf3b57b9e90fe37a42305d983ac72058804ab2599e8f0c2  eog-44.3.tar.xz
+"

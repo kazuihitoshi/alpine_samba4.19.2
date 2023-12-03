@@ -1,0 +1,34 @@
+# Contributor: Michał Szmidt <michal.sz@disroot.org>
+# Maintainer: Michał Szmidt <michal.sz@disroot.org>
+
+pkgname=hctl
+pkgver=0.2.4
+pkgrel=0
+pkgdesc="Ultimate tool to manage (transform, merge, validate) hostlists written in rust for pihole/adguard/unbound dns blocker"
+url="https://github.com/michalszmidt/hctl"
+arch="all"
+license="BSD-3-Clause"
+makedepends="openssl-dev cargo cargo-auditable"
+source="$pkgname-$pkgver.tar.gz::https://github.com/michalszmidt/hctl/archive/refs/tags/$pkgver.tar.gz"
+
+prepare() {
+	default_prepare
+
+	cargo fetch --target="$CTARGET" --locked
+}
+
+build() {
+	cargo auditable build -p hctl --frozen --release
+}
+
+check() {
+	cargo test --release --frozen
+}
+
+package() {
+	install -Dm755 target/release/hctl -t "$pkgdir"/usr/bin/
+}
+
+sha512sums="
+4e0fa04a7144857747148dff93fec466c0bb1626ba07a5aabed8121d28f7c4063012936091aa484de1dc53cb428947526cc0ec3810802940112ae20314e903ea  hctl-0.2.4.tar.gz
+"

@@ -1,0 +1,53 @@
+# Contributor: Natanael Copa <ncopa@alpinelinux.org>
+# Maintainer: team/gnome <ablocorrea@hotmail.com>
+pkgname=gnome-bluetooth
+pkgver=42.7
+pkgrel=0
+pkgdesc="The GNOME Bluetooth Subsystem"
+url="https://wiki.gnome.org/Projects/GnomeBluetooth"
+# Fails to build on s390x
+arch="all !s390x"
+license="GPL-2.0-or-later AND LGPL-2.1-or-later"
+depends="
+	bluez>=5
+	obexd-enhanced
+	"
+makedepends="
+	eudev-dev
+	glib-dev
+	gobject-introspection-dev
+	gsound-dev
+	gtk4.0-dev
+	libadwaita-dev
+	libnotify-dev
+	meson
+	upower-dev
+	"
+checkdepends="py3-dbus py3-gobject3 py3-dbusmock"
+subpackages="$pkgname-dev $pkgname-doc $pkgname-lang $pkgname-libs"
+source="https://download.gnome.org/sources/gnome-bluetooth/${pkgver%.*}/gnome-bluetooth-$pkgver.tar.xz
+	61-gnome-bluetooth-rfkill.rules"
+
+if [ "$CARCH" = "armhf" ]; then
+	options="!check"; # tests fail on armhf
+fi
+
+build() {
+	abuild-meson -Db_lto=true . output
+	meson compile -C output
+}
+
+check() {
+	meson test --no-rebuild --print-errorlogs -C output
+}
+
+package() {
+	DESTDIR="$pkgdir" meson install --no-rebuild -C output
+	install -m644 -D "$srcdir/61-gnome-bluetooth-rfkill.rules" \
+		"$pkgdir/lib/udev/rules.d/61-gnome-bluetooth-rfkill.rules"
+}
+
+sha512sums="
+dcbc5f54c2eb9eea29fea91e3c2c60ab3b6bf23effbe79df54dfc91834dda10fef144fb3abf6dc8a4651b5cc18bc666d4ab0574be793d31d199d1514e96c2a59  gnome-bluetooth-42.7.tar.xz
+68ea6502a469d800e92d8984984cfddfa66e7bf8a0252d52a2338843d183680c84aa7ec6c4c7d14a250515b34b71d89364480c809743ba9e7ef30473b8ebb5a8  61-gnome-bluetooth-rfkill.rules
+"

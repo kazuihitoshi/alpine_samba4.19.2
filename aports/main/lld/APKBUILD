@@ -1,0 +1,74 @@
+# Contributor: Eric Molitor <eric@molitor.org>
+# Contributor: Jakub Jirutka <jakub@jirutka.cz>
+# Contributor: Rasmus Thomsen <oss@cogitri.dev>
+# Maintainer: Natanael Copa <ncopa@alpinelinux.org>
+pkgname=lld
+pkgver=17.0.5
+pkgrel=0
+_llvmver=${pkgver%%.*}
+pkgdesc="The LLVM Linker"
+url="https://llvm.org/"
+arch="all"
+license="Apache-2.0"
+depends_dev="$pkgname=$pkgver-r$pkgrel"
+makedepends="
+	clang
+	cmake
+	compiler-rt
+	libedit-dev
+	libxml2-dev
+	llvm$_llvmver-dev
+	llvm$_llvmver-gtest
+	llvm$_llvmver-static
+	llvm$_llvmver-test-utils
+	llvm-libunwind-dev
+	patchelf
+	samurai
+	scudo-malloc
+	zlib-dev
+	"
+checkdepends="gtest-dev bash llvm$_llvmver-test-utils"
+subpackages="$pkgname-dbg $pkgname-libs $pkgname-dev $pkgname-doc"
+source="https://github.com/llvm/llvm-project/releases/download/llvmorg-${pkgver//_/-}/lld-${pkgver//_/}.src.tar.xz
+	https://github.com/llvm/llvm-project/releases/download/llvmorg-${pkgver//_/-}/cmake-${pkgver//_/}.src.tar.xz
+	"
+builddir="$srcdir/$pkgname-${pkgver//_/}.src"
+
+prepare() {
+	default_prepare
+	mv "$srcdir"/cmake-${pkgver//_/}.src "$srcdir"/cmake
+}
+
+build() {
+	CFLAGS="$CFLAGS -O2 -DNDEBUG -g1" \
+	CXXFLAGS="$CXXFLAGS -O2 -DNDEBUG -g1" \
+	CC=clang CXX=clang++ \
+	cmake -B build -G Ninja -Wno-dev \
+		-DCMAKE_BUILD_TYPE=None \
+		-DCMAKE_INSTALL_PREFIX=/usr \
+		-DCMAKE_SKIP_INSTALL_RPATH=ON \
+		-DBUILD_SHARED_LIBS=ON \
+		-DLLVM_INCLUDE_TESTS="$(want_check && echo ON || echo OFF)" \
+		-DLLVM_EXTERNAL_LIT=/usr/bin/lit \
+		-DLLD_BUILT_STANDALONE=ON \
+		-DCMAKE_EXE_LINKER_FLAGS="$LDFLAGS -Wl,-z,stack-size=2097152"
+	cmake --build build
+}
+
+check() {
+	ninja -C build check-lld
+}
+
+package() {
+	DESTDIR="$pkgdir" cmake --install build
+	install -Dm644 "$builddir"/docs/ld.lld.1 -t "$pkgdir"/usr/share/man/man1/
+
+	# we have the scudo allocator available, so link lld to it to
+	# significantly improve performance, especially in LTO contexts
+	patchelf --add-needed libscudo.so "$pkgdir"/usr/bin/lld
+}
+
+sha512sums="
+f33ffabd3c43348fd25f1bf6a7b5b3e99d6d337f9e6e6ad7edb9dd1d2492faeed7e73fb52fad50994b210eca57daf32d8c6635a127fb3b2dcacaef4e0cfffb11  lld-17.0.5.src.tar.xz
+3ef19c40975e18ba38862d0e5cc5db15f269f7705b8a9f37e39467eda0424b56ee0e390f94809972be41513074aa4dac997c668280e94e6d7b1ada088f75d73e  cmake-17.0.5.src.tar.xz
+"

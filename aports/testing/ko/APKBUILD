@@ -1,0 +1,44 @@
+# Maintainer: Ariadne Conill <ariadne@dereferenced.org>
+pkgname=ko
+pkgver=0.15.1
+pkgrel=0
+pkgdesc="Build containers from Go projects"
+url="https://ko.build/"
+arch="all"
+license="Apache-2.0"
+makedepends="go"
+subpackages="
+	$pkgname-bash-completion
+	$pkgname-fish-completion
+	$pkgname-zsh-completion
+	"
+source="https://github.com/ko-build/ko/archive/v$pkgver/ko-$pkgver.tar.gz"
+
+export GOCACHE="${GOCACHE:-"$srcdir/go-cache"}"
+export GOTMPDIR="${GOTMPDIR:-"$srcdir"}"
+export GOMODCACHE="${GOMODCACHE:-"$srcdir/go"}"
+
+build() {
+	go build -v -ldflags "-X github.com/google/ko/pkg/commands.Version=$pkgver"
+
+	for i in bash fish zsh; do
+		./ko completion $i > ko.$i
+	done
+}
+
+check() {
+	# TestNewPublisherCanPublish test tries to connect to the Docker socket
+	go test -skip TestNewPublisherCanPublish ./...
+}
+
+package() {
+	install -Dm755 ko -t "$pkgdir"/usr/bin/
+
+	install -Dm644 ko.bash "$pkgdir"/usr/share/bash-completion/completions/ko
+	install -Dm644 ko.fish "$pkgdir"/usr/share/fish/vendor_completions.d/ko.fish
+	install -Dm644 ko.zsh "$pkgdir"/usr/share/zsh/site-functions/_ko
+}
+
+sha512sums="
+0fac42224a124b2c86125e2a33e01d2903cc0ec268a5b6814daf0259864fa269f9a1e9fc78ac66b19d20480503b9ae204163737c9030ba9fca7d165ee4b69c9f  ko-0.15.1.tar.gz
+"

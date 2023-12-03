@@ -1,0 +1,24 @@
+#!/sbin/openrc-run
+
+description="Jitsi Conference Focus"
+
+pidfile="/var/run/jicofo/jicofo.pid"
+# launcher script below will work on OpenRC also
+command="/usr/lib/jicofo/jicofo.sh"
+command_args=" --host=$JICOFO_HOST --domain=$JICOFO_HOSTNAME --port=$JICOFO_PORT --user_name=$JICOFO_AUTH_USER --user_domain=$JICOFO_AUTH_DOMAIN ${JICOFO_OPTS}"
+command_user="jicofo:jitsi"
+command_background=true
+output_log="$JICOFO_LOGFILE"
+error_log="$JICOFO_LOGFILE"
+
+export JAVA_SYS_PROPS
+
+depend() {
+	need net
+	want jabber-server
+}
+
+start_pre() {
+	checkpath -d -o $command_user -m 770 /var/run/jicofo
+	checkpath -f -m 640 -o $command_user "$JICOFO_LOGFILE"
+}

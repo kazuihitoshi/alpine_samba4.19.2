@@ -1,0 +1,56 @@
+# Contributor: Bart Ribbers <bribbers@disroot.org>
+# Maintainer: team/kde <bribbers@disroot.org>
+
+# The group tag is just to easily find this APKBUILD by some scripts for automation
+# group=kde-plasma
+pkgname=plasma-thunderbolt
+pkgver=5.27.9
+pkgrel=0
+# armhf blocked by qt5-qtdeclarative
+arch="all !armhf"
+url="https://kde.org/plasma-desktop/"
+pkgdesc="Plasma integration for controlling Thunderbolt devices"
+license="GPL-2.0-only OR GPL-3.0-only"
+depends="bolt"
+makedepends="
+	extra-cmake-modules
+	kcmutils5-dev
+	kcoreaddons5-dev
+	kdbusaddons5-dev
+	kdeclarative5-dev
+	ki18n5-dev
+	knotifications5-dev
+	qt5-qtbase-dev
+	qt5-qtdeclarative-dev
+	samurai
+	"
+checkdepends="xvfb-run"
+
+case "$pkgver" in
+	*.90*) _rel=unstable;;
+	*) _rel=stable;;
+esac
+_repo_url="https://invent.kde.org/plasma/plasma-thunderbolt.git"
+source="https://download.kde.org/$_rel/plasma/$pkgver/plasma-thunderbolt-$pkgver.tar.xz"
+subpackages="$pkgname-lang"
+options="!check" # Requires running dbus server
+
+build() {
+	cmake -B build -G Ninja \
+		-DCMAKE_BUILD_TYPE=RelWithDebInfo \
+		-DCMAKE_INSTALL_PREFIX=/usr \
+		-DCMAKE_INSTALL_LIBDIR=lib
+	cmake --build build
+}
+
+check() {
+	xvfb-run ctest --test-dir build --output-on-failure
+}
+
+package() {
+	DESTDIR="$pkgdir" cmake --install build
+}
+
+sha512sums="
+3ab445eb660f9b882186ec8267f6dc678f703ad1ebf3bb063759eb29092f9f650bcfc0a2feac3724c877b03be5439ea818f48ded0af272f15606526683155dd3  plasma-thunderbolt-5.27.9.tar.xz
+"

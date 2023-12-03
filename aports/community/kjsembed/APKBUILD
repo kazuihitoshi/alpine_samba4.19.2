@@ -1,0 +1,46 @@
+# Contributor: Bart Ribbers <bribbers@disroot.org>
+# Maintainer: team/kde <bribbers@disroot.org>
+
+# The group tag is just to easily find this APKBUILD by some scripts for automation
+# group=kde-frameworks
+pkgname=kjsembed
+pkgver=5.112.0
+pkgrel=0
+pkgdesc="JavaScript bindings for QObject"
+arch="all !armhf" # armhf blocked by extra-cmake-modules
+url="https://community.kde.org/Frameworks"
+license="LGPL-2.1-or-later"
+depends_dev="
+	ki18n5-dev
+	kjs-dev
+	qt5-qtsvg-dev
+	"
+makedepends="$depends_dev
+	extra-cmake-modules
+	kdoctools5-dev
+	qt5-qttools-dev
+	samurai
+	"
+_repo_url="https://invent.kde.org/frameworks/kjsembed.git"
+source="https://download.kde.org/stable/frameworks/${pkgver%.*}/portingAids/kjsembed-$pkgver.tar.xz"
+subpackages="$pkgname-dev $pkgname-doc $pkgname-lang"
+
+build() {
+	cmake -B build -G Ninja \
+		-DCMAKE_BUILD_TYPE=RelWithDebInfo \
+		-DCMAKE_INSTALL_PREFIX=/usr \
+		-DCMAKE_INSTALL_LIBDIR=lib
+	cmake --build build
+}
+
+check() {
+	ctest --test-dir build --output-on-failure
+}
+
+package() {
+	DESTDIR="$pkgdir" cmake --install build
+}
+
+sha512sums="
+8f66765a4313c5c1c0d9a8676bcb7be782b584e3f684828840aed11d5a7c2b92c9da1b735fdca6cda133a2e287ac9c10332eb23bc0d096b892ebf0c1539758af  kjsembed-5.112.0.tar.xz
+"

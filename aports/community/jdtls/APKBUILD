@@ -1,0 +1,37 @@
+# Contributor: Krassy Boykinov <kboykinov@teamcentrixx.com>
+# Maintainer: Krassy Boykinov <kboykinov@teamcentrixx.com>
+pkgname=jdtls
+pkgver=1.29.0
+pkgrel=0
+pkgdesc="Eclipse Java language server"
+url="https://github.com/eclipse/eclipse.jdt.ls"
+arch="aarch64 x86_64"
+license="EPL-2.0"
+depends="java-jre-headless python3"
+makedepends="maven"
+source="$pkgname-$pkgver.tar.gz::https://github.com/eclipse/eclipse.jdt.ls/archive/refs/tags/v$pkgver.tar.gz"
+builddir="$srcdir/eclipse.jdt.ls-$pkgver"
+options="!check" # runs in build
+
+build() {
+	mvn -B package
+}
+
+package() {
+	cd org.eclipse.jdt.ls.product/target/repository
+
+	mkdir -p "$pkgdir"/usr/share/jdtls "$pkgdir"/usr/bin
+	cp -a \
+		config_linux \
+		config_ss_linux \
+		features \
+		plugins \
+		bin \
+		"$pkgdir"/usr/share/jdtls/
+
+	ln -sfv ../share/jdtls/bin/jdtls "$pkgdir"/usr/bin/jdtls
+}
+
+sha512sums="
+c36f08801853fc8ba36c08545ed58e789fc1c856b5ec0832ed8bf980198cc062c63bb0d69feb6ac96c3a592579265942feba39ac0cc4f70efdb4f61e900775c1  jdtls-1.29.0.tar.gz
+"

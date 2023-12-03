@@ -1,0 +1,51 @@
+# Contributor: Adam Bruce <adam@adambruce.net>
+# Maintainer: Duncan Bellamy <dunk@denkimushi.com>
+pkgname=oci-cli
+pkgver=3.36.2
+pkgrel=1
+pkgdesc="Oracle Cloud Infrastructure CLI"
+url="https://docs.oracle.com/en-us/iaas/Content/API/Concepts/cliconcepts.htm"
+arch="noarch"
+license="UPL-1.0 OR Apache-2.0"
+depends="
+	python3
+	py3-arrow
+	py3-certifi
+	py3-click
+	py3-cryptography
+	py3-dateutil
+	py3-jmespath
+	py3-oci
+	py3-openssl
+	py3-prompt_toolkit
+	py3-setuptools
+	py3-six
+	py3-terminaltables
+	py3-tz
+	py3-yaml
+	"
+makedepends="
+	py3-gpep517
+	py3-setuptools
+	py3-wheel
+	"
+subpackages="$pkgname-pyc"
+source="$pkgname-$pkgver.tar.gz::https://github.com/oracle/oci-cli/archive/refs/tags/v$pkgver.tar.gz"
+options="!check" # Cannot test as OCI resource identifiers are required as environment variables
+
+build() {
+	gpep517 build-wheel \
+		--wheel-dir .dist \
+		--output-fd 3 3>&1 >&2
+}
+
+package() {
+	python3 -m installer -d "$pkgdir" \
+		.dist/*.whl
+
+	find "$pkgdir"/usr/lib/python* -type d -name "tests" -exec rm -r {} \+
+}
+
+sha512sums="
+4b41ead5499cb04eaeedf7f8402404c8650e1390aa155c1af6aeb6ccf1f818e946491db18d451d011bad5fe31259f0c0ba5489208566cda3156e144ec27fa82a  oci-cli-3.36.2.tar.gz
+"

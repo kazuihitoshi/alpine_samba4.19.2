@@ -1,0 +1,60 @@
+# Contributor: Patrycja Rosa <alpine@ptrcnull.me>
+# Maintainer: Patrycja Rosa <alpine@ptrcnull.me>
+pkgname=pdm
+pkgver=2.10.3
+pkgrel=0
+pkgdesc="Modern Python package and dependency manager"
+url="https://pdm.fming.dev/"
+arch="noarch"
+license="MIT"
+depends="
+	py3-blinker
+	py3-cachecontrol
+	py3-certifi
+	py3-dotenv
+	py3-findpython
+	py3-installer
+	py3-packaging
+	py3-platformdirs
+	py3-pyproject-hooks
+	py3-requests-toolbelt
+	py3-resolvelib
+	py3-rich
+	py3-shellingham
+	py3-tomlkit
+	py3-truststore
+	py3-unearth
+	py3-virtualenv
+	"
+makedepends="py3-pdm-backend py3-gpep517 py3-installer"
+checkdepends="
+	bash
+	py3-pytest
+	py3-pytest-httpserver
+	py3-pytest-mock
+	py3-pytest-rerunfailures
+	"
+subpackages="$pkgname-pyc"
+source="https://github.com/pdm-project/pdm/archive/$pkgver/pdm-$pkgver.tar.gz"
+
+build() {
+	export PDM_BUILD_SCM_VERSION=$pkgver
+	gpep517 build-wheel \
+		--wheel-dir .dist \
+		--output-fd 3 3>&1 >&2
+}
+
+check() {
+	python3 -m venv --clear --without-pip --system-site-packages .testenv
+	.testenv/bin/python3 -m installer .dist/*.whl
+	.testenv/bin/python3 -m pytest -k 'not test_use_wrapper_python'
+}
+
+package() {
+	python3 -m installer -d "$pkgdir" \
+		.dist/*.whl
+}
+
+sha512sums="
+99b989e0936e65aa3f31a6f8ea4e69e463fa831b5965332cd1dc4c325416fc913f06d4a3319b6b8234f3565c168265b04b6ba4a076934f17f0532801a8e0b32a  pdm-2.10.3.tar.gz
+"

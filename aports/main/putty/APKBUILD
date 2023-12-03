@@ -1,0 +1,42 @@
+# Maintainer: Jeff Bilyk <jbilyk@alpinelinux.org>
+pkgname=putty
+pkgver=0.79
+pkgrel=0
+pkgdesc="SSH and telnet client"
+url="https://www.chiark.greenend.org.uk/~sgtatham/putty/"
+arch="all"
+license="MIT"
+depends="ncurses-terminfo-base"
+makedepends="cmake gtk+3.0-dev linux-headers perl samurai"
+subpackages="$pkgname-doc"
+source="https://the.earth.li/~sgtatham/putty/$pkgver/putty-$pkgver.tar.gz"
+options="!check" # no test suite
+
+# secfixes:
+#   0.76-r0:
+#     - CVE-2021-36367
+#   0.74-r0:
+#     - CVE-2020-14002
+#   0.73-r0:
+#     - CVE-2019-17068
+#     - CVE-2019-17069
+#   0.71-r0:
+#     - CVE-2019-9894
+#     - CVE-2019-9895
+#     - CVE-2019-9897
+#     - CVE-2019-9898
+
+build() {
+	cmake -B build -G Ninja \
+		-DCMAKE_INSTALL_PREFIX=/usr \
+		-DCMAKE_BUILD_TYPE=None
+	cmake --build build
+}
+
+package() {
+	DESTDIR="$pkgdir" cmake --install build
+}
+
+sha512sums="
+4f10f870b229c89e928921d3b350955ce1c1170a062e7943d9cc8dbd83389d82a9b844623541605f0db5a429d545c2d188bf8e384c6515466fae69b216120983  putty-0.79.tar.gz
+"

@@ -1,0 +1,106 @@
+# Contributor: Bart Ribbers <bribbers@disroot.org>
+# Maintainer: Luca Weiss <luca@z3ntu.xyz>
+pkgname=mir
+pkgver=2.16.0
+pkgrel=0
+pkgdesc="Mir Display Server"
+url="https://mir-server.io"
+arch="all"
+license="GPL-2.0-or-later AND LGPL-2.0-or-later"
+depends="
+	ttf-freefont
+	xkeyboard-config
+	"
+depends_dev="
+	boost-dev
+	capnproto-dev
+	eudev-dev
+	freetype-dev
+	gflags-dev
+	glib-dev
+	glm-dev
+	glog-dev
+	libepoxy-dev
+	libevdev-dev
+	libinput-dev
+	libxcursor-dev
+	libxkbcommon-dev
+	libxml++-2.6-dev
+	lttng-ust-dev
+	mesa-dev
+	nettle-dev
+	protobuf-dev
+	umockdev-dev
+	wayland-dev
+	yaml-cpp-dev
+	"
+makedepends="
+	$depends_dev
+	cmake
+	gmock
+	gtest-dev
+	lttng-ust-tools
+	py3-pillow
+	samurai
+	wlcs-dev
+	"
+checkdepends="
+	bash
+	grep
+	wlcs
+	"
+source="https://github.com/MirServer/mir/releases/download/v$pkgver/mir-$pkgver.tar.xz"
+subpackages="$pkgname-dev $pkgname-demos $pkgname-test-tools:test_tools"
+options="!check" # some tests fail/hang currently, to be debugged
+
+build() {
+	cmake -B build -G Ninja \
+		-DCMAKE_INSTALL_PREFIX=/usr \
+		-DCMAKE_INSTALL_LIBDIR=lib \
+		-DBUILD_SHARED_LIBS=ON \
+		-DCMAKE_BUILD_TYPE=None \
+		-DMIR_FATAL_COMPILE_WARNINGS=OFF \
+		-DMIR_ENABLE_WLCS_TESTS=OFF \
+		-DMIR_USE_LD=ld
+	cmake --build build
+}
+
+check() {
+	XDG_RUNTIME_DIR=/tmp ctest --test-dir build --output-on-failure
+}
+
+package() {
+	DESTDIR="$pkgdir" cmake --install build
+}
+
+dev() {
+	default_dev
+	amove usr/bin/mir_wayland_generator
+}
+
+demos() {
+	pkgdesc="$pkgdesc - demonstration programs"
+	amove usr/bin/miral-shell
+	amove usr/bin/miral-kiosk
+	amove usr/bin/miral-app
+	amove usr/bin/miral-terminal
+	amove usr/bin/miral-system-compositor
+	amove usr/share/applications/miral-shell.desktop
+	amove usr/share/icons/hicolor/scalable/apps/ubuntu-logo.svg
+}
+
+test_tools() {
+	pkgdesc="$pkgdesc - stress tests and other test tools"
+	amove usr/bin/mir_performance_tests
+	amove usr/bin/mir-smoke-test-runner
+	amove usr/bin/mir_platform_graphics_test_harness
+	amove usr/lib/mir/tools/libmirserverlttng.so
+	amove usr/bin/mir_demo_client_*
+	amove usr/bin/mir_demo_server
+	amove usr/lib/mir/server-platform/graphics-dummy.so
+	amove usr/lib/mir/server-platform/input-stub.so
+}
+
+sha512sums="
+bd6576d6bed705249e8ada65f53975bd80c4e43a30f574a7f8695f2330cf346ac8dd5714bb03d31d603fc5ee4076190e93a7250f77546369176d208e2604afd0  mir-2.16.0.tar.xz
+"

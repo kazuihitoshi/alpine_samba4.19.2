@@ -1,0 +1,44 @@
+# Maintainer: Hugo Osvaldo Barrera <hugo@whynothugo.nl>
+pkgname=py3-lsp-mypy
+_pypi_name=pylsp-mypy
+pkgver=0.6.7
+pkgrel=0
+pkgdesc="MyPy plugin for the Python LSP Server"
+url="https://github.com/python-lsp/pylsp-mypy"
+# armhf, s390x: no py3-lsp-server
+arch="noarch !armhf !s390x"
+license="MIT"
+depends="
+	py3-lsp-server
+	py3-mypy
+	"
+makedepends="
+	py3-gpep517
+	py3-installer
+	py3-wheel
+	"
+checkdepends="py3-pytest"
+subpackages="$pkgname-pyc"
+source="https://files.pythonhosted.org/packages/source/${_pypi_name:0:1}/$_pypi_name/$_pypi_name-$pkgver.tar.gz"
+builddir="$srcdir"/$_pypi_name-$pkgver
+
+build() {
+	gpep517 build-wheel \
+		--wheel-dir .dist \
+		--output-fd 3 3>&1 >&2
+}
+
+check() {
+	python3 -m venv --clear --without-pip --system-site-packages .testenv
+	.testenv/bin/python3 -m installer .dist/*.whl
+	.testenv/bin/python3 -m pytest
+}
+
+package() {
+	python3 -m installer -d "$pkgdir" \
+		.dist/*.whl
+}
+
+sha512sums="
+263d1ab6d1f1a560f399b2d5c16e38620b18268cde3b99ef597de14f143760b198cb8b8b14efb6d72cb094bdd054320a5c62c533f1591f98e57cacd7da9f194d  pylsp-mypy-0.6.7.tar.gz
+"

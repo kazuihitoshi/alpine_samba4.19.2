@@ -1,0 +1,35 @@
+# Contributor: Fabian Affolter <fabian@affolter-engineering.ch>
+# Maintainer: Fabian Affolter <fabian@affolter-engineering.ch>
+pkgname=py3-mock
+_pkgname=mock
+pkgver=5.1.0
+pkgrel=0
+pkgdesc="Python3 Mocking and Patching Library for Testing"
+url="https://github.com/testing-cabal/mock"
+arch="noarch"
+license="BSD-2-Clause"
+makedepends="py3-setuptools py3-pbr"
+subpackages="$pkgname-pyc"
+source="https://files.pythonhosted.org/packages/source/m/mock/mock-$pkgver.tar.gz"
+builddir="$srcdir/$_pkgname-$pkgver"
+checkdepends="py3-pytest"
+
+replaces="py-mock" # Backwards compatibility
+provides="py-mock=$pkgver-r$pkgrel" # Backwards compatibility
+
+build() {
+	python3 setup.py build
+}
+
+package() {
+	python3 setup.py install --skip-build --root="$pkgdir"
+}
+
+check() {
+	# The skipped test checks internal Python unittest behavior and fails
+	python3 -m pytest -k "not test_bool_not_called"
+}
+
+sha512sums="
+26b7350fddf2eca82b6dfaafc58cacbd4031fd787b1afc463ee13eff778846941120fd89755e4783bfad389f01cfbdd64f2feab5a12ac2bd4ca6407c0f2e973c  mock-5.1.0.tar.gz
+"

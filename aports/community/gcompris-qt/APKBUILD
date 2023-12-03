@@ -1,0 +1,46 @@
+# Contributor: Thomas Kienlen <kommander@laposte.net>
+# Maintainer: Thomas Kienlen <kommander@laposte.net>
+pkgname=gcompris-qt
+pkgver=3.3
+pkgrel=0
+pkgdesc="Educational software suite comprising of numerous activities for children aged 2 to 10"
+url="https://gcompris.net"
+# armhf blocked by extra-cmake-modules
+arch="all !armhf"
+license="GPL-3.0-or-later"
+depends="
+	qt5-qtquickcontrols2
+	qt5-qtsvg
+	"
+makedepends="
+	extra-cmake-modules
+	kdoctools5
+	qt5-qtcharts-dev
+	qt5-qtdeclarative-dev
+	qt5-qtmultimedia-dev
+	qt5-qtquickcontrols2-dev
+	qt5-qtsensors-dev
+	qt5-qtsvg-dev
+	qt5-qttools
+	qt5-qttools-dev
+	qt5-qtxmlpatterns-dev
+	samurai
+	"
+source="https://download.kde.org/stable/gcompris/qt/src/gcompris-qt-$pkgver.tar.xz"
+options="!check" # No test suite
+
+build() {
+	cmake -B build -G Ninja \
+		-DCMAKE_INSTALL_PREFIX=/usr \
+		-DCMAKE_BUILD_TYPE=None \
+		-DQML_BOX2D_LIBRARY=/usr/lib/qt/qml/Box2D.2.0
+	cmake --build build
+}
+
+package() {
+	DESTDIR="$pkgdir" cmake --install build
+}
+
+sha512sums="
+e58972cc3ac61bf0a4b8244765957a58a222bad97ce3fded7fcebf270f86df8dbc064991937f4f610dc7b8296582412acf49d3acc59b4c5b2c27e2a263e2f464  gcompris-qt-3.3.tar.xz
+"

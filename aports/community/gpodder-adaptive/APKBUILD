@@ -1,0 +1,43 @@
+# Maintainer: Oliver Smith <ollieparanoid@postmarketos.org>
+# Contributor: Johannes Marbach <n0-0ne+gitlab@mailbox.org>
+pkgname=gpodder-adaptive
+pkgver=3.11.3
+_plusver=1
+pkgrel=0
+pkgdesc="Podcast aggregator (adaptive version)"
+url="https://github.com/gpodder/gpodder/tree/adaptive"
+arch="all !s390x !riscv64" # blocked by adwaita-icon-theme
+license="GPL-3.0-or-later"
+depends="
+	adwaita-icon-theme
+	libhandy1
+	py3-cairo
+	py3-dbus
+	py3-gobject3
+	py3-html5lib
+	py3-mygpoclient
+	py3-podcastparser
+	py3-requests
+	python3
+	xdg-utils
+"
+makedepends="py3-setuptools intltool help2man"
+checkdepends="py3-pytest py3-pytest-httpserver py3-pytest-cov py3-minimock desktop-file-utils"
+subpackages="$pkgname-doc $pkgname-lang $pkgname-pyc"
+source="gpodder-adaptive-$pkgver+$_plusver.tar.gz::https://github.com/gpodder/gpodder/archive/refs/tags/adaptive/$pkgver+$_plusver.tar.gz"
+builddir="$srcdir/gpodder-adaptive-$pkgver-$_plusver"
+
+check() {
+	make unittest
+}
+
+package() {
+	make install PREFIX=/usr DESTDIR=$pkgdir
+
+	touch no-update-check
+	install -Dm644 no-update-check -t "$pkgdir"/usr/share/gpodder
+}
+
+sha512sums="
+511f98c64faa229c9995cb0282b70620a656af36ecb8a5e4689b07a48170d896773f9fa65397265bc34531840fcb81d8ea0498e9afd1ee7e58c1ff8b1b3cb80e  gpodder-adaptive-3.11.3+1.tar.gz
+"

@@ -1,0 +1,48 @@
+# Contributor: Bart Ribbers <bribbers@disroot.org>
+# Maintainer: team/kde <bribbers@disroot.org>
+
+# The group tag is just to easily find this APKBUILD by some scripts for automation
+# group=kde-applications
+pkgname=kapptemplate
+pkgver=23.08.3
+pkgrel=0
+# armhf blocked by extra-cmake-modules
+arch="all !armhf"
+url="https://kde.org/applications/development/org.kde.kapptemplate"
+pkgdesc="Factory for the easy creation of KDE/Qt components and programs"
+license="GPL-2.0-or-later AND GFDL-1.2-only"
+makedepends="
+	extra-cmake-modules
+	karchive5-dev
+	kcompletion5-dev
+	kconfigwidgets5-dev
+	kcoreaddons5-dev
+	kdoctools5-dev
+	ki18n5-dev
+	kio5-dev
+	qt5-qtbase-dev
+	samurai
+	"
+_repo_url="https://invent.kde.org/sdk/kapptemplate.git"
+source="https://download.kde.org/stable/release-service/$pkgver/src/kapptemplate-$pkgver.tar.xz"
+subpackages="$pkgname-doc $pkgname-lang"
+
+build() {
+	cmake -B build -G Ninja \
+		-DCMAKE_BUILD_TYPE=RelWithDebInfo \
+		-DCMAKE_INSTALL_PREFIX=/usr \
+		-DCMAKE_INSTALL_LIBDIR=lib
+	cmake --build build
+}
+
+check() {
+	ctest --test-dir build --output-on-failure
+}
+
+package() {
+	DESTDIR="$pkgdir" cmake --install build
+}
+
+sha512sums="
+e264000591a18f0b3e1b39b2892a058f445f44597a27a68a6637be85261700830fc81066d99c2102ed11208dac615b3f6484bedffd701fccd7f2442356b8d97a  kapptemplate-23.08.3.tar.xz
+"

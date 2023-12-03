@@ -1,0 +1,71 @@
+# Contributor: Sören Tempel <soeren+alpine@soeren-tempel.net>
+# Contributor: Carlo Landmeter <clandmeter@alpinelinux.org>
+# Maintainer: Francesco Colista <fcolista@alpinelinux.org>
+pkgname=mkvtoolnix
+pkgver=80.0
+pkgrel=0
+pkgdesc="Set of tools to create, edit and inspect Matroska files"
+url="https://mkvtoolnix.download/index.html"
+# riscv64 blocked by fatal error: boost/core/use_default.hpp: No such file or directory
+arch="all !riscv64"
+license="GPL-2.0-only"
+makedepends="
+	boost-dev
+	cmark-dev
+	docbook-xsl
+	file-dev
+	flac-dev
+	fmt-dev
+	gmp-dev
+	gtest-dev
+	libmatroska-dev
+	libogg-dev
+	libvorbis-dev
+	nlohmann-json
+	pcre2-dev
+	pugixml-dev
+	qt6-qtbase-dev
+	qt6-qtmultimedia-dev
+	qt6-qtsvg
+	ruby
+	ruby-rake
+	zlib-dev
+	"
+subpackages="$pkgname-doc $pkgname-gui"
+source="https://mkvtoolnix.download/sources/mkvtoolnix-$pkgver.tar.xz"
+
+build() {
+	export CFLAGS="$CFLAGS -flto=auto"
+	export CXXFLAGS="$CXXFLAGS -flto=auto"
+	./configure \
+		--build=$CBUILD \
+		--host=$CHOST \
+		--prefix=/usr \
+		--sysconfdir=/etc \
+		--mandir=/usr/share/man \
+		--localstatedir=/var \
+		--without-gettext \
+		--disable-update-check
+	rake V=1 -j$JOBS
+}
+
+check() {
+	rake V=1 -j$JOBS tests:unit
+	rake V=1 -j$JOBS tests:run_unit
+}
+
+package() {
+	rake DESTDIR="$pkgdir" install
+}
+
+gui() {
+	pkgdesc="$pkgdesc (GUI)"
+	depends="$pkgname qt6-qtsvg"
+
+	amove usr/bin/mkvtoolnix-gui
+	amove usr/share
+}
+
+sha512sums="
+066c10a9112ca0cdb59567235aae70e94ccab25b0e2d6156f4ba1090e102614b07c37eb0116a9ee540b2ed8f4b9d58a699f553b974a3f2636c65241915b3b6bc  mkvtoolnix-80.0.tar.xz
+"

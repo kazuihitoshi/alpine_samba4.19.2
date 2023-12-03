@@ -1,0 +1,45 @@
+# Contributor: ScrumpyJack <scrumpyjack@st.ilet.to>
+# Maintainer: ScrumpyJack <scrumpyjack@st.ilet.to>
+pkgname=geeqie
+pkgver=2.1
+pkgrel=0
+pkgdesc="Gtk+ based image viewer and organiser"
+url="http://www.geeqie.org/"
+arch="all"
+license="GPL-2.0-only"
+makedepends="
+	doxygen
+	exiv2-dev
+	graphviz-dev
+	gtk+3.0-dev
+	lcms2-dev
+	libarchive-dev
+	lua5.3-dev
+	meson
+	xxd
+	"
+subpackages="$pkgname-doc $pkgname-lang"
+source="https://github.com/BestImageViewer/geeqie/releases/download/v$pkgver/geeqie-$pkgver.tar.xz
+	geeqie-exiv2-0.28-3.patch
+	geeqie-exiv2-0.28-4.patch
+	lua.patch
+	"
+options="!check" # no tests
+
+build() {
+	abuild-meson \
+		-Db_lto=true \
+		. output
+	meson compile -C output
+}
+
+package() {
+	DESTDIR="$pkgdir" meson install --no-rebuild -C output
+}
+
+sha512sums="
+1812234d349536626433bbb7670cd45ef5ce328bf58f603af8eb4a01f7d3db2557d5a812714b12a9b49559aa1fe1c186ceddf2f632c2b303d64d36ad746a2d2f  geeqie-2.1.tar.xz
+7cc8e47187605473efa3b42464838bd23a89303a11c89f75a4c98c1950bc6b0ee00d300342691313ed58f5369843f1b60fa700a3572280665c572bf871987af6  geeqie-exiv2-0.28-3.patch
+c4687a9887ab0b0e415e6c1e28dd0a72a2a9dac024829d50c8a88897bd4606fbdaffe22d35dfd7d0b2998d3452a2b9886f0ec8664bcbc085cbb147a840433b11  geeqie-exiv2-0.28-4.patch
+cccc17e6ea0ca6009466fee5b957ec87eded327e866c4bdbc4baa808fe2bea21cca8792be6845d6b4c8fcd3935f785b11dab493c27ec7c35a60c2c789f0533c2  lua.patch
+"

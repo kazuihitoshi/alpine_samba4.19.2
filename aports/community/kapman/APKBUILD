@@ -1,0 +1,53 @@
+# Contributor: Bart Ribbers <bribbers@disroot.org>
+# Maintainer: team/kde <bribbers@disroot.org>
+
+# The group tag is just to easily find this APKBUILD by some scripts for automation
+# group=kde-applications
+pkgname=kapman
+pkgver=23.08.3
+pkgrel=0
+# armhf blocked by extra-cmake-modules
+arch="all !armhf"
+url="https://kde.org/applications/games/org.kde.kapman"
+pkgdesc="A clone of the well known game Pac-Man"
+license="GPL-2.0-or-later AND GFDL-1.2-only"
+makedepends="
+	extra-cmake-modules
+	kconfig5-dev
+	kconfig5-dev
+	kconfigwidgets5-dev
+	kcoreaddons5-dev
+	kcrash5-dev
+	kdbusaddons5-dev
+	kdoctools5-dev
+	ki18n5-dev
+	kxmlgui5-dev
+	libkdegames-dev
+	qt5-qtbase-dev
+	qt5-qtsvg-dev
+	samurai
+	"
+_repo_url="https://invent.kde.org/games/kapman.git"
+source="https://download.kde.org/stable/release-service/$pkgver/src/kapman-$pkgver.tar.xz"
+subpackages="$pkgname-doc $pkgname-lang"
+options="!check" # No tests
+
+build() {
+	cmake -B build -G Ninja \
+		-DCMAKE_BUILD_TYPE=RelWithDebInfo \
+		-DCMAKE_INSTALL_PREFIX=/usr \
+		-DCMAKE_INSTALL_LIBDIR=lib
+	cmake --build build
+}
+
+check() {
+	ctest --test-dir build --output-on-failure
+}
+
+package() {
+	DESTDIR="$pkgdir" cmake --install build
+}
+
+sha512sums="
+e1eabdd9823b9a5c8995514d21dd18a6b5953be7cd67f056337ef33df7128654aec2d40b1a0801bbe90848295f752cb5ad89db0e7acd77e4ccf31f4d5b436a77  kapman-23.08.3.tar.xz
+"

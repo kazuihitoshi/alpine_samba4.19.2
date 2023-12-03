@@ -1,0 +1,19 @@
+# Contributor: Alex Yam <alex@alexyam.com>
+# Maintainer:
+pkgname=wasi-sdk
+pkgver=20
+pkgrel=3
+_llvmver=17
+pkgdesc="WASI-enabled WebAssembly C/C++ toolchain"
+url="https://github.com/WebAssembly/wasi-sdk"
+arch="noarch"
+depends="wasi-libc wasi-libcxx wasi-compiler-rt"
+options="!check" # no testsuite
+license="Apache-2.0"
+
+package() {
+	mkdir -p "$pkgdir"/etc/clang$_llvmver
+	cat > "$pkgdir"/etc/clang$_llvmver/wasm32-unknown-wasi.cfg <<-EOF
+	--sysroot /usr/share/wasi-sysroot
+	EOF
+}

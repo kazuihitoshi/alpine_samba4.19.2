@@ -1,0 +1,31 @@
+# Contributor: Jakub Jirutka <jakub@jirutka.cz>
+# Maintainer: Jakub Jirutka <jakub@jirutka.cz>
+pkgname=postgresql-plpgsql_check
+_pkgname=plpgsql_check
+pkgver=2.6.2
+pkgrel=0
+pkgdesc="Additional tools for plpgsql functions validation"
+url="https://github.com/okbob/plpgsql_check"
+arch="all"
+license="MIT"
+makedepends="postgresql-dev"
+subpackages="$pkgname-doc"
+source="$_pkgname-$pkgver.tar.gz::https://github.com/okbob/$_pkgname/archive/v$pkgver.tar.gz"
+builddir="$srcdir/$_pkgname-$pkgver"
+options="!check"  # XXX: installcheck requires running PostgreSQL
+
+build() {
+	make USE_PGXS=1 all
+}
+
+package() {
+	depends="postgresql$(pg_config --major-version)"
+
+	make USE_PGXS=1 DESTDIR="$pkgdir" install
+
+	install -Dm644 LICENSE -t "$pkgdir"/usr/share/licenses
+}
+
+sha512sums="
+85fd61decc7e63e52cb52491acdb4bd459fc3ae73b29aee6b381bf4148f10b09853248559fd268b46c5c592ee47fae70b7a788f7beb7bc3d5f0376945848dd97  plpgsql_check-2.6.2.tar.gz
+"

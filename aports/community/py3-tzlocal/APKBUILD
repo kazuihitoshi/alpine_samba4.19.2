@@ -1,0 +1,31 @@
+# Maintainer: prspkt <prspkt@protonmail.com>
+pkgname=py3-tzlocal
+pkgver=5.1
+pkgrel=0
+pkgdesc="Python tzinfo object for the local timezone"
+url="https://github.com/regebro/tzlocal"
+arch="noarch"
+license="MIT"
+replaces="py-tzlocal" # for backwards compatibility
+provides="py-tzlocal=$pkgver-r$pkgrel" # for backwards compatibility
+depends="python3 py3-tzdata"
+makedepends="py3-gpep517 py3-setuptools py3-wheel"
+subpackages="$pkgname-pyc"
+source="$pkgname-$pkgver.tar.gz::https://files.pythonhosted.org/packages/source/t/tzlocal/tzlocal-$pkgver.tar.gz"
+builddir="$srcdir/tzlocal-$pkgver"
+options="!check" # the package requires a configured timezone
+
+build() {
+	gpep517 build-wheel \
+		--wheel-dir .dist \
+		--output-fd 3 3>&1 >&2
+}
+
+package() {
+	python3 -m installer -d "$pkgdir" \
+		.dist/*.whl
+}
+
+sha512sums="
+7cff3572c85a635ea4a8aed8b74f53f92ab5c59c87955bf1009ddc4f68d4270f311190f43c809d930d7859e770d925dc8986caf0313f095546572c21ccf15470  py3-tzlocal-5.1.tar.gz
+"

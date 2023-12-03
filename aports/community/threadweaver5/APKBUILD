@@ -1,0 +1,49 @@
+# Contributor: Bart Ribbers <bribbers@disroot.org>
+# Maintainer: team/kde <bribbers@disroot.org>
+
+# The group tag is just to easily find this APKBUILD by some scripts for automation
+# group=kde-frameworks
+pkgname=threadweaver5
+pkgver=5.112.0
+pkgrel=0
+pkgdesc="High-level multithreading framework"
+arch="all !armhf" # armhf blocked by qt5-qtdeclarative
+url="https://community.kde.org/Frameworks"
+license="LGPL-2.1-only"
+depends_dev="
+	qt5-qtbase-dev
+	qt5-qtdeclarative-dev
+	"
+makedepends="$depends_dev
+	doxygen
+	extra-cmake-modules
+	qt5-qttools-dev
+	samurai
+	"
+_repo_url="https://invent.kde.org/frameworks/threadweaver.git"
+source="https://download.kde.org/stable/frameworks/${pkgver%.*}/threadweaver-$pkgver.tar.xz"
+subpackages="$pkgname-dev $pkgname-doc"
+builddir="$srcdir/threadweaver-$pkgver"
+
+replaces="threadweaver<=5.110.0-r0"
+
+build() {
+	cmake -B build -G Ninja \
+		-DCMAKE_BUILD_TYPE=RelWithDebInfo \
+		-DCMAKE_INSTALL_PREFIX=/usr \
+		-DCMAKE_INSTALL_LIBDIR=lib \
+		-DBUILD_QCH=ON
+	cmake --build build
+}
+
+check() {
+	ctest --test-dir build --output-on-failure
+}
+
+package() {
+	DESTDIR="$pkgdir" cmake --install build
+}
+
+sha512sums="
+b7c194eec408ca14b3a604999dacd0dc034314a2f53398de5f5b40b01f9282d478426e5682a7b2a28fd8da9e793ee9f6528b325c2946f9d880cd1df3ca3b8a69  threadweaver-5.112.0.tar.xz
+"

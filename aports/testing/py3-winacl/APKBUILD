@@ -1,0 +1,37 @@
+# Contributor: Jonas <3426-spameier@users.gitlab.alpinelinux.org>
+# Maintainer: Jonas <3426-spameier@users.gitlab.alpinelinux.org>
+pkgname=py3-winacl
+_pyname=winacl
+pkgver=0.1.8
+pkgrel=0
+pkgdesc="ACL/ACE/Security Descriptor manipulation library in pure Python"
+url="https://github.com/skelsec/winacl"
+arch="noarch"
+license="MIT"
+depends="
+	py3-cryptography
+	python3
+	"
+makedepends="
+	py3-gpep517
+	py3-wheel
+	py3-setuptools
+	"
+subpackages="$pkgname-pyc"
+source="$pkgname-$pkgver.tar.gz::https://github.com/skelsec/winacl/archive/refs/tags/$pkgver.tar.gz"
+builddir="$srcdir/$_pyname-$pkgver"
+options="!check" # no tests provided
+
+build() {
+	gpep517 build-wheel \
+		--wheel-dir .dist \
+		--output-fd 3 3>&1 >&2
+}
+
+package() {
+	python3 -m installer -d "$pkgdir" .dist/*.whl
+}
+
+sha512sums="
+fd28579e1a524c0bdea28e5a3f12722513f9c0aa413e31dc4e54238c15f778fa769ab1e8992b028d265da6dadd512b7e56aa524d14d8a326b7927a4cf52786a1  py3-winacl-0.1.8.tar.gz
+"

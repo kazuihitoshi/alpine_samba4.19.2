@@ -1,0 +1,68 @@
+# Contributor: Oleg Titov <oleg.titov@gmail.com>
+# Maintainer: Oleg Titov <oleg.titov@gmail.com>
+pkgname=aom
+pkgver=3.7.1
+pkgrel=0
+pkgdesc="Alliance for Open Media (AOM) AV1 codec SDK"
+url="https://aomedia.org/"
+arch="all"
+license="BSD-2-Clause AND custom"
+options="!check" # tests run for 5+ hours
+makedepends="
+	cmake
+	linux-headers
+	nasm
+	perl
+	python3
+	samurai
+	"
+subpackages="$pkgname-dev $pkgname-doc $pkgname-libs"
+source="https://storage.googleapis.com/aom-releases/libaom-$pkgver.tar.gz
+	fix-stack-size-e53da0b.patch
+	posix-implicit.patch
+	"
+builddir="$srcdir/libaom-$pkgver"
+
+# secfixes:
+#   3.1.1-r0:
+#     - CVE-2021-30473
+#     - CVE-2021-30474
+#     - CVE-2021-30475
+
+build() {
+	local _neon_opt=
+	case "$CARCH" in
+		armhf) _neon_opt="-DENABLE_NEON=OFF" ;;
+		armv7) _neon_opt="-DAOM_NEON_INTRIN_FLAG=-mfpu=neon" ;;
+	esac
+
+	cmake -B build -G Ninja \
+		-DCMAKE_INSTALL_PREFIX=/usr \
+		-DCMAKE_INSTALL_LIBDIR=lib \
+		-DBUILD_SHARED_LIBS=True \
+		-DCMAKE_BUILD_TYPE=Release \
+		-DENABLE_TESTS="$(want_check && echo ON || echo OFF)" \
+		$_neon_opt
+	cmake --build build
+}
+
+check() {
+	local _testdata="$builddir"/test_data
+	mkdir -p $_testdata
+	export LIBAOM_TEST_DATA_PATH=$_testdata
+	ninja -C build testdata
+	ninja -C build runtests
+}
+
+package() {
+	DESTDIR="$pkgdir" cmake --install build
+
+	install -Dm 644 -t "$pkgdir"/usr/share/doc/"$pkgname"/ \
+		README.md LICENSE PATENTS
+}
+
+sha512sums="
+2ac90997065fcbdfa028e09945c10cbdad405569b98e03592a46971aebb189014ebd59553589804ba0a03c386af41bfbc37dd0a12320eb0fc6c9fd03e2149ee3  libaom-3.7.1.tar.gz
+ae844ad9c2f74a25048f939227d8c00a1ebccb0adecfb734f3aab1a5c7c22c77f46a6c3d42a7ec4fabfa952a33a0fa831dfa74bcd12f94cbf1489a3c20106f21  fix-stack-size-e53da0b.patch
+14e241f4bf8f181c323cc7db16ea791e3a5ccf6f7f82b854b468f167e7f7210ab66cfacd85806693ba604c58e91ff6a45a5c49dc17a200d5fd65eb3788d397b5  posix-implicit.patch
+"

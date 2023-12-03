@@ -1,0 +1,47 @@
+# Contributor: Francesco Colista <fcolista@alpinelinux.org>
+# Maintainer: Francesco Colista <fcolista@alpinelinux.org>
+pkgname=certbot-apache
+pkgver=2.7.4
+pkgrel=0
+pkgdesc="Apache plugin for Certbot client"
+url="https://github.com/certbot/certbot"
+arch="noarch"
+license="Apache-2.0"
+depends="
+	certbot
+	py3-acme
+	py3-augeas
+	py3-setuptools
+	"
+makedepends="
+	py3-gpep517
+	py3-wheel
+	"
+checkdepends="py3-pytest-xdist"
+subpackages="$pkgname-pyc"
+source="$pkgname-$pkgver.tar.gz::https://github.com/certbot/certbot/archive/refs/tags/v$pkgver.tar.gz
+alpine-support.patch"
+
+builddir="$srcdir/certbot-$pkgver/$pkgname"
+
+build() {
+	gpep517 build-wheel \
+		--wheel-dir .dist \
+		--output-fd 3 3>&1 >&2
+}
+
+check() {
+	python3 -m venv --clear --without-pip --system-site-packages .testenv
+	.testenv/bin/python3 -m installer .dist/*.whl
+	.testenv/bin/python3 -m pytest -n auto -p no:warnings
+}
+
+package() {
+	python3 -m installer -d "$pkgdir" \
+		.dist/*.whl
+}
+
+sha512sums="
+4363a2b9cc0d80692c26b6e4e82d7b2f1b57145f82603d33591cc6d00f08a920a2f9b963268c9a24211492e570fc8a91a1c64ccbcd4a44068e30590ce0a1d369  certbot-apache-2.7.4.tar.gz
+e4d9c141b330d3101b0bdcfb3f2d1b8b0ef47ef8d8870efa87880f85907080dd8a7db39a33199c610c84e77fd5a2cfd88f19fd117482cadb0f939531d906743e  alpine-support.patch
+"

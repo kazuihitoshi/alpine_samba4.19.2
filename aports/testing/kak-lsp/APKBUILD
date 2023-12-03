@@ -1,0 +1,34 @@
+# Contributor: Siva Mahadevan <me@svmhdvn.name>
+# Maintainer: Siva Mahadevan <me@svmhdvn.name>
+pkgname=kak-lsp
+pkgver=15.0.0
+pkgrel=0
+pkgdesc="Language Server Protocol client for Kakoune implemented in Rust"
+url="https://github.com/kak-lsp/kak-lsp"
+arch="all !s390x !riscv64" # limited by cargo
+license="Unlicense OR MIT"
+makedepends="cargo cargo-auditable"
+source="$pkgname-$pkgver.tar.gz::https://github.com/kak-lsp/kak-lsp/archive/v$pkgver.tar.gz"
+
+
+prepare() {
+	default_prepare
+
+	cargo fetch --target="$CTARGET" --locked
+}
+
+build() {
+	cargo auditable build --frozen --release
+}
+
+check() {
+	cargo test --frozen
+}
+
+package() {
+	install -Dm755 "target/release/$pkgname" "$pkgdir/usr/bin/$pkgname"
+}
+
+sha512sums="
+2e42d29a50f9893db50ffc8257b4558923c1851695baffac19fcadd7cb927b38d5baf857b4560756f808024f6cf7ec72ae2977ddd887b247f785151a24dbb6d3  kak-lsp-15.0.0.tar.gz
+"

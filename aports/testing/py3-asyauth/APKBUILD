@@ -1,0 +1,39 @@
+# Contributor: Jonas <3426-spameier@users.gitlab.alpinelinux.org>
+# Maintainer: Jonas <3426-spameier@users.gitlab.alpinelinux.org>
+pkgname=py3-asyauth
+_pyname=asyauth
+pkgver=0.0.16
+pkgrel=0
+pkgdesc="Unified authentication library"
+url="https://github.com/skelsec/asyauth"
+arch="noarch"
+license="MIT"
+depends="
+	py3-asn1crypto
+	py3-asysocks
+	py3-minikerberos
+	py3-unicrypto
+	"
+makedepends="
+	py3-gpep517
+	py3-wheel
+	py3-setuptools
+	"
+subpackages="$pkgname-pyc"
+source="$pkgname-$pkgver.tar.gz::https://github.com/skelsec/asyauth/archive/refs/tags/$pkgver.tar.gz"
+builddir="$srcdir/$_pyname-$pkgver"
+options="!check" # no tests provided
+
+build() {
+	gpep517 build-wheel \
+		--wheel-dir .dist \
+		--output-fd 3 3>&1 >&2
+}
+
+package() {
+	python3 -m installer -d "$pkgdir" .dist/*.whl
+}
+
+sha512sums="
+75b67f6472f35fe2e462fa5203bb3c2ff998817d0395113a1ccdd814f9617e1650e54ff57fa607ff6e2068a00ee7b354d821f690e0a9a2adef12890369d94ca9  py3-asyauth-0.0.16.tar.gz
+"

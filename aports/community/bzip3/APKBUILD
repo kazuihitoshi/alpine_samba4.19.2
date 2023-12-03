@@ -1,0 +1,44 @@
+# Contributor: Grigory Kirillov <txgk@bk.ru>
+# Maintainer: Simon Rupf <simon@rupf.net>
+pkgname=bzip3
+pkgver=1.3.2
+pkgrel=0
+pkgdesc="Better and stronger spiritual successor to BZip2"
+url="https://github.com/kspalaiologos/bzip3"
+arch="all"
+license="LGPL-3.0-or-later"
+# clang provides better performance https://gitlab.alpinelinux.org/alpine/aports/-/issues/13807
+makedepends="clang llvm-dev"
+subpackages="$pkgname-libs $pkgname-static $pkgname-dev $pkgname-doc"
+source="https://github.com/kspalaiologos/bzip3/releases/download/$pkgver/bzip3-$pkgver.tar.gz"
+
+build() {
+	export CFLAGS="${CFLAGS/-Os/-O3}"
+
+	case "$CARCH" in
+	arm*|riscv64)
+		;;
+	*)
+		export CFLAGS="$CFLAGS -flto"
+		;;
+	esac
+
+	CC=clang ./configure \
+		--target="$CTARGET" \
+		--build="$CBUILD" \
+		--host="$CHOST" \
+		--prefix=/usr
+	make all
+}
+
+check() {
+	make check
+}
+
+package() {
+	make DESTDIR="$pkgdir" install
+}
+
+sha512sums="
+3276c9a33bd929967f5908fdac03a9f54eb42cbe962202137c8daac2ce1fe0f6c5d80d6837a5f70af212f62e766018ed11b6920e0ef37c5a20fe20cb1c6027c0  bzip3-1.3.2.tar.gz
+"

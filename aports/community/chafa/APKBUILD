@@ -1,0 +1,41 @@
+# Contributor: knuxify <knuxify@gmail.com>
+# Contributor: Maxim Karasev <begs@disroot.org>
+# Maintainer: knuxify <knuxify@gmail.com>
+pkgname=chafa
+pkgver=1.12.5
+pkgrel=1
+pkgdesc="Terminal graphics for the 21st century"
+url="https://hpjansson.org/chafa"
+arch="all"
+license="LGPL-3.0-or-later"
+makedepends="glib-dev freetype-dev libjpeg-turbo-dev tiff-dev librsvg-dev libwebp-dev"
+subpackages="$pkgname-libs $pkgname-dev $pkgname-doc"
+source="https://github.com/hpjansson/chafa/releases/download/$pkgver/chafa-$pkgver.tar.xz"
+
+build() {
+	# https://github.com/hpjansson/chafa/issues/152
+	export LDFLAGS="$LDFLAGS -lwebp"
+
+	./configure \
+		--build=$CBUILD \
+		--host=$CHOST \
+		--prefix=/usr \
+		--sysconfdir=/etc \
+		--mandir=/usr/share/man \
+		--localstatedir=/var \
+		--disable-gtk-doc \
+		--without-imagemagick
+	make
+}
+
+check() {
+	make check
+}
+
+package() {
+	make DESTDIR="$pkgdir" install
+}
+
+sha512sums="
+d0b719294bdc8880f2c65c1bd777ac0eb98d47d48147bc6f883f1917d4f9a6b246c4e9365bc0128b1332d4a268611ac7e479f346f13c49d2e56ff4f446f22d94  chafa-1.12.5.tar.xz
+"

@@ -1,0 +1,53 @@
+# Contributor: Bart Ribbers <bribbers@disroot.org>
+# Maintainer: team/kde <bribbers@disroot.org>
+
+# The group tag is just to easily find this APKBUILD by some scripts for automation
+# group=kde-applications
+pkgname=kmouth
+pkgver=23.08.3
+pkgrel=0
+# armhf blocked by extra-cmake-modules
+arch="all !armhf"
+url="https://kde.org/applications/utilities/org.kde.kmouth"
+pkgdesc="Speech Synthesizer Frontend"
+license="GPL-2.0-or-later"
+makedepends="
+	extra-cmake-modules
+	kcompletion5-dev
+	kconfig5-dev
+	kconfigwidgets5-dev
+	kcoreaddons5-dev
+	kcrash5-dev
+	kdoctools5-dev
+	ki18n5-dev
+	kio5-dev
+	kwidgetsaddons5-dev
+	kxmlgui5-dev
+	qt5-qtbase-dev
+	qt5-qtspeech-dev
+	samurai
+	"
+_repo_url="https://invent.kde.org/accessibility/kmouth.git"
+source="https://download.kde.org/stable/release-service/$pkgver/src/kmouth-$pkgver.tar.xz"
+subpackages="$pkgname-doc $pkgname-lang"
+
+build() {
+	cmake -B build -G Ninja \
+		-DCMAKE_BUILD_TYPE=RelWithDebInfo \
+		-DCMAKE_INSTALL_PREFIX=/usr \
+		-DCMAKE_INSTALL_LIBDIR=lib \
+		-DKF_IGNORE_PLATFORM_CHECK=ON
+	cmake --build build
+}
+
+check() {
+	ctest --test-dir build --output-on-failure
+}
+
+package() {
+	DESTDIR="$pkgdir" cmake --install build
+}
+
+sha512sums="
+cfa602e7d1549210f8e8b63b46a162ade59f050300585e16c27a26cde98de22d01416357da592a3b49629e840274887e287be03266d6b02c86e986dc8566c2d5  kmouth-23.08.3.tar.xz
+"

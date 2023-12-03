@@ -1,0 +1,32 @@
+# Maintainer: Cowington Post <cowingtonpost@gmail.com>
+pkgname=ttyper
+pkgver=1.4.0
+pkgrel=0
+pkgdesc="Terminal-based typing test"
+url="https://github.com/max-niederman/ttyper/"
+arch="all"
+license="MIT"
+makedepends="cargo cargo-auditable"
+source="https://github.com/max-niederman/ttyper/archive/refs/tags/v$pkgver/ttyper-$pkgver.tar.gz"
+
+prepare() {
+	default_prepare
+
+	cargo fetch --target="$CTARGET" --locked
+}
+
+build() {
+	cargo auditable build --frozen --release
+}
+
+check() {
+	cargo test --frozen
+}
+
+package() {
+	install -Dm755 target/release/ttyper -t "$pkgdir"/usr/bin
+}
+
+sha512sums="
+12d25b06c30a8c944bf6ba578a536216b7b15258d7112f8f87700ba33e49edf432337fd87f293b34b651539b14c09df616cba2abbad50a65aeb777fa0c954378  ttyper-1.4.0.tar.gz
+"

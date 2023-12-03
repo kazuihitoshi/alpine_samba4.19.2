@@ -1,0 +1,32 @@
+# Contributor: Konstantin Kulikov <k.kulikov2@gmail.com>
+# Maintainer: Konstantin Kulikov <k.kulikov2@gmail.com>
+
+# Make sure to keep this package in sync with grafana.
+
+# Frontend files split from main grafana package.
+# This is because grafana's build process is
+# > build backend -> test backend -> build frontend -> test frontend
+# while alpine doesn't allow easily interleaving those.
+# Second problem is grafana doesn't support building on anything except linux/amd64,
+# while alpine requires every build to be done natively.
+# This is also a reason why we use prebuilt frontend archive.
+
+pkgname=grafana-frontend
+pkgver=10.2.2
+pkgrel=0
+pkgdesc="Open source, feature rich metrics dashboard and graph editor (frontend files)"
+url="https://grafana.com"
+arch="noarch"
+license="AGPL-3.0-only"
+options="!check" # We don't build frontend from sources.
+source="$pkgname-$pkgver-bin.tar.gz::https://dl.grafana.com/oss/release/grafana-$pkgver.linux-amd64.tar.gz"
+builddir="$srcdir/grafana-v$pkgver"
+
+package() {
+	install -dm755 "$pkgdir/usr/share/grafana"
+	cp -r "$builddir/plugins-bundled" "$builddir/public" "$pkgdir/usr/share/grafana/"
+}
+
+sha512sums="
+a42e9d8ce125ca80c6995659128aaf521bf73ea4af27dd8b5db0ffed3a3f87a437326ee1f079b46a09c1fa3d95ee608fed0b4dd081f7589fa9e18655216aed38  grafana-frontend-10.2.2-bin.tar.gz
+"

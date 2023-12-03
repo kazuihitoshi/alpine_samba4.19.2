@@ -1,0 +1,30 @@
+# Contributor: Antoine Fontaine <antoine.fontaine@epfl.ch>
+# Maintainer: Patrycja Rosa <alpine@ptrcnull.me>
+pkgname=repo
+pkgver=2.38
+pkgrel=0
+pkgdesc="repository management tool built on top of git"
+url="https://gerrit.googlesource.com/git-repo"
+arch="noarch"
+license="Apache-2.0"
+options="!check" # no tests upstream
+depends="python3 git"
+makedepends="py3-setuptools"
+subpackages="$pkgname-doc"
+source="$pkgname-$pkgver.tar.gz::https://github.com/GerritCodeReview/git-repo/archive/refs/tags/v$pkgver.tar.gz"
+builddir="$srcdir/git-repo-$pkgver"
+
+prepare() {
+	default_prepare
+
+	sed -i 's|^#!/usr/bin/env python|#!/usr/bin/python3|' repo
+}
+
+package() {
+	install -Dm755 repo -t "$pkgdir"/usr/bin
+	install -Dm644 man/* -t "$pkgdir"/usr/share/man/man1
+}
+
+sha512sums="
+2897042c52bcb643644647927d826b31c7d8973573efd5e96fc41253b0ef623cf529e578a04c8af662e55674a155150351835dce4a1c4c4650fabdb8865da125  repo-2.38.tar.gz
+"

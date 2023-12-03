@@ -1,0 +1,45 @@
+# Contributor: Francesco Colista <fcolista@alpinelinux.org>
+# Maintainer: Francesco Colista <fcolista@alpinelinux.org>
+pkgname=evolution-ews
+pkgver=3.50.1
+pkgrel=0
+pkgdesc="MS Exchange integration through Exchange Web Services"
+url="https://wiki.gnome.org/Apps/Evolution/EWS"
+arch="all !s390x !riscv64" # blocked by evolution
+license="LGPL-2.1-or-later"
+makedepends="
+	cmake
+	evolution-data-server-dev
+	evolution-dev
+	gettext-dev
+	glib-dev
+	gtk-doc
+	libmspack-dev
+	libsoup3-dev
+	samurai
+	uhttpmock-dev
+	"
+options="!check" # fail in docker due to port restrictions
+subpackages="$pkgname-lang"
+source="https://download.gnome.org/sources/evolution-ews/${pkgver%.*}/evolution-ews-$pkgver.tar.xz"
+
+build() {
+	cmake -B build -G Ninja \
+		-DCMAKE_INSTALL_PREFIX=/usr \
+		-DCMAKE_BUILD_TYPE=MinSizeRel \
+		-DENABLE_TESTS=OFF
+	cmake --build build
+}
+
+check() {
+	cd build
+	CTEST_OUTPUT_ON_FAILURE=TRUE ctest
+}
+
+package() {
+	DESTDIR="$pkgdir" cmake --install build
+}
+
+sha512sums="
+f02b1815f8d641a5941f67e7b7507966231301f258602b8772e7ae01490f6ac18f66f60609c94e4ea996bf8544a65d5d895dd56a0eabbf7c20a86ff310537c18  evolution-ews-3.50.1.tar.xz
+"

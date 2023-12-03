@@ -1,0 +1,98 @@
+# Contributor: André Klitzing <aklitzing@gmail.com>
+# Maintainer: André Klitzing <aklitzing@gmail.com>
+pkgname=ostree
+pkgver=2023.7
+pkgrel=0
+pkgdesc="Operating system and container binary deployment and upgrades"
+url="https://github.com/ostreedev/ostree"
+arch="all"
+license="LGPL-2.0-or-later"
+makedepends="
+	bison
+	curl-dev
+	e2fsprogs-dev
+	fuse3-dev
+	gpgme-dev
+	gtk-doc
+	libarchive-dev
+	libsoup3-dev
+	libxslt
+	linux-headers
+	openssl-dev>3
+	xz-dev
+	"
+checkdepends="
+	bash
+	coreutils
+	"
+subpackages="
+	$pkgname-dev
+	$pkgname-doc
+	$pkgname-dbg
+	$pkgname-grub:grub:noarch
+	$pkgname-bash-completion:bashcomp:noarch
+	"
+source="https://github.com/ostreedev/ostree/releases/download/v$pkgver/libostree-$pkgver.tar.xz"
+builddir="$srcdir/lib$pkgname-$pkgver"
+# todo: fails to make stuff in var/tmp in root
+options="!check"
+
+build() {
+	CFLAGS="$CFLAGS -flto=auto" \
+	CXXFLAGS="$CXXFLAGS -flto=auto" \
+	./configure \
+		--build=$CBUILD \
+		--host=$CHOST \
+		--prefix=/usr \
+		--sysconfdir=/etc \
+		--localstatedir=/var \
+		--sbindir=/usr/bin \
+		--libexecdir=/usr/lib \
+		--enable-gtk-doc \
+		--disable-static \
+		--disable-glibtest \
+		--with-curl \
+		--with-openssl \
+		--with-soup3
+	make
+	make ostree-trivial-httpd
+}
+
+check() {
+	export TMPDIR="$srcdir"
+	make check || {
+		cat test-suite.log
+		return 1
+	}
+}
+
+package() {
+	make DESTDIR="$pkgdir" install
+}
+
+dev() {
+	default_dev
+
+	install -Dm755 "$builddir"/ostree-trivial-httpd \
+		-t "$subpkgdir"/usr/lib/libostree/
+}
+
+grub() {
+	pkgdesc="GRUB2 integration for OSTree"
+	install_if="$pkgname=$pkgver-r$pkgrel grub"
+
+	amove etc/grub.d/*
+	amove usr/lib/libostree/grub2-*
+}
+
+bashcomp() {
+	depends=""
+	pkgdesc="Bash completions for $pkgname"
+	install_if="$pkgname=$pkgver-r$pkgrel bash-completion"
+
+	amove usr/share/bash-completion
+}
+
+sha512sums="
+12398c1c30df11e899204e0b798ee650c6099d983b3e20e4f6da4a3a0e4c0b1fcee7c8e123919ccca8e45324102f2378f63a6597c1fd4c3bae14fb89241879b1  libostree-2023.7.tar.xz
+"

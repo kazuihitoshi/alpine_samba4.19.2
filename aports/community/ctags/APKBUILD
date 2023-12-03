@@ -1,0 +1,54 @@
+# Contributor: Sören Tempel <soeren+alpine@soeren-tempel.net>
+# Contributor: Michael Mason <ms13sp@gmail.com>
+# Maintainer: Sören Tempel <soeren+alpine@soeren-tempel.net>
+pkgname=ctags
+pkgver=6.0.20230910.0
+_realver="p$pkgver"
+pkgrel=0
+pkgdesc="Generator of tags for all types of C/C++ languages"
+url="https://ctags.io/"
+arch="all"
+license="GPL-2.0-or-later"
+checkdepends="diffutils python3"
+makedepends="autoconf automake pkgconf py3-docutils"
+subpackages="$pkgname-doc"
+source="$pkgname-$pkgver.tar.gz::https://github.com/universal-ctags/ctags/archive/$_realver.tar.gz"
+builddir="$srcdir"/$pkgname-$_realver
+
+# secfixes:
+#   5.8-r5:
+#     - CVE-2014-7204
+
+prepare() {
+	default_prepare
+	./autogen.sh
+
+	# Fail, likely due to compatibility issues with musl's iconv.
+	# Alternative solution: Build ctags with --disable-iconv.
+	rm -r Tmain/input-encoding-option.d \
+		Tmain/output-encoding-option.d
+}
+
+build() {
+	./configure \
+		--build=$CBUILD \
+		--host=$CHOST \
+		--prefix=/usr \
+		--sysconfdir=/etc \
+		--mandir=/usr/share/man \
+		--localstatedir=/var \
+		--disable-external-sort
+	make
+}
+
+check() {
+	make check
+}
+
+package() {
+	make DESTDIR="$pkgdir" install
+}
+
+sha512sums="
+0344c96f9a57bedd94fdf7cc839725eb9e3d3106590d2ef79c99a1487f632de43b290e82e2290172c11ffbd1c8acccfaa22e512e3aed03047ae91ee3bea71608  ctags-6.0.20230910.0.tar.gz
+"

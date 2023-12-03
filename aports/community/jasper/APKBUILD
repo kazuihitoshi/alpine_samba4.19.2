@@ -1,0 +1,42 @@
+# Contributor: Bart Ribbers <bribbers@disroot.org>
+# Maintainer: Bart Ribbers <bribbers@disroot.org>
+pkgname=jasper
+pkgver=4.1.1
+pkgrel=0
+pkgdesc="Software-based implementation of the codec specified in the emerging JPEG-2000 Part-1 standard"
+url="https://www.ece.uvic.ca/~mdadams/jasper/"
+arch="all"
+license="custom:JasPer2.0"
+makedepends="
+	cmake
+	samurai
+	"
+subpackages="$pkgname-dev $pkgname-doc"
+source="https://github.com/mdadams/jasper/releases/download/version-$pkgver/jasper-$pkgver.tar.gz"
+
+build() {
+	# The directory "build" already exists in the repo
+	cmake -B build-jasper -G Ninja \
+		-DCMAKE_BUILD_TYPE=MinSizeRel \
+		-DCMAKE_INSTALL_PREFIX=/usr \
+		-DCMAKE_INSTALL_LIBDIR=lib \
+		-DCMAKE_SKIP_RPATH=ON \
+		-DJAS_ENABLE_OPENGL=ON \
+		-DJAS_ENABLE_LIBJPEG=ON \
+		-DJAS_ENABLE_AUTOMATIC_DEPENDENCIES=OFF \
+		-DALLOW_IN_SOURCE_BUILD=ON
+		# We're not actually building in source, the check is wrong so overwrite it
+	cmake --build build-jasper
+}
+
+check() {
+	ctest --test-dir build-jasper --output-on-failure
+}
+
+package() {
+	DESTDIR="$pkgdir" cmake --install build-jasper
+}
+
+sha512sums="
+4ac287cfcc304f9bcaad47b285b9cb14643682515b1bc89135a103b0b0302b50b075a10cc4a87588f67d676ee1a2a29a72688f0114be61c85b2bee2bf654f8ea  jasper-4.1.1.tar.gz
+"

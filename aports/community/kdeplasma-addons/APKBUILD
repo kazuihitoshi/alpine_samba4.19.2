@@ -1,0 +1,75 @@
+# Contributor: Bart Ribbers <bribbers@disroot.org>
+# Maintainer: team/kde <bribbers@disroot.org>
+
+# The group tag is just to easily find this APKBUILD by some scripts for automation
+# group=kde-plasma
+pkgname=kdeplasma-addons
+pkgver=5.27.9
+pkgrel=1
+pkgdesc="All kind of addons to improve your Plasma experience"
+# armhf blocked by qt5-qtdeclarative
+# ppc64le, s390x and riscv64 blocked by qt5-qtwebengine
+arch="all !armhf !ppc64le !s390x !riscv64"
+url="https://kde.org/plasma-desktop/"
+license="LGPL-2.0-only AND GPL-2.0-or-later"
+depends="purpose5"
+depends_dev="
+	icu-dev
+	karchive5-dev
+	kcmutils5-dev
+	kconfig5-dev
+	kcoreaddons5-dev
+	kdeclarative5-dev
+	kholidays5-dev
+	ki18n5-dev
+	kiconthemes5-dev
+	kio5-dev
+	knewstuff5-dev
+	knotifications5-dev
+	kross-dev
+	krunner5-dev
+	kservice5-dev
+	kunitconversion5-dev
+	kwindowsystem5-dev
+	networkmanager-qt5-dev
+	plasma-framework5-dev
+	qt5-qtbase-dev
+	qt5-qtdeclarative-dev
+	qt5-qtwebengine-dev
+	sonnet5-dev
+	"
+makedepends="$depends_dev
+	extra-cmake-modules
+	samurai
+	"
+checkdepends="xvfb-run"
+
+case "$pkgver" in
+	*.90*) _rel=unstable;;
+	*) _rel=stable;;
+esac
+_repo_url="https://invent.kde.org/plasma/kdeplasma-addons.git"
+source="https://download.kde.org/$_rel/plasma/$pkgver/kdeplasma-addons-$pkgver.tar.xz"
+subpackages="$pkgname-dev $pkgname-lang"
+
+build() {
+	cmake -B build -G Ninja \
+		-DCMAKE_BUILD_TYPE=RelWithDebInfo \
+		-DCMAKE_INSTALL_PREFIX=/usr \
+		-DCMAKE_INSTALL_LIBDIR=lib
+	cmake --build build
+}
+
+check() {
+	# converterrunnertest is broken
+	# datetimerunnertest requires running Wayland session
+	xvfb-run ctest --test-dir build --output-on-failure -E "(converterrunner|datetimerunner)test"
+}
+
+package() {
+	DESTDIR="$pkgdir" cmake --install build
+}
+
+sha512sums="
+f74e8699715aa965f9d38b9d75facfbc03320442fbf716e5410ceaab5880956aa8cd8d31a476e3621d4a5bdda1661c0ccdafd52c216e34619425cc26ba944abe  kdeplasma-addons-5.27.9.tar.xz
+"

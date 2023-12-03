@@ -1,0 +1,37 @@
+# Maintainer:
+pkgname=fcitx5-hangul
+pkgver=5.1.0
+pkgrel=0
+pkgdesc="libhangul input method support for fcitx5"
+url="https://github.com/fcitx/fcitx5-hangul"
+# armhf: extra-cmake-modules
+arch="all !armhf"
+license="GPL-3.0-or-later"
+makedepends="
+	cmake
+	extra-cmake-modules
+	gettext-dev
+	fcitx5-dev
+	libhangul-dev
+	samurai
+	"
+subpackages="$pkgname-lang"
+source="$pkgname-$pkgver.tar.gz::https://github.com/fcitx/fcitx5-hangul/archive/refs/tags/$pkgver.tar.gz"
+options="!check" # no tests
+
+build() {
+	CXXFLAGS="$CXXFLAGS -flto=auto" \
+	CFLAGS="$CFLAGS -flto=auto" \
+	cmake -B build -G Ninja \
+		-DCMAKE_BUILD_TYPE=None \
+		-DCMAKE_INSTALL_PREFIX=/usr
+	cmake --build build
+}
+
+package() {
+	DESTDIR="$pkgdir" cmake --install build
+}
+
+sha512sums="
+206d211b90fdf104c71847e7fb92809f2ab501dc64bbd6a670f022ee3b8b43262a089ada2beb63541dbb28390500e2513844997b4e8455a2719e54c17941a536  fcitx5-hangul-5.1.0.tar.gz
+"

@@ -1,0 +1,43 @@
+# Maintainer:
+pkgname=fiery
+pkgver=1.1.1
+pkgrel=0
+pkgdesc="KDE Convergent web browser"
+url="https://invent.kde.org/maui/fiery"
+# qt5-qtwebengine
+arch="x86_64 x86 aarch64 armv7"
+license="LicenseRef-KDE-Accepted-LGPL"
+makedepends="
+	cmake
+	extra-cmake-modules
+	kcoreaddons5-dev
+	ki18n5-dev
+	mauikit-dev
+	mauikit-filebrowsing-dev
+	qt5-qtbase-dev
+	qt5-qttools-dev
+	qt5-qtwebengine-dev
+	samurai
+	"
+source="https://invent.kde.org/maui/fiery/-/archive/v$pkgver/fiery-v$pkgver.tar.gz"
+builddir="$srcdir/fiery-v$pkgver"
+options="!check !spdx" # no tests
+
+provides="kde-sol=$pkgver-r$pkgrel kde-fiery=$pkgver-r$pkgrel"
+replaces="kde-sol kde-fiery"
+
+build() {
+	CXXFLAGS="$CXXFLAGS -flto=auto" \
+	cmake -B build -G Ninja \
+		-DCMAKE_BUILD_TYPE=RelWithDebInfo \
+		-DCMAKE_INSTALL_PREFIX=/usr
+	cmake --build build
+}
+
+package() {
+	DESTDIR="$pkgdir" cmake --install build
+}
+
+sha512sums="
+8635541d2e4cf2ea4e46be7b088dd1191c90d84b3118b8779f5e0d24694fc58b9673cafb94876947c7151dd008a8d8cd9ebc7600a28914c94db633d37b47a96c  fiery-v1.1.1.tar.gz
+"

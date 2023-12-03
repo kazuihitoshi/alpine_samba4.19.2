@@ -1,0 +1,60 @@
+# Contributor: Bart Ribbers <bribbers@disroot.org>
+# Maintainer: team/kde <bribbers@disroot.org>
+
+# The group tag is just to easily find this APKBUILD by some scripts for automation
+# group=kde-applications
+pkgname=kmix
+pkgver=23.08.3
+pkgrel=0
+# armhf blocked by extra-cmake-modules
+arch="all !armhf"
+url="https://kde.org/applications/multimedia/org.kde.kmix"
+pkgdesc="A sound channel mixer and volume control"
+license="GPL-2.0-or-later AND LGPL-2.0-or-later AND GFDL-1.2-only"
+makedepends="
+	alsa-lib-dev
+	extra-cmake-modules
+	kcompletion5-dev
+	kconfig5-dev
+	kconfigwidgets5-dev
+	kcrash5-dev
+	kdbusaddons5-dev
+	kdoctools5-dev
+	kglobalaccel5-dev
+	ki18n5-dev
+	kiconthemes5-dev
+	knotifications5-dev
+	kwidgetsaddons5-dev
+	kwindowsystem5-dev
+	kxmlgui5-dev
+	libcanberra-dev
+	plasma-framework5-dev
+	pulseaudio-dev
+	qt5-qtbase-dev
+	samurai
+	solid5-dev
+	"
+_repo_url="https://invent.kde.org/multimedia/kmix.git"
+source="https://download.kde.org/stable/release-service/$pkgver/src/kmix-$pkgver.tar.xz"
+subpackages="$pkgname-doc $pkgname-lang"
+options="!check" # No tests
+
+build() {
+	cmake -B build -G Ninja \
+		-DCMAKE_BUILD_TYPE=RelWithDebInfo \
+		-DCMAKE_INSTALL_PREFIX=/usr \
+		-DCMAKE_INSTALL_LIBDIR=lib
+	cmake --build build
+}
+
+check() {
+	ctest --test-dir build --output-on-failure
+}
+
+package() {
+	DESTDIR="$pkgdir" cmake --install build
+}
+
+sha512sums="
+3b9f0a99c521cc639e5f1fb449bdb30e1f42026e390c8f13f4677a23e929d442603ae05403bcc7297c0535989a198130bd6c2bdc3b72edcf3a59e2fe570c3472  kmix-23.08.3.tar.xz
+"

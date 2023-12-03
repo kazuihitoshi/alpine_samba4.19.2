@@ -1,0 +1,50 @@
+# Contributor: Bart Ribbers <bribbers@disroot.org>
+# Maintainer: team/kde <bribbers@disroot.org>
+
+# The group tag is just to easily find this APKBUILD by some scripts for automation
+# group=kde-frameworks
+pkgname=kxmlrpcclient5
+pkgver=5.112.0
+pkgrel=0
+pkgdesc="XML-RPC client library for KDE"
+# armhf blocked by extra-cmake-modules
+arch="all !armhf"
+url="https://projects.kde.org/projects/kde/pim/kxmlrpcclient"
+license="BSD-2-Clause"
+depends_dev="
+	ki18n5-dev
+	kio5-dev
+	"
+makedepends="$depends_dev
+	doxygen
+	extra-cmake-modules
+	qt5-qttools-dev
+	samurai
+	"
+_repo_url="https://invent.kde.org/frameworks/kxmlrpcclient.git"
+source="https://download.kde.org/stable/frameworks/${pkgver%.*}/portingAids/kxmlrpcclient-$pkgver.tar.xz"
+subpackages="$pkgname-dev $pkgname-doc $pkgname-lang"
+builddir="$srcdir/kxmlrpcclient-$pkgver"
+
+replaces="kxmlrpcclient<=5.110.0-r0"
+
+build() {
+	cmake -B build -G Ninja \
+		-DCMAKE_BUILD_TYPE=RelWithDebInfo \
+		-DCMAKE_INSTALL_PREFIX=/usr \
+		-DCMAKE_INSTALL_LIBDIR=lib \
+		-DBUILD_QCH=ON
+	cmake --build build
+}
+
+check() {
+	ctest --test-dir build --output-on-failure
+}
+
+package() {
+	DESTDIR="$pkgdir" cmake --install build
+}
+
+sha512sums="
+8347b09d1739262afb3bd219e3e5ef4a1ca10fe1270f9b76b48e7004d7b39cb982814a430073b522c6b4cc008cf210583bf6e712c7f7f6c395c2abae812ac18d  kxmlrpcclient-5.112.0.tar.xz
+"

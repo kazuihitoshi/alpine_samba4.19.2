@@ -1,0 +1,40 @@
+# Contributor: André Klitzing <aklitzing@gmail.com>
+# Maintainer: André Klitzing <aklitzing@gmail.com>
+pkgname=geth
+pkgver=1.13.5
+pkgrel=0
+pkgdesc="Official Go implementation of the Ethereum protocol"
+url="https://geth.ethereum.org/"
+arch="all"
+license="LGPL-3.0-or-later"
+makedepends="go linux-headers"
+checkdepends="fuse"
+options="!check chmod-clean net"
+source="$pkgname-$pkgver.tar.gz::https://github.com/ethereum/go-ethereum/archive/v$pkgver.tar.gz"
+builddir="$srcdir/go-ethereum-$pkgver"
+
+# secfixes:
+#   1.10.22-r0:
+#     - CVE-2022-37450
+
+export GOROOT=/usr/lib/go
+export GOCACHE="${GOCACHE:-"$srcdir/go-cache"}"
+export GOTMPDIR="${GOTMPDIR:-"$srcdir"}"
+export GOMODCACHE="${GOMODCACHE:-"$srcdir/go"}"
+
+build() {
+	make
+}
+
+check() {
+	make test
+}
+
+package() {
+	mkdir -p "$pkgdir"/usr/bin
+	install -m755 -t "$pkgdir"/usr/bin build/bin/*
+}
+
+sha512sums="
+7f1ba136ed1ff13128b50059b16e6007507ab324423f64742bf929af621e03e67fba4ce493c5057f44c8f85df850a4673236ffec9fbdb5159c6b0dc7b831f71b  geth-1.13.5.tar.gz
+"

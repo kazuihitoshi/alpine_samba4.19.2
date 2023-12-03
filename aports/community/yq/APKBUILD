@@ -1,0 +1,57 @@
+# Contributor: Hoang Nguyen <folliekazetani@protonmail.com>
+# Contributor: Tuan Hoang <tmhoang@linux.ibm.com>
+# Maintainer: Tuan Hoang <tmhoang@linux.ibm.com>
+pkgname=yq
+pkgver=4.35.2
+pkgrel=1
+pkgdesc="Portable command-line YAML processor written in Go"
+url="https://github.com/mikefarah/yq"
+arch="all"
+license="MIT"
+makedepends="go"
+checkdepends="bash tzdata"
+subpackages="
+	$pkgname-bash-completion
+	$pkgname-zsh-completion
+	$pkgname-fish-completion
+	"
+source="$pkgname-$pkgver.tar.gz::https://github.com/mikefarah/yq/archive/v$pkgver.tar.gz"
+
+export GOCACHE="${GOCACHE:-"$srcdir/go-cache"}"
+export GOTMPDIR="${GOTMPDIR:-"$srcdir"}"
+export GOMODCACHE="${GOMODCACHE:-"$srcdir/go"}"
+
+build() {
+	go build -v -o yq
+
+	./yq shell-completion bash > yq.bash
+	./yq shell-completion zsh > yq.zsh
+	./yq shell-completion fish > yq.fish
+}
+
+check() {
+	go test ./...
+
+	# Yanked from scripts/acceptance.sh
+	for test in acceptance_tests/*.sh; do
+		echo "--------------------------------------------------------------"
+		echo "$test"
+		echo "--------------------------------------------------------------"
+		bash "$test"
+	done
+}
+
+package() {
+	install -Dm755 yq "$pkgdir"/usr/bin/yq
+
+	install -Dm644 yq.bash \
+		"$pkgdir"/usr/share/bash-completion/completions/yq
+	install -Dm644 yq.zsh \
+		"$pkgdir"/usr/share/zsh/site-functions/_yq
+	install -Dm644 yq.fish \
+		"$pkgdir"/usr/share/fish/vendor_completions.d/yq.fish
+}
+
+sha512sums="
+a63e64859e290b763e4a3c6ddd73d5ca5acbe61293e60caaeb79931f5f1ecbad63c9e81b0b7d9ea490afe10b6558001620f0f8c1142a91d96e2d489e9c979306  yq-4.35.2.tar.gz
+"

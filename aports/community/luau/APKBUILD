@@ -1,0 +1,40 @@
+# Contributor: Rob Blanckaert <basicer@gmail.com>
+# Maintainer: Rob Blanckaert <basicer@gmail.com>
+pkgname=luau
+pkgver=0.601
+pkgrel=0
+pkgdesc="A fast, small, safe, gradually typed embeddable scripting language derived from Lua"
+url="https://github.com/roblox/luau"
+# arm: doesn't build, __deregister_frame
+arch="all !armhf !armv7"
+license="MIT"
+makedepends="cmake linux-headers samurai"
+source="
+$pkgname-$pkgver.tar.gz::https://github.com/luau-lang/luau/archive/refs/tags/$pkgver.tar.gz
+"
+
+build() {
+	if [ "$CBUILD" != "$CHOST" ]; then
+		CMAKE_CROSSOPTS="-DCMAKE_SYSTEM_NAME=Linux -DCMAKE_HOST_SYSTEM_NAME=Linux"
+	fi
+	cmake -B build -G Ninja \
+		-DCMAKE_INSTALL_PREFIX=/usr \
+		-DBUILD_SHARED_LIBS=True \
+		-DCMAKE_BUILD_TYPE=MinSizeRel \
+		$CMAKE_CROSSOPTS
+	cmake --build build
+}
+
+check() {
+	"$builddir"/build/Luau.UnitTest && "$builddir"/build/Luau.Conformance
+}
+
+package() {
+	install -Dm755 build/luau "$pkgdir"/usr/bin/luau
+	install -Dm755 build/luau-analyze "$pkgdir"/usr/bin/luau-analyze
+	install -Dm755 build/luau-compile "$pkgdir"/usr/bin/luau-compile
+}
+
+sha512sums="
+be8c5fc29269a8c94a8aa0f15f4d88f11ee0d75be4c51c61225b6a0ebebba3c9cfb6c0dee0045a775ccfaf95ea9b4d52e84acf7a9fe970fa92b9bc0d161233d8  luau-0.601.tar.gz
+"

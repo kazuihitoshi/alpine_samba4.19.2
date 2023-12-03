@@ -1,0 +1,50 @@
+# Contributor: Bart Ribbers <bribbers@disroot.org>
+# Maintainer: team/kde <bribbers@disroot.org>
+
+# The group tag is just to easily find this APKBUILD by some scripts for automation
+# group=kde-frameworks
+pkgname=syntax-highlighting5
+pkgver=5.112.0
+pkgrel=0
+pkgdesc="Syntax highlighting engine for structured text and code"
+arch="all !armhf" # armhf blocked by extra-cmake-modules
+url="https://community.kde.org/Frameworks"
+license="MIT"
+depends_dev="
+	qt5-qtbase-dev
+	qt5-qtdeclarative-dev
+	qt5-qtxmlpatterns-dev
+	"
+makedepends="$depends_dev
+	doxygen
+	extra-cmake-modules
+	qt5-qttools-dev
+	samurai
+	"
+_repo_url="https://invent.kde.org/frameworks/syntax-highlighting.git"
+source="https://download.kde.org/stable/frameworks/${pkgver%.*}/syntax-highlighting-$pkgver.tar.xz"
+subpackages="$pkgname-dev $pkgname-doc $pkgname-lang"
+builddir="$srcdir/syntax-highlighting-$pkgver"
+
+replaces="syntax-highlighting<=5.110.0-r0"
+
+build() {
+	cmake -B build -G Ninja \
+		-DCMAKE_INSTALL_PREFIX=/usr \
+		-DCMAKE_BUILD_TYPE=RelWithDebInfo \
+		-DCMAKE_INSTALL_LIBDIR=lib \
+		-DBUILD_QCH=ON
+	cmake --build build
+}
+
+check() {
+	ctest --test-dir build --output-on-failure
+}
+
+package() {
+	DESTDIR="$pkgdir" cmake --install build
+}
+
+sha512sums="
+485d2bf9c85cd67e9c08bd756f834b89268b18c933aed4a6b7153fc4fc8652be118c66858ed288c2679b8280f3eb69cf736edd0989984a7286b88e4a9e3e27cf  syntax-highlighting-5.112.0.tar.xz
+"

@@ -1,0 +1,44 @@
+# Contributor: Olliver Schinagl <oliver@schinagl.nl>
+# Maintainer: Olliver Schinagl <oliver@schinagl.nl>
+pkgname=shfmt
+pkgver=3.7.0
+pkgrel=4
+pkgdesc="A shell parser, formatter, and interpreter (sh/bash/mksh)"
+url="https://mvdan.cc/sh"
+arch="all"
+license="BSD-3-Clause"
+makedepends="go scdoc"
+subpackages="$pkgname-doc"
+source="$pkgname-$pkgver.tar.gz::https://github.com/mvdan/sh/archive/v$pkgver.tar.gz"
+builddir="$srcdir/sh-$pkgver"
+
+export GOCACHE="${GOCACHE:-"$srcdir/go-cache"}"
+export GOTMPDIR="${GOTMPDIR:-"$srcdir"}"
+export GOMODCACHE="${GOMODCACHE:-"$srcdir/go"}"
+
+prepare() {
+	default_prepare
+
+	go mod tidy
+}
+
+build() {
+	go build \
+		-ldflags "-X main.version=$pkgver-$pkgrel" \
+		-v \
+		./cmd/shfmt
+	scdoc < cmd/shfmt/shfmt.1.scd > shfmt.1
+}
+
+check() {
+	go test ./...
+}
+
+package() {
+	install -Dm755 shfmt "$pkgdir"/usr/bin/shfmt
+	install -Dm644 shfmt.1 "$pkgdir"/usr/share/man/man1/shfmt.1
+}
+
+sha512sums="
+5869b68d4bb59907ff7543019e02e8e1efee5963475763b2b2daf0b1ef8621d919d54978a50e52d865b5b76b188c821fecb673e6a9ce42b30cd9907a020e6387  shfmt-3.7.0.tar.gz
+"

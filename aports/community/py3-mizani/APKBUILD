@@ -1,0 +1,43 @@
+# Contributor: Iztok Fister, Jr. <iztok@iztok-jr-fister.eu>
+# Maintainer: Iztok Fister, Jr. <iztok@iztok-jr-fister.eu>
+pkgname=py3-mizani
+pkgver=0.10.0
+pkgrel=1
+pkgdesc="A scales package for python"
+url="https://github.com/has2k1/mizani"
+arch="noarch"
+license="MIT"
+depends="
+	python3
+	py3-numpy
+	py3-scipy
+	py3-pandas
+	py3-matplotlib
+	py3-palettable
+	py3-tzdata
+	"
+checkdepends="py3-pytest py3-pytest-cov"
+makedepends="py3-gpep517 py3-setuptools_scm py3-wheel"
+subpackages="$pkgname-pyc"
+source="https://github.com/has2k1/mizani/archive/v$pkgver/mizani-$pkgver.tar.gz"
+builddir="$srcdir/mizani-$pkgver"
+
+build() {
+	export SETUPTOOLS_SCM_PRETEND_VERSION=$pkgver
+	gpep517 build-wheel \
+		--wheel-dir .dist \
+		--output-fd 3 3>&1 >&2
+}
+
+check() {
+	python3 -m pytest -k 'not breaks and not test_bounds'
+}
+
+package() {
+	python3 -m installer -d "$pkgdir" \
+		.dist/mizani-$pkgver-py3-none-any.whl
+}
+
+sha512sums="
+cb9e09d2f696a893f36b4c336b3cb2f0ce9ca2e9e1f7cded510ecd5f7f52131ffa02fbaf7fc34f90a21e12a99b8cbd4615adf8c6e332d89ea37669ca44797cb8  mizani-0.10.0.tar.gz
+"

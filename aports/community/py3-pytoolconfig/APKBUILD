@@ -1,0 +1,43 @@
+# Maintainer: Patrycja Rosa <alpine@ptrcnull.me>
+pkgname=py3-pytoolconfig
+pkgver=1.2.6
+pkgrel=0
+pkgdesc="Python tool configuration"
+url="https://github.com/bagel897/pytoolconfig"
+arch="noarch"
+license="LGPL-3.0-or-later"
+depends="
+	py3-docutils
+	py3-packaging
+	py3-platformdirs
+	py3-sphinx
+	py3-tabulate
+	python3
+	"
+makedepends="py3-gpep517 py3-pdm-backend py3-installer"
+checkdepends="py3-pytest"
+subpackages="$pkgname-pyc"
+source="https://github.com/bagel897/pytoolconfig/archive/v$pkgver/py3-pytoolconfig-$pkgver.tar.gz"
+builddir="$srcdir/pytoolconfig-$pkgver"
+
+build() {
+	export PDM_BUILD_SCM_VERSION=$pkgver
+	gpep517 build-wheel \
+		--wheel-dir .dist \
+		--output-fd 3 3>&1 >&2
+}
+
+check() {
+	python3 -m venv --clear --without-pip --system-site-packages test-env
+	test-env/bin/python3 -m installer .dist/*.whl
+	test-env/bin/python3 -m pytest
+}
+
+package() {
+	python3 -m installer -d "$pkgdir" \
+		.dist/*.whl
+}
+
+sha512sums="
+730f0c82f762124863fb915e10bf83dcbcfe156ac1036dfec1d0d4351522c18a3bc42d51b1e79601cd2335b58151cc1cdb2b707dd1e33526da326aad3234eec0  py3-pytoolconfig-1.2.6.tar.gz
+"

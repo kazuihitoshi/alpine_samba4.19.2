@@ -1,0 +1,74 @@
+# Contributor: Bart Ribbers <bribbers@disroot.org>
+# Maintainer: team/kde <bribbers@disroot.org>
+
+# The group tag is just to easily find this APKBUILD by some scripts for automation
+# group=kde-frameworks
+pkgname=knewstuff5
+pkgver=5.112.0
+pkgrel=0
+pkgdesc="Framework for downloading and sharing additional application data"
+# armhf blocked by qt5-qtdeclarative
+arch="all !armhf"
+url="https://community.kde.org/Frameworks"
+license="LGPL-2.1-or-later"
+depends="kirigami2"
+depends_dev="
+	karchive5-dev
+	kcompletion5-dev
+	kconfig5-dev
+	kcoreaddons5-dev
+	ki18n5-dev
+	kiconthemes5-dev
+	kio5-dev
+	kitemviews5-dev
+	kpackage5-dev
+	kservice5-dev
+	ktextwidgets5-dev
+	kwidgetsaddons5-dev
+	kxmlgui5-dev
+	qt5-qtbase-dev
+	qt5-qtdeclarative-dev
+	syndication5-dev
+	"
+makedepends="$depends_dev
+	doxygen
+	extra-cmake-modules
+	qt5-qttools-dev
+	samurai
+	"
+checkdepends="xvfb-run"
+_repo_url="https://invent.kde.org/frameworks/knewstuff.git"
+source="https://download.kde.org/stable/frameworks/${pkgver%.*}/knewstuff-$pkgver.tar.xz"
+subpackages="$pkgname-dev $pkgname-doc $pkgname-lang"
+builddir="$srcdir/knewstuff-$pkgver"
+
+replaces="knewstuff<=5.110.0-r0"
+
+case "$CARCH" in
+s390x)
+	# times out in knewstuff-installationtest after 300s
+	options="$options !check"
+	;;
+esac
+
+build() {
+	cmake -B build -G Ninja \
+		-DCMAKE_BUILD_TYPE=RelWithDebInfo \
+		-DCMAKE_INSTALL_PREFIX=/usr \
+		-DCMAKE_INSTALL_LIBDIR=lib \
+		-DBUILD_QCH=ON
+	cmake --build build
+}
+
+check() {
+	XDG_RUNTIME_DIR="$(mktemp -p -d "$builddir")" \
+	xvfb-run ctest --test-dir build --output-on-failure
+}
+
+package() {
+	DESTDIR="$pkgdir" cmake --install build
+}
+
+sha512sums="
+b858ee4004fd0a85243206db0a413732f06434cd8fcbf4aa676367ed54259f5f5295e026641784b43969de046711ec5d3a442141a8fc2a5c170041dd588aa4e1  knewstuff-5.112.0.tar.xz
+"

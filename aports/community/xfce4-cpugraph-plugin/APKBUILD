@@ -1,0 +1,32 @@
+# Contributor: Natanael Copa <ncopa@alpinelinux.org>
+# Maintainer: Natanael Copa <ncopa@alpinelinux.org>
+pkgname=xfce4-cpugraph-plugin
+pkgver=1.2.8
+pkgrel=0
+pkgdesc="CPU monitor for the Xfce panel"
+url="https://goodies.xfce.org/projects/panel-plugins/xfce4-cpugraph-plugin"
+arch="all"
+license="GPL-2.0-or-later"
+makedepends="libxfce4ui-dev xfce4-panel-dev"
+subpackages="$pkgname-lang"
+source="https://archive.xfce.org/src/panel-plugins/xfce4-cpugraph-plugin/${pkgver%.*}/xfce4-cpugraph-plugin-$pkgver.tar.bz2"
+
+build() {
+	./configure \
+		--build=$CBUILD \
+		--host=$CHOST \
+		--prefix=/usr \
+		--sysconfdir=/etc \
+		--mandir=/usr/share/man \
+		--infodir=/usr/share/info \
+		--localstatedir=/var
+	make
+}
+
+package() {
+	make -j1 DESTDIR="$pkgdir" install
+}
+
+sha512sums="
+f0f4201d0572997e8c610a25fcb957ebe4dd224204421aeba4e8ca54da71bdd97fa147dd7af7097b9e09ce6e1317836622a0bcbfec9589858010942993e27940  xfce4-cpugraph-plugin-1.2.8.tar.bz2
+"

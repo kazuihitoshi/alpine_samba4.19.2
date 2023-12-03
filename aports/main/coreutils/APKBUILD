@@ -1,0 +1,91 @@
+# Contributor: Valery Kartel <valery.kartel@gmail.com>
+# Contributor: Michael Mason <ms13sp@gmail.com>
+# Maintainer: Natanael Copa <ncopa@alpinelinux.org>
+pkgname=coreutils
+pkgver=9.4
+pkgrel=1
+pkgdesc="The basic file, shell and text manipulation utilities"
+url="https://www.gnu.org/software/coreutils/"
+arch="all"
+license="GPL-3.0-or-later"
+makedepends="acl-dev attr-dev utmps-dev perl openssl-dev"
+subpackages="$pkgname-doc $pkgname-env $pkgname-fmt $pkgname-sha512sum:_sha512sum"
+install="$pkgname.post-deinstall"
+source="https://ftp.gnu.org/gnu/coreutils/coreutils-$pkgver.tar.xz"
+options="!check"
+
+# secfixes:
+#   8.30-r0:
+#     - CVE-2017-18018
+
+build() {
+	CFLAGS="$CFLAGS -I/usr/include/utmps -flto=auto" \
+	LIBS="-lutmps -lskarnet" \
+	./configure \
+		--build=$CBUILD \
+		--host=$CHOST \
+		--prefix=/usr \
+		--sysconfdir=/etc \
+		--mandir=/usr/share/man \
+		--infodir=/usr/share/info \
+		--disable-nls \
+		--enable-no-install-program=hostname,su,kill,uptime \
+		--enable-single-binary=symlinks \
+		--enable-single-binary-exceptions=env,fmt,sha512sum \
+		--with-openssl
+	make
+}
+
+# XXX - some gnulib tests broken, find a way to patch out gnulib tests
+check() {
+	make check
+}
+
+package() {
+	# we put this separately
+	depends="
+		coreutils-env=$pkgver-r$pkgrel
+		coreutils-fmt=$pkgver-r$pkgrel
+		coreutils-sha512sum=$pkgver-r$pkgrel
+		"
+	make DESTDIR="$pkgdir" install
+
+	rm -rf "$pkgdir"/usr/lib/charset.alias
+	rmdir -p "$pkgdir"/usr/lib 2>/dev/null || true
+
+	install -d "$pkgdir"/bin "$pkgdir"/usr/sbin
+	cd "$pkgdir"/usr/bin/
+
+	# binaries that busybox puts in /bin
+	local busybox_bin="base64 cat chgrp chmod chown cp date dd df echo false ln ls
+		mkdir mknod mktemp mv nice printenv pwd rm rmdir sleep stat stty sync touch true uname"
+
+	# as these binaries live in /bin on busybox, we want to put them in /bin with coreutils
+	for i in $busybox_bin; do
+		rm "$pkgdir"/usr/bin/$i
+		ln -s ../usr/bin/coreutils "$pkgdir"/bin/$i
+	done
+
+	# chroot lives in /usr/sbin with busybox
+	rm "$pkgdir"/usr/bin/chroot
+	ln -s ../bin/coreutils "$pkgdir"/usr/sbin/chroot
+
+	# resolve conflict between shadow and coreutils for cmd:groups
+	rm "$pkgdir"/usr/bin/groups
+}
+
+env() {
+	amove usr/bin/env
+}
+
+fmt() {
+	amove usr/bin/fmt
+}
+
+_sha512sum() {
+	amove usr/bin/sha512sum
+}
+
+sha512sums="
+7c55ee23b685a0462bbbd118b04d25278c902604a0dcf3bf4f8bf81faa0500dee5a7813cba6f586d676c98e520cafd420f16479619305e94ea6798d8437561f5  coreutils-9.4.tar.xz
+"

@@ -1,0 +1,52 @@
+# Contributor: Guy Godfroy <guy.godfroy@gugod.fr>
+# Maintainer: Jakub Jirutka <jakub@jirutka.cz>
+pkgname=clipboard
+pkgver=0.8.3
+pkgrel=0
+pkgdesc="Cut, copy, and paste anything, anywhere, all from the terminal"
+url="https://github.com/Slackadays/Clipboard"
+arch="all"
+license="GPL-3.0-only"
+makedepends="alsa-lib-dev cmake libx11-dev samurai wayland-dev wayland-protocols"
+subpackages="$pkgname-doc $pkgname-x11 $pkgname-wayland"
+source="$pkgname-$pkgver.tar.gz::https://github.com/Slackadays/Clipboard/archive/refs/tags/$pkgver.tar.gz"
+builddir="$srcdir/Clipboard-$pkgver"
+options="!check" # No test configuration file
+
+build() {
+	if [ "$CBUILD" != "$CHOST" ]; then
+		CMAKE_CROSSOPTS="-DCMAKE_SYSTEM_NAME=Linux -DCMAKE_HOST_SYSTEM_NAME=Linux"
+	fi
+	CFLAGS="$CFLAGS -DNDEBUG" \
+	CXXFLAGS="$CXXFLAGS -DNDEBUG" \
+	cmake -B build -G Ninja \
+		-DCMAKE_INSTALL_PREFIX=/usr \
+		-DCMAKE_BUILD_TYPE=None \
+		-DCMAKE_SKIP_INSTALL_RPATH=ON \
+		-DNO_LTO=1 \
+		$CMAKE_CROSSOPTS
+	cmake --build build
+}
+
+package() {
+	DESTDIR="$pkgdir" cmake --install build
+}
+
+x11() {
+	pkgdesc="$pkgdesc (x11 clipboard integration)"
+	# pretty much always installed anyway
+	install_if="$pkgname=$pkgver-r$pkgrel libx11"
+
+	amove usr/lib/libcbx11.so
+}
+
+wayland() {
+	pkgdesc="$pkgdesc (wayland clipboard integration)"
+	install_if="$pkgname=$pkgver-r$pkgrel wayland-libs-server"
+
+	amove usr/lib/libcbwayland.so
+}
+
+sha512sums="
+fd906ebd42e894da7770713a6b7f9ca7327f9550d2d046d8e93cac6bfd44f6408f3e6286c7d51e4a5087b1ed2d5097fee6a25c1b13aa5d924a63eef60acf346d  clipboard-0.8.3.tar.gz
+"

@@ -1,0 +1,37 @@
+# Contributor: Patrycja Rosa <alpine@ptrcnull.me>
+# Maintainer: Patrycja Rosa <alpine@ptrcnull.me>
+pkgname=py3-poetry-dynamic-versioning
+pkgver=1.1.1
+pkgrel=0
+pkgdesc="Plugin for Poetry to enable dynamic versioning based on VCS tags"
+url="https://github.com/mtkennerly/poetry-dynamic-versioning"
+arch="noarch"
+license="MIT"
+depends="py3-dunamai py3-tomlkit py3-jinja2 py3-poetry-core"
+makedepends="py3-gpep517 py3-poetry-core py3-wheel py3-installer"
+checkdepends="py3-pytest"
+subpackages="$pkgname-pyc"
+source="https://github.com/mtkennerly/poetry-dynamic-versioning/archive/v$pkgver/py3-poetry-dynamic-versioning-$pkgver.tar.gz"
+builddir="$srcdir/poetry-dynamic-versioning-$pkgver"
+options="!check" # tests require a git repo
+
+build() {
+	gpep517 build-wheel \
+		--wheel-dir .dist \
+		--output-fd 3 3>&1 >&2
+}
+
+check() {
+	python3 -m venv --clear --without-pip --system-site-packages .testenv
+	.testenv/bin/python3 -m installer .dist/*.whl
+	.testenv/bin/python3 -m pytest
+}
+
+package() {
+	python3 -m installer -d "$pkgdir" \
+		.dist/*.whl
+}
+
+sha512sums="
+0a2f3abe3de5e4929394c196d207370561826903552f100aac0c9b838788abeb12a30531789278effcbdf82293935a7102f0826c534440c4c4f2ecd4cb5f544f  py3-poetry-dynamic-versioning-1.1.1.tar.gz
+"

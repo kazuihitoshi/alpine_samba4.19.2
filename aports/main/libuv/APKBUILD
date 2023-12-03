@@ -1,0 +1,50 @@
+# Contributor: Jose-Luis Rivas <ghostbar@riseup.net>
+# Contributor: Sören Tempel <soeren+alpine@soeren-tempel.net>
+# Maintainer: Natanael Copa <ncopa@alpinelinux.org>
+pkgname=libuv
+pkgver=1.47.0
+pkgrel=0
+pkgdesc="Cross-platform asychronous I/O"
+url="https://libuv.org/"
+arch="all"
+license="MIT"
+makedepends_build="automake autoconf libtool"
+makedepends_host="linux-headers"
+subpackages="$pkgname-dbg $pkgname-static $pkgname-dev"
+source="https://dist.libuv.org/dist/v$pkgver/libuv-v$pkgver.tar.gz"
+builddir="$srcdir/$pkgname-v$pkgver"
+
+# secfixes:
+#   1.39.0-r0:
+#     - CVE-2020-8252
+
+prepare() {
+	default_prepare
+	sh autogen.sh
+}
+
+build() {
+	CFLAGS="$CFLAGS -O2" \
+	./configure \
+		--build=$CBUILD \
+		--host=$CHOST \
+		--prefix=/usr \
+		--sysconfdir=/etc \
+		--mandir=/usr/share/man \
+		--localstatedir=/var
+	make
+}
+
+check() {
+	make check
+}
+
+package() {
+	make DESTDIR="$pkgdir" install
+	install -Dm644 LICENSE \
+		"$pkgdir"/usr/share/licenses/$pkgname/LICENSE
+}
+
+sha512sums="
+3fb6db0109dfa49db0e6028f6667ab5245b9707df337134ce6e1e9c9f82d4d686356cad30221094f79e87441e300f3c036a3cf04838d6eb23d4f27b1aaf4da13  libuv-v1.47.0.tar.gz
+"

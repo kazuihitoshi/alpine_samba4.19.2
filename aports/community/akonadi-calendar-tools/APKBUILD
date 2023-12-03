@@ -1,0 +1,50 @@
+# Contributor: Bart Ribbers <bribbers@disroot.org>
+# Maintainer: team/kde <bribbers@disroot.org>
+
+# The group tag is just to easily find this APKBUILD by some scripts for automation
+# group=kde-applications
+pkgname=akonadi-calendar-tools
+pkgver=23.08.3
+pkgrel=0
+# armhf blocked by extra-cmake-modules
+# ppc64le, s390x and riscv64 blocked by akonadi-calendar -> kmailtransport -> libkgapi -> qt5-qtwebengine
+arch="all !armhf !ppc64le !s390x !riscv64"
+url="https://kontact.kde.org/"
+pkgdesc="CLI tools to manage akonadi calendars"
+license="GPL-2.0-or-later AND GFDL-1.2-only"
+makedepends="
+	akonadi-calendar-dev
+	akonadi-dev>=$pkgver
+	calendarsupport-dev
+	extra-cmake-modules
+	kcalendarcore5-dev
+	kcalutils-dev
+	kdoctools5-dev
+	libkdepim-dev
+	qt5-qtbase-dev
+	samurai
+	"
+_repo_url="https://invent.kde.org/pim/akonadi-calendar-tools.git"
+source="https://download.kde.org/stable/release-service/$pkgver/src/akonadi-calendar-tools-$pkgver.tar.xz"
+subpackages="$pkgname-doc $pkgname-lang"
+options="!check" # No tests available
+
+build() {
+	cmake -B build -G Ninja \
+		-DCMAKE_BUILD_TYPE=MinSizeRel \
+		-DCMAKE_INSTALL_PREFIX=/usr \
+		-DCMAKE_INSTALL_LIBDIR=lib
+	cmake --build build
+}
+
+check() {
+	ctest --test-dir build --output-on-failure
+}
+
+package() {
+	DESTDIR="$pkgdir" cmake --install build
+}
+
+sha512sums="
+573ca13d90c5e82bde83ba38a21ecbfaaf4f81a82d31ab3c6f7a272fcc18cb4b9f6ccaf481c3cd4b3693ac2b1dc19ac48f282ca5929269fa8f48fc6a5691aed8  akonadi-calendar-tools-23.08.3.tar.xz
+"

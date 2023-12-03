@@ -1,0 +1,46 @@
+# Contributor: Francesco Colista <fcolista@alpinelinux.org>
+# Maintainer: Francesco Colista <fcolista@alpinelinux.org>
+pkgname=py3-bcrypt
+_pkgname=bcrypt
+pkgver=4.1.1
+pkgrel=0
+pkgdesc="Modern password hashing for your software and your servers"
+url="https://github.com/pyca/bcrypt"
+arch="all"
+license="Apache-2.0"
+depends="py3-cffi"
+makedepends="
+	libffi-dev
+	py3-cparser
+	py3-gpep517
+	py3-setuptools
+	py3-setuptools-rust
+	py3-wheel
+	python3-dev
+	"
+checkdepends="py3-pytest"
+options="net"
+subpackages="$pkgname-pyc"
+source="$pkgname-$pkgver.tar.gz::https://github.com/pyca/$_pkgname/archive/$pkgver.tar.gz"
+builddir="$srcdir/$_pkgname-$pkgver"
+
+build() {
+	gpep517 build-wheel \
+		--wheel-dir .dist \
+		--output-fd 3 3>&1 >&2
+}
+
+check() {
+	python3 -m venv --clear --without-pip --system-site-packages .testenv
+	.testenv/bin/python3 -m installer .dist/bcrypt-*.whl
+	.testenv/bin/python3 -m pytest
+}
+
+package() {
+	python3 -m installer -d "$pkgdir" \
+		.dist/bcrypt-*.whl
+}
+
+sha512sums="
+fec2df0da06ded99bdcf5a32298ad362d5b9efdc159bc72d3eb2aa74fe01bc56ec6cbb8ed4b822301e208772dd1d10bf542d4f44fe31d82fe88e26bd6a726b47  py3-bcrypt-4.1.1.tar.gz
+"

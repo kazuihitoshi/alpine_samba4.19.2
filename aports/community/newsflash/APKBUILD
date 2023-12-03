@@ -1,0 +1,39 @@
+# Contributor: Alex McGrath <amk@amk.ie>
+# Maintainer: Alex McGrath <amk@amk.ie>
+pkgname=newsflash
+pkgver=3.0.2
+pkgrel=0
+pkgdesc="An rss feed reader that supports various web based services"
+url="https://gitlab.com/news-flash/news_flash_gtk/"
+arch="all !s390x !riscv64 !ppc64le" # ring crate fails to build
+license="GPL-3.0-only"
+depends="desktop-file-utils"
+makedepends="
+	bash
+	blueprint-compiler
+	cargo
+	gettext-dev
+	libadwaita-dev
+	meson
+	openssl-dev>3
+	sqlite-dev
+	webkit2gtk-6.0-dev
+	"
+subpackages="$pkgname-lang"
+source="https://gitlab.com/news-flash/news_flash_gtk/-/archive/v.$pkgver/news_flash_gtk-v.$pkgver.tar.gz"
+options="net !check" # no tests
+builddir="$srcdir/news_flash_gtk-v.$pkgver"
+
+build() {
+	abuild-meson . output
+	meson compile -j 1 -C output
+}
+
+package() {
+	DESTDIR="$pkgdir" meson install --no-rebuild -C output
+	ln -s io.gitlab.news_flash.NewsFlash "$pkgdir"/usr/bin/newsflash
+}
+
+sha512sums="
+4654557549d0ca37e04ae1061a96e26b2b145ae8d472cdaaa827ba32e7f9f82bcb66337f55dd446aac8dd31b38cacb4d54a6494cec23849eb75c11f943b15507  news_flash_gtk-v.3.0.2.tar.gz
+"

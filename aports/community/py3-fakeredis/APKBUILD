@@ -1,0 +1,46 @@
+# Maintainer: Leonardo Arena <rnalrd@alpinelinux.org>
+pkgname=py3-fakeredis
+_pkgname=${pkgname#py3-}
+pkgver=2.20.0
+pkgrel=0
+pkgdesc="Fake implementation of redis API for testing purposes"
+url="https://pypi.org/project/fakeredis/"
+arch="noarch"
+license="BSD-3-Clause"
+depends="py3-packaging py3-redis py3-sortedcontainers"
+makedepends="py3-poetry-core py3-gpep517"
+checkdepends="
+	py3-hypothesis
+	py3-lupa
+	py3-pytest
+	py3-pytest-asyncio
+	py3-pytest-mock
+	py3-pytest-xdist
+	"
+subpackages="$pkgname-pyc"
+source="$pkgname-$pkgver.tar.gz::https://files.pythonhosted.org/packages/source/${_pkgname:0:1}/$_pkgname/$_pkgname-$pkgver.tar.gz
+	fix-test-exception-msg.patch
+	"
+builddir="$srcdir"/$_pkgname-$pkgver
+
+build() {
+	gpep517 build-wheel \
+		--wheel-dir .dist \
+		--output-fd 3 3>&1 >&2
+}
+
+check() {
+	python3 -m venv --clear --without-pip --system-site-packages .testenv
+	.testenv/bin/python3 -m installer .dist/*.whl
+	.testenv/bin/python3 -m pytest -n auto
+}
+
+package() {
+	python3 -m installer -d "$pkgdir" \
+		.dist/*.whl
+}
+
+sha512sums="
+3c71a42df92a92b02c4774cf120c697a5e7f376768923b74561fb4cbe10605b4d57ea826d2b8c4d304ff1e12cf4c84d0fbebc34edd0afa0b0241ff7cb707e5de  py3-fakeredis-2.20.0.tar.gz
+69ffb5c3eb8e991cdfe8900c72df3de421b696ecab55fadd51ba30d3283cf71e64ad80ceef298e0aa93ea1504a4f98ef2df37488d9498050aef01975e67e019c  fix-test-exception-msg.patch
+"

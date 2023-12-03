@@ -1,0 +1,30 @@
+# Maintainer: Willow Barraco <contact@willowbarraco.fr>
+pkgname=hare-ev
+pkgver=0_git20231030
+_commit=9bdbd02401334b7d762131a46e64ca2cd24846dc
+pkgrel=0
+pkgdesc="Event loop for Hare"
+url="https://git.sr.ht/~sircmpwn/hare-ev"
+arch="x86_64 aarch64 riscv64" # hare
+license="MPL-2.0"
+makedepends="hare"
+source="
+	$pkgname-$_commit.tar.gz::https://git.sr.ht/~sircmpwn/hare-ev/archive/$_commit.tar.gz
+"
+builddir="$srcdir/$pkgname-$_commit"
+
+build() {
+	make -j1 PREFIX=/usr
+}
+
+check() {
+	make check
+}
+
+package() {
+	make DESTDIR="$pkgdir" PREFIX=/usr install
+}
+
+sha512sums="
+ef322c149eba594acca17c8b6ca816b4209cf095240474c27393b6b23c385f4c20091e72478a27b487085b45d14244c08b9e5ae6325fc644123f6600ac38b281  hare-ev-9bdbd02401334b7d762131a46e64ca2cd24846dc.tar.gz
+"

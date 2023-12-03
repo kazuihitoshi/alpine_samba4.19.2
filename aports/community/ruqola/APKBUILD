@@ -1,0 +1,79 @@
+# Contributor: Bart Ribbers <bribbers@disroot.org>
+# Maintainer: Bart Ribbers <bribbers@disroot.org>
+
+# The group tag is just to easily find this APKBUILD by some scripts for automation
+# group=kde-other
+pkgname=ruqola
+pkgver=2.0.0
+pkgrel=0
+pkgdesc="A Qt client for Rocket Chat"
+url="https://invent.kde.org/network/ruqola"
+# armhf blocked by qt5-qtdeclarative-dev
+arch="all !armhf"
+license="GPL-2.0-only OR GPL-3.0-only"
+makedepends="
+	extra-cmake-modules
+	kconfig5-dev
+	kcoreaddons5-dev
+	kcrash5-dev
+	kdbusaddons5-dev
+	kdoctools5-dev
+	ki18n5-dev
+	kidletime5-dev
+	kio5-dev
+	knotifications5-dev
+	knotifyconfig5-dev
+	ktextwidgets5-dev
+	kuserfeedback-dev
+	kxmlgui5-dev
+	libsecret-dev
+	prison5-dev
+	qt5-qtbase-dev
+	qtkeychain-dev
+	qt5-qtmultimedia-dev
+	qt5-qtnetworkauth-dev
+	qt5-qtwebsockets-dev
+	samurai
+	sonnet5-dev
+	syntax-highlighting5-dev
+	"
+checkdepends="xvfb-run"
+_repo_url="https://invent.kde.org/network/ruqola.git"
+source="https://download.kde.org/stable/ruqola/ruqola-$pkgver.tar.xz"
+
+build() {
+	cmake -B build -G Ninja \
+		-DCMAKE_BUILD_TYPE=RelWithDebInfo \
+		-DCMAKE_INSTALL_PREFIX=/usr \
+		-DCMAKE_INSTALL_LIBDIR=lib
+	cmake --build build
+}
+
+check() {
+	# Skip broken tests
+	local skipped_tests="("
+	local tests="
+		roomscleanhistoryjob
+		roomsexportjob
+		user
+		channelcounterinfo
+		roomheaderwidget
+		messagelinewidget
+		messagelistdelegate
+		inviteuserswidget
+		showvideowidget
+		"
+	for test in $tests; do
+		skipped_tests="$skipped_tests|$test"
+	done
+	skipped_tests="$skipped_tests)test"
+	xvfb-run ctest --test-dir build --output-on-failure -E "$skipped_tests"
+}
+
+package() {
+	DESTDIR="$pkgdir" cmake --install build
+}
+
+sha512sums="
+3e60f4f2dd8de0a160ed624f661e005f167d57a49bc93c200c98241205d27791886cd49f8f637f0fda8dd1f71a64e4c8e2e0fc8ea4abb9a25cb07750b3761004  ruqola-2.0.0.tar.xz
+"

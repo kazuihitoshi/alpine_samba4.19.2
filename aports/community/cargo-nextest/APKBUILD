@@ -1,0 +1,58 @@
+# Contributor: Jakub Jirutka <jakub@jirutka.cz>
+# Maintainer: Jakub Jirutka <jakub@jirutka.cz>
+pkgname=cargo-nextest
+pkgver=0.9.58
+pkgrel=0
+pkgdesc="A next-generation test runner for Rust"
+url="https://nexte.st/"
+# s390x, ppc64le: no ring crate
+arch="all !s390x !ppc64le"
+license="Apache-2.0 OR MIT"
+depends="cargo"
+makedepends="
+	cargo
+	cargo-auditable
+	zstd-dev
+	"
+source="https://github.com/nextest-rs/nextest/archive/cargo-nextest-$pkgver.tar.gz"
+builddir="$srcdir/nextest-$pkgname-$pkgver"
+options="net"  # integration tests need net
+
+case "$CARCH" in
+# Tests hang on CI.
+riscv64) options="$options !check" ;;
+esac
+
+_cargo_opts="--frozen --no-default-features --features default-no-update"
+
+prepare() {
+	default_prepare
+
+	# Rust target triple.
+	local target=$(rustc -vV | sed -n 's/host: //p')
+
+	# Build against system-provided libzstd.
+	cat >> .cargo/config.toml <<-EOF
+		[target.$target]
+		zstd = { rustc-link-lib = ["zstd"] }
+	EOF
+
+	cargo fetch --target="$CTARGET" --locked
+}
+
+build() {
+	cargo auditable build -p cargo-nextest $_cargo_opts --release
+}
+
+check() {
+	cargo auditable build -p nextest-runner --bin passthrough --frozen
+	PATH="$PWD/target/release:$PWD/target/debug:$PATH" cargo nextest run $_cargo_opts
+}
+
+package() {
+	install -D -m755 target/release/cargo-nextest -t "$pkgdir"/usr/bin/
+}
+
+sha512sums="
+73bb3bf2cccf100f1040c941796744e441d063dca4c68a268d2c85d02c9a5ca5a43caa966c7d4cb5e1d8f66cf3ad329b40cc3a0650f56cd9d7fe0094cadaceb3  cargo-nextest-0.9.58.tar.gz
+"

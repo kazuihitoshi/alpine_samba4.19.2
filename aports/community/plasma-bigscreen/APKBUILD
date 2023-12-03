@@ -1,0 +1,70 @@
+# Contributor: Bart Ribbers <bribbers@disroot.org>
+# Maintainer: team/kde <bribbers@disroot.org>
+
+# The group tag is just to easily find this APKBUILD by some scripts for automation
+# group=kde-plasma
+pkgname=plasma-bigscreen
+pkgver=5.27.9
+pkgrel=0
+pkgdesc="A 10-feet interface made for TVs"
+url="https://invent.kde.org/plasma/plasma-bigscreen/"
+# armhf blocked by qt5-qtdeclarative
+arch="all !armhf"
+license="LGPL-2.1-only OR LGPL-3.0-only OR LicenseRef-KDE-Accepted-LGPL"
+depends="
+	kde-cli-tools
+	kdeconnect
+	kirigami2
+	plasma-nano
+	plasma-nm
+	plasma-pa
+	plasma-remotecontrollers
+	plasma-settings
+	plasma-workspace
+	"
+makedepends="
+	extra-cmake-modules
+	kactivities5-dev
+	kactivities-stats5-dev
+	kcmutils5-dev
+	kdeclarative5-dev
+	ki18n5-dev
+	kio5-dev
+	kirigami2-dev
+	knotifications5-dev
+	kwayland5-dev
+	kwindowsystem5-dev
+	plasma-framework5-dev
+	plasma-workspace-dev
+	qt5-qtbase-dev
+	qt5-qtdeclarative-dev
+	qt5-qtmultimedia-dev
+	samurai
+	"
+subpackages="$pkgname-lang"
+case "$pkgver" in
+	*.90*) _rel=unstable;;
+	*) _rel=stable;;
+esac
+_repo_url="https://invent.kde.org/plasma/plasma-bigscreen.git"
+source="https://download.kde.org/$_rel/plasma/$pkgver/plasma-bigscreen-$pkgver.tar.xz"
+
+build() {
+	cmake -B build -G Ninja \
+		-DCMAKE_BUILD_TYPE=RelWithDebInfo \
+		-DCMAKE_INSTALL_PREFIX=/usr \
+		-DCMAKE_INSTALL_LIBDIR=lib
+	cmake --build build
+}
+
+check() {
+	ctest --test-dir build --output-on-failure
+}
+
+package() {
+	DESTDIR="$pkgdir" cmake --install build
+}
+
+sha512sums="
+9a2761641bdc1f0187212b78536f18498131c9a66a820f71dbf057ac35463ad1493372adf8ec785d4a9a77b51e0812b0de2aa00aff157997c9f3d77fedef853d  plasma-bigscreen-5.27.9.tar.xz
+"

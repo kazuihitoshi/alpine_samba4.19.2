@@ -1,0 +1,29 @@
+# Contributor: Will Sinatra <wpsinatra@gmail.com>
+# Maintainer: Will Sinatra <wpsinatra@gmail.com>
+pkgname=tflint
+pkgver=0.49.0
+pkgrel=0
+pkgdesc="A linter for Terraform code"
+license="MIT"
+arch="all"
+makedepends="go"
+url="https://github.com/terraform-linters/tflint"
+source="tflint-$pkgver.tar.gz::https://github.com/terraform-linters/tflint/archive/v$pkgver.tar.gz"
+options="!check" #No tests
+
+export GOFLAGS="$GOFLAGS -modcacherw"
+export GOCACHE="${GOCACHE:-"$srcdir/go-cache"}"
+export GOTMPDIR="${GOTMPDIR:-"$srcdir"}"
+export GOMODCACHE="${GOMODCACHE:-"$srcdir/go"}"
+
+build() {
+	go build -o tflint-bin
+}
+
+package() {
+	install -Dm755 $srcdir/tflint-$pkgver/tflint-bin $pkgdir/usr/bin/tflint
+}
+
+sha512sums="
+3f7bf0f545a909cee367b5a575c5296a3d5b6e350aaefb8825b290b64fd560a1f542601ee9ba42bd899b452d4a09c0194600d715855404f179850b198d399a6f  tflint-0.49.0.tar.gz
+"

@@ -1,0 +1,105 @@
+# Contributor: Valery Kartel <valery.kartel@gmail.com>
+# Contributor: Łukasz Jendrysik <scadu@yandex.com>
+# Maintainer: Natanael Copa <ncopa@alpinelinux.org>
+pkgname=btrfs-progs
+pkgver=6.6.2
+pkgrel=0
+pkgdesc="BTRFS filesystem utilities"
+url="https://btrfs.wiki.kernel.org"
+arch="all"
+license="GPL-2.0-or-later"
+depends_dev="linux-headers"
+makedepends="$depends_dev
+	acl-dev
+	asciidoc
+	attr-dev
+	e2fsprogs-dev
+	eudev-dev
+	lzo-dev
+	py3-setuptools
+	py3-sphinx
+	python3-dev
+	util-linux-dev
+	xmlto
+	zlib-dev
+	zstd-dev
+	"
+checkdepends="
+	acl
+	coreutils
+	libaio-dev
+	liburing-dev
+	losetup
+	xz
+	"
+subpackages="
+	$pkgname-doc
+	$pkgname-static
+	$pkgname-dev
+	$pkgname-bash-completion
+	py3-$pkgname:py3
+	$pkgname-libs
+	$pkgname-extra
+	$pkgname-openrc
+	"
+source="https://www.kernel.org/pub/linux/kernel/people/kdave/btrfs-progs/btrfs-progs-v$pkgver.tar.xz
+	btrfs-scan.initd
+	"
+builddir="$srcdir/$pkgname-v$pkgver"
+# most pass, one fails to build (fsstress renameat2)
+options="!check"
+
+build() {
+	./configure \
+		--build=$CBUILD \
+		--host=$CHOST \
+		--prefix=/usr \
+		--sysconfdir=/etc \
+		--mandir=/usr/share/man \
+		--localstatedir=/var \
+		--disable-backtrace
+	make
+}
+
+check() {
+	make test
+}
+
+package() {
+	make DESTDIR="$pkgdir" install install_python
+
+	mkdir -p "$pkgdir"/usr/share/doc/$pkgname
+	install -m644 README.md CHANGES \
+		"$pkgdir"/usr/share/doc/$pkgname
+
+	mkdir "$pkgdir"/sbin
+	local i; for i in btrfs btrfsck fsck.btrfs mkfs.btrfs; do
+		mv "$pkgdir"/usr/bin/$i "$pkgdir"/sbin/
+	done
+	mv "$pkgdir"/usr/bin "$pkgdir"/usr/sbin
+
+	install -Dm644 btrfs-completion \
+		"$pkgdir"/usr/share/bash-completion/completions/btrfs
+
+	install -Dm755 "$srcdir"/btrfs-scan.initd "$pkgdir"/etc/init.d/btrfs-scan
+}
+
+py3() {
+	pkgdesc="Python 3 bindings for $pkgname"
+	provides="py-btrfs-progs=$pkgver-r$pkgrel"  # for backward compatibility
+	replaces="py-btrfs-progs"  # for backward compatibility
+
+	amove usr/lib/python*
+}
+
+extra() {
+	depends="$pkgname"
+	pkgdesc="BTRFS filesystem extra utilities"
+
+	amove usr/sbin
+}
+
+sha512sums="
+23878cdd6f16a7ddba55321169bf7dd565719dd5d16a5a47fb7879aa0e04bd9008dc436cdbb712cee286b3a9b97ac3a4f6ea22213286a5025b5371d7975a2fa8  btrfs-progs-v6.6.2.tar.xz
+5077492776f1249ce5828c65050b1aeba55535133b734afd670c81a5585084586d4a89271bf01b5d7247295c5bb1fcd3af3cdbaab2ebcf3e5a0a319450cb4edd  btrfs-scan.initd
+"

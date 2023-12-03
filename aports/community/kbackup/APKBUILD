@@ -1,0 +1,52 @@
+# Contributor: Bart Ribbers <bribbers@disroot.org>
+# Maintainer: team/kde <bribbers@disroot.org>
+
+# The group tag is just to easily find this APKBUILD by some scripts for automation
+# group=kde-applications
+pkgname=kbackup
+pkgver=23.08.3
+pkgrel=0
+# armhf blocked by extra-cmake-modules
+arch="all !armhf"
+url="https://kde.org/applications/utilities/org.kde.kbackup"
+pkgdesc="An application which lets you back up your data in a simple, user friendly way"
+license="GPL-2.0-only"
+makedepends="
+	extra-cmake-modules
+	karchive5-dev
+	kdoctools5-dev
+	ki18n5-dev
+	kiconthemes5-dev
+	kio5-dev
+	knotifications5-dev
+	kwidgetsaddons5-dev
+	kxmlgui5-dev
+	libarchive-dev
+	qt5-qtbase-dev
+	samurai
+	shared-mime-info
+	"
+_repo_url="https://invent.kde.org/utilities/kbackup.git"
+source="https://download.kde.org/stable/release-service/$pkgver/src/kbackup-$pkgver.tar.xz"
+subpackages="$pkgname-doc $pkgname-lang"
+options="!check" # No tests
+
+build() {
+	cmake -B build -G Ninja \
+		-DCMAKE_BUILD_TYPE=RelWithDebInfo \
+		-DCMAKE_INSTALL_PREFIX=/usr \
+		-DCMAKE_INSTALL_LIBDIR=lib
+	cmake --build build
+}
+
+check() {
+	ctest --test-dir build --output-on-failure
+}
+
+package() {
+	DESTDIR="$pkgdir" cmake --install build
+}
+
+sha512sums="
+459769a66445d3632e64814b23e8072a4c638f9fb1e3436fdfabf12e01909e2e579f6d15b952f642b091119fcc6df7f0eb03b12c37e8fb910e3856580b950a00  kbackup-23.08.3.tar.xz
+"

@@ -1,0 +1,37 @@
+# Maintainer: Hoang Nguyen <folliekazetani@protonmail.com>
+pkgname=cloud-hypervisor
+pkgver=36.0
+pkgrel=0
+pkgdesc="Virtual machine monitor for modern cloud workloads"
+url="https://www.cloudhypervisor.org/"
+# Only x86_64 and aarch64 are officially supported
+arch="x86_64 aarch64"
+license="Apache-2.0 AND BSD-3-Clause"
+makedepends="cargo libcap-utils cargo-auditable"
+source="https://github.com/cloud-hypervisor/cloud-hypervisor/releases/download/v$pkgver/cloud-hypervisor-v$pkgver.tar.xz"
+builddir="$srcdir/$pkgname-v$pkgver"
+# tests require CAP_NET_ADMIN capability
+# setcap cap_net_admin
+options="!check setcap"
+
+prepare() {
+	default_prepare
+	cargo fetch --target="$CTARGET" --locked
+}
+
+build() {
+	cargo auditable build --release --frozen
+}
+
+package() {
+	install -Dm755 -t "$pkgdir"/usr/bin/ \
+		target/release/cloud-hypervisor \
+		target/release/ch-remote
+
+	# Needs NET_ADMIN capabilities to set TAP interfaces up on the host
+	setcap cap_net_admin=+ep "$pkgdir"/usr/bin/cloud-hypervisor
+}
+
+sha512sums="
+59c8735af5b3c0bd371e752fbba5bc802c8baae933dbccf0b6c26a85d0b30788ff17a52c87702feda44cf3de3e6581a3ffc8cab69bbff38193b76ade60c2ef7e  cloud-hypervisor-v36.0.tar.xz
+"

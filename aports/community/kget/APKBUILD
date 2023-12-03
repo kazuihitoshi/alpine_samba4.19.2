@@ -1,0 +1,71 @@
+# Contributor: Bart Ribbers <bribbers@disroot.org>
+# Maintainer: team/kde <bribbers@disroot.org>
+
+# The group tag is just to easily find this APKBUILD by some scripts for automation
+# group=kde-applications
+pkgname=kget
+pkgver=23.08.3
+pkgrel=0
+# armhf blocked by extra-cmake-modules
+arch="all !armhf"
+url="https://kde.org/applications/internet/org.kde.kget"
+pkgdesc="A versatile and user-friendly download manager"
+license="GPL-2.0-or-later AND LGPL-2.0-only AND GFDL-1.2-only"
+makedepends="
+	extra-cmake-modules
+	gpgme-dev
+	kcmutils5-dev
+	kcompletion5-dev
+	kconfig5-dev
+	kconfigwidgets5-dev
+	kcoreaddons5-dev
+	kcrash5-dev
+	kdbusaddons5-dev
+	kdelibs4support-dev
+	kdoctools5-dev
+	ki18n5-dev
+	kiconthemes5-dev
+	kio5-dev
+	kitemmodels5-dev
+	kitemviews5-dev
+	knotifications5-dev
+	knotifyconfig5-dev
+	kparts5-dev
+	kservice5-dev
+	ktextwidgets5-dev
+	kwallet5-dev
+	kwidgetsaddons5-dev
+	kwindowsystem5-dev
+	kxmlgui5-dev
+	libktorrent-dev
+	libmms-dev
+	plasma-workspace-dev
+	qca-dev
+	qt5-qtbase-dev
+	samurai
+	sqlite-dev
+	"
+_repo_url="https://invent.kde.org/network/kget.git"
+source="https://download.kde.org/stable/release-service/$pkgver/src/kget-$pkgver.tar.xz"
+subpackages="$pkgname-doc $pkgname-lang"
+options="!check" # No tests
+
+build() {
+	cmake -B build -G Ninja \
+		-DCMAKE_BUILD_TYPE=RelWithDebInfo \
+		-DCMAKE_INSTALL_PREFIX=/usr \
+		-DCMAKE_INSTALL_LIBDIR=lib
+	cmake --build build
+}
+
+check() {
+	ctest --test-dir build --output-on-failure
+}
+
+package() {
+	DESTDIR="$pkgdir" cmake --install build
+}
+
+sha512sums="
+97b1c22e9f5ad7eaf8d38ebe950638e8aaf208271be18c8c39202ba8d36d5adfb20989325fc497bfce8ceb5ed8e529cd5a0fe2eda47fb986b48842a7d700e5b7  kget-23.08.3.tar.xz
+"

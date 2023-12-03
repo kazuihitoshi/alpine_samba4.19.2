@@ -1,0 +1,39 @@
+# Contributor: Andrej Kolchin <KAAtheWise@protonmail.com>
+# Maintainer: Andrej Kolchin <KAAtheWise@protonmail.com>
+pkgname=carapace
+pkgver=0.28.3
+pkgrel=0
+pkgdesc="Multi-shell multi-command argument completer"
+url="https://rsteube.github.io/carapace-bin/"
+arch="all"
+license="MIT"
+makedepends="go"
+source="$pkgname-$pkgver.tar.gz::https://github.com/rsteube/carapace-bin/archive/v$pkgver.tar.gz"
+# fixes the tar archive unpacking to carapace-bin-$pkgver
+_pkgname=carapace-bin
+builddir="$srcdir/$_pkgname-$pkgver"
+
+export GOCACHE="${GOCACHE:-"$srcdir/go-cache"}"
+export GOTMPDIR="${GOTMPDIR:-"$srcdir"}"
+export GOMODCACHE="${GOMODCACHE:-"$srcdir/go"}"
+export GOFLAGS="$GOFLAGS -modcacherw"
+
+build() {
+	go generate ./cmd/carapace/...
+	go build -tags release ./cmd/carapace
+}
+
+check() {
+	# The two lone tests in the repository.
+	# There is also 'completers/pandoc_completer/cmd/action', but it
+	# shadows the release completer.
+	go test ./cmd/carapace ./completers_release/pandoc_completer/cmd/action
+}
+
+package() {
+	install -Dm755 carapace -t "$pkgdir"/usr/bin
+}
+
+sha512sums="
+e6d71a05f347a9002ecf80090cb50342cf24e085b393d29aa10878c9b79796950836c019027ce2d8519251a88c0f1cd9fa9a39b5907f8aa55558a98fc6249462  carapace-0.28.3.tar.gz
+"

@@ -1,0 +1,47 @@
+# Contributor: Bhushan Shah <bshah@kde.org>
+# Maintainer: team/kde <bribbers@disroot.org>
+
+# The group tag is just to easily find this APKBUILD by some scripts for automation
+# group=kde-plasma
+pkgname=kwayland-integration
+pkgver=5.27.9
+pkgrel=0
+pkgdesc="KWayland integration"
+url="https://kde.org/plasma-desktop/"
+arch="all !armhf" # armhf blocked by extra-cmake-modules
+license="LGPL-2.1-only OR LGPL-3.0-only"
+depends="kglobalaccel5"
+makedepends="
+	extra-cmake-modules
+	kguiaddons5-dev
+	kidletime5-dev
+	kwayland5-dev
+	kwindowsystem5-dev
+	qt5-qtbase-dev
+	samurai
+	wayland-protocols
+	"
+
+case "$pkgver" in
+	*.90*) _rel=unstable;;
+	*) _rel=stable;;
+esac
+_repo_url="https://invent.kde.org/plasma/kwayland-integration.git"
+source="https://download.kde.org/$_rel/plasma/$pkgver/kwayland-integration-$pkgver.tar.xz"
+options="!check" # Broken
+
+build() {
+	cmake -B build -G Ninja \
+		-DCMAKE_BUILD_TYPE=RelWithDebInfo \
+		-DCMAKE_INSTALL_PREFIX=/usr \
+		-DCMAKE_INSTALL_LIBDIR=lib
+	cmake --build build
+}
+
+package() {
+	DESTDIR="$pkgdir" cmake --install build
+}
+
+sha512sums="
+aaea32038eb9098387d819e9c9dcff4f5b4634841614a0a5c5db9528a6f51d5197cab5ee24dccfbba400b7c012f6360248b4d8c64948c79ee7a545009a64594f  kwayland-integration-5.27.9.tar.xz
+"

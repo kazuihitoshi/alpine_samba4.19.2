@@ -1,0 +1,50 @@
+# Contributor: Michał Polański <michal@polanski.me>
+# Maintainer: Michał Polański <michal@polanski.me>
+pkgname=yambar
+pkgver=1.10.0
+pkgrel=0
+pkgdesc="Modular status panel for X11 and Wayland, inspired by Polybar"
+url="https://codeberg.org/dnkl/yambar"
+license="MIT"
+arch="all"
+makedepends="
+	alsa-lib-dev
+	bison
+	eudev-dev
+	fcft-dev
+	flex
+	json-c-dev
+	libmpdclient-dev
+	meson
+	pipewire-dev
+	pixman-dev
+	scdoc
+	tllist-dev
+	wayland-dev
+	wayland-protocols
+	xcb-util-cursor-dev
+	xcb-util-dev
+	xcb-util-wm-dev
+	yaml-dev
+	"
+checkdepends="font-dejavu"
+subpackages="$pkgname-doc $pkgname-zsh-completion"
+source="$pkgname-$pkgver.tar.gz::https://codeberg.org/dnkl/yambar/archive/$pkgver.tar.gz"
+builddir="$srcdir/$pkgname"
+
+build() {
+	abuild-meson . output
+	meson compile -C output
+}
+
+check() {
+	meson test --no-rebuild --print-errorlogs -C output
+}
+
+package() {
+	DESTDIR="$pkgdir" meson install --no-rebuild -C output
+}
+
+sha512sums="
+c8d1e807017f62886cba65dab9933913f473eeeae8cbf8d44ddd4953754a55c81def9a02506b28a7ea7264325748db0a0ca4cdff39ba74a06f531e6e55878b35  yambar-1.10.0.tar.gz
+"

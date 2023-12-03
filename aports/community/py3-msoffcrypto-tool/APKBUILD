@@ -1,0 +1,39 @@
+# Contributor: Duncan Bellamy <dunk@denkimushi.com>
+# Maintainer: Duncan Bellamy <dunk@denkimushi.com>
+pkgname=py3-msoffcrypto-tool
+pkgver=5.1.1
+pkgrel=0
+pkgdesc="tool and library for decrypting MS Office files with passwords or other keys"
+url="https://github.com/nolze/msoffcrypto-tool"
+arch="noarch"
+license="MIT"
+depends="python3 py3-cryptography py3-olefile py3-setuptools"
+makedepends="py3-gpep517 py3-installer py3-poetry-core"
+checkdepends="bash py3-pytest"
+subpackages="$pkgname-pyc"
+source="$pkgname-$pkgver.tar.gz::https://github.com/nolze/msoffcrypto-tool/archive/refs/tags/v$pkgver.tar.gz"
+builddir="$srcdir/msoffcrypto-tool-$pkgver"
+
+build() {
+	gpep517 build-wheel \
+		--wheel-dir .dist \
+		--output-fd 3 3>&1 >&2
+}
+
+check() {
+	python3 -m venv --clear --without-pip --system-site-packages .testenv
+	.testenv/bin/python3 -m installer .dist/*.whl
+	(
+		# shellcheck disable=1091
+		. .testenv/bin/activate
+		.testenv/bin/python3 -m pytest
+	)
+}
+
+package() {
+	python3 -m installer -d "$pkgdir" .dist/*.whl
+}
+
+sha512sums="
+eb96ef96c603a87e9d146d43972c451e1db237f9056dd5df1fbe06d85c96a9604bf46ca9762a51aa37fd15c2f24a5f829da8a5419dfed871f5bad2a4c7fd8283  py3-msoffcrypto-tool-5.1.1.tar.gz
+"

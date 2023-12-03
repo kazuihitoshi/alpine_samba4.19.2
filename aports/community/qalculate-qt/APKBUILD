@@ -1,0 +1,35 @@
+# Contributor: Patrycja Rosa <alpine@ptrcnull.me>
+# Maintainer: Patrycja Rosa <alpine@ptrcnull.me>
+# version must be kept in sync with libqalculate
+pkgname=qalculate-qt
+pkgver=4.8.1
+pkgrel=0
+pkgdesc="Multi-purpose desktop calculator - Qt version"
+url="https://github.com/Qalculate/qalculate-qt"
+# qmake is broken on riscv64
+arch="all !riscv64"
+license="GPL-2.0-or-later"
+depends="gnuplot"
+makedepends="qt6-qtbase-dev qt6-qttools-dev libqalculate-dev"
+subpackages="$pkgname-doc"
+source="https://github.com/Qalculate/qalculate-qt/archive/v$pkgver/qalculate-qt-$pkgver.tar.gz"
+options="!check" # no test suite
+
+build() {
+	export CFLAGS="$CFLAGS -flto=auto"
+	export CXXFLAGS="$CXXFLAGS -flto=auto"
+	qmake6 PREFIX=/usr
+	make
+}
+
+check() {
+	make check
+}
+
+package() {
+	make INSTALL_ROOT="$pkgdir" install
+}
+
+sha512sums="
+73973b3e1ba7f1c35cd78ff8b97ffe41435f04a7e9947bbec2ae672fdca7be3ea2d553e771e4ad0c9aa39b99561f16d4172548c02ec3384da61c6a555481dc8b  qalculate-qt-4.8.1.tar.gz
+"

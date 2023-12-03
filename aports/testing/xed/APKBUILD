@@ -1,0 +1,53 @@
+# Maintainer: Saijin-Naib <Saijin-Naib_package-maintenance@outlook.com>
+pkgname=xed
+pkgver=3.4.3
+pkgrel=2
+pkgdesc="X-Apps Text Editor"
+url="https://github.com/linuxmint/xed"
+arch="all"
+license="GPL-2.0-or-later"
+makedepends="
+	intltool
+	itstool
+	libpeas-dev
+	gobject-introspection-dev
+	gspell-dev
+	gtksourceview4-dev
+	gvfs-dev
+	gzip
+	meson
+	python3
+	xapp-dev
+	"
+checkdepends="cage-run"
+subpackages="$pkgname-lang $pkgname-dev $pkgname-doc $pkgname-python"
+source="$pkgname-$pkgver.tar.gz::https://github.com/linuxmint/xed/archive/refs/tags/$pkgver.tar.gz"
+options="!check" # needs dogtail
+
+build() {
+	abuild-meson \
+		-Db_lto=true \
+		. output
+	meson compile -C output
+}
+
+check() {
+	cage-run meson test --no-rebuild --print-errorlogs -C output
+}
+
+package() {
+	DESTDIR="$pkgdir" meson install --no-rebuild -C output
+}
+
+python() {
+	depends="$pkgname=$pkgver-r$pkgrel libpeas-python3"
+	pkgdesc="$pkgdesc (python plugins)"
+	amove \
+		usr/lib/xed/plugins/joinlines* \
+		usr/lib/xed/plugins/open-uri-context-menu* \
+		usr/lib/xed/plugins/textsize*
+}
+
+sha512sums="
+dc7921e0e3f3a4000546a5df3cc233e2da70eb0ac40b6940e8192213b073fda28da73300bc0d72bf96e167687a44ed805d0d3b682ac2f8008f7a1178800c88fb  xed-3.4.3.tar.gz
+"

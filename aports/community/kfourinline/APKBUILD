@@ -1,0 +1,49 @@
+# Contributor: Bart Ribbers <bribbers@disroot.org>
+# Maintainer: team/kde <bribbers@disroot.org>
+
+# The group tag is just to easily find this APKBUILD by some scripts for automation
+# group=kde-applications
+pkgname=kfourinline
+pkgver=23.08.3
+pkgrel=0
+pkgdesc="A four-in-a-row game"
+# armhf blocked by extra-cmake-modules
+arch="all !armhf"
+url="https://kde.org/applications/games/kfourinline/"
+license="GPL-2.0-or-later AND GFDL-1.2-only"
+makedepends="
+	extra-cmake-modules
+	kconfig5-dev
+	kconfigwidgets5-dev
+	kcoreaddons5-dev
+	kcrash5-dev
+	kdnssd5-dev
+	kdoctools5-dev
+	ki18n5-dev
+	kwidgetsaddons5-dev
+	kxmlgui5-dev
+	libkdegames-dev
+	qt5-qtbase-dev
+	qt5-qtsvg-dev
+	samurai
+	"
+_repo_url="https://invent.kde.org/games/kfourinline.git"
+source="https://download.kde.org/stable/release-service/$pkgver/src/kfourinline-$pkgver.tar.xz"
+subpackages="$pkgname-doc $pkgname-lang"
+options="!check" # No tests
+
+build() {
+	cmake -B build -G Ninja \
+		-DCMAKE_BUILD_TYPE=RelWithDebInfo \
+		-DCMAKE_INSTALL_PREFIX=/usr \
+		-DCMAKE_INSTALL_LIBDIR=lib
+	cmake --build build
+}
+
+package() {
+	DESTDIR="$pkgdir" cmake --install build
+}
+
+sha512sums="
+89e45c5644639a09992490d65c8507687e997967ac66635f1e3f32b53744c57475c43dcebcd40acee83ff55931c9583fc9ab7483d2daf26060dbf280e02b9f6f  kfourinline-23.08.3.tar.xz
+"
